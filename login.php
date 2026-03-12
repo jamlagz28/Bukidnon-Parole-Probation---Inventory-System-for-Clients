@@ -1,27 +1,24 @@
 <?php
+session_start();
 include("config/database.php");
 
-if(isset($_POST['register'])){
+if(isset($_POST['login'])){
 
 $username = $_POST['username'];
-$fullname = $_POST['fullname'];
 $password = $_POST['password'];
-$role = $_POST['role'];
 
-// Simple validation
-if(empty($username) || empty($fullname) || empty($password) || empty($role)){
-    echo "<script>alert('Please fill all fields');</script>";
+$query = "SELECT * FROM staff WHERE username='$username' AND password='$password'";
+$result = mysqli_query($conn,$query);
+
+if(mysqli_num_rows($result) > 0){
+    $row = mysqli_fetch_assoc($result);
+    $_SESSION['username'] = $row['username'];
+    $_SESSION['fullname'] = $row['full_name'];
+    $_SESSION['role'] = $row['role'];
+    header("Location: dashboard.php");
     exit;
-}
-
-// Insert into database
-$query="INSERT INTO staff(username, full_name, password, role) 
-VALUES('$username','$fullname','$password','$role')";
-
-if(mysqli_query($conn,$query)){
-    echo "<script>alert('Account Created Successfully');</script>";
-} else {
-    echo "<script>alert('Error: ".mysqli_error($conn)."');</script>";
+}else{
+    echo "<script>alert('Invalid Username or Password');</script>";
 }
 
 }
@@ -30,8 +27,7 @@ if(mysqli_query($conn,$query)){
 <!DOCTYPE html>
 <html>
 <head>
-<title>Register</title>
-
+<title>Login</title>
 <style>
 body{
 font-family:Arial;
@@ -45,13 +41,13 @@ height:100vh;
 .box{
 background:white;
 padding:35px;
-width:360px;
+width:350px;
 border-radius:8px;
 box-shadow:0 2px 10px rgba(0,0,0,0.2);
 text-align:center;
 }
 
-input, select{
+input{
 width:100%;
 padding:12px;
 margin-bottom:15px;
@@ -85,46 +81,38 @@ background:#999;
 color:white;
 }
 
-.login-link{
+.signup-text{
 margin-top:10px;
 font-size:14px;
 }
 
-.login-link a{
+.signup-text a{
 color:#1a73e8;
 text-decoration:none;
 font-weight:bold;
 }
 </style>
-
 </head>
 <body>
 
 <div class="box">
 
-<h2>Create Staff Account</h2>
+<h2>Staff Login</h2>
 
 <form method="POST">
 
 <input type="text" name="username" placeholder="Username" required>
-<input type="text" name="fullname" placeholder="Full Name" required>
 <input type="password" name="password" placeholder="Password" required>
 
-<select name="role" required>
-<option value="">Select Staff Role</option>
-<option value="viewer">Staff Viewing</option>
-<option value="editor">Staff Edit Clients</option>
-</select>
-
-<button type="submit" name="register">Register</button>
+<button type="submit" name="login">Login</button>
 
 </form>
 
 <!-- Back to Landing Page Button -->
 <a href="index.php"><button class="back-btn">← Back to Landing Page</button></a>
 
-<div class="login-link">
-Already have an account? <a href="login.php">Login here</a>
+<div class="signup-text">
+Don't have an account? <a href="register.php">Sign up here</a>
 </div>
 
 </div>

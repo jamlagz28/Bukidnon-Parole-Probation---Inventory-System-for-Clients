@@ -4,118 +4,179 @@ include("config/database.php");
 
 if(isset($_POST['login'])){
 
-$username = $_POST['username'];
-$password = $_POST['password'];
+    $username = $_POST['username'];
+    $password = $_POST['password'];
 
-$query = "SELECT * FROM staff WHERE username='$username' AND password='$password'";
-$result = mysqli_query($conn,$query);
+    $query = "SELECT * FROM staff WHERE username='$username' AND password='$password'";
+    $result = mysqli_query($conn,$query);
 
-if(mysqli_num_rows($result) > 0){
-    $row = mysqli_fetch_assoc($result);
-    $_SESSION['username'] = $row['username'];
-    $_SESSION['fullname'] = $row['full_name'];
-    $_SESSION['role'] = $row['role'];
-    header("Location: dashboard.php");
-    exit;
-}else{
-    echo "<script>alert('Invalid Username or Password');</script>";
-}
+    if(mysqli_num_rows($result) > 0){
+        $row = mysqli_fetch_assoc($result);
+        $_SESSION['username'] = $row['username'];
+        $_SESSION['fullname'] = $row['full_name'];
+        $_SESSION['role'] = $row['role'];
+        header("Location: dashboard.php");
+        exit;
+    }else{
+        echo "<script>alert('Invalid Username or Password');</script>";
+    }
 
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BPPO Staff Login</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
-body{
-font-family:Arial;
-background:#f1f3f4;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+/* Reset & Fonts */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #eaf0fa, #d0e1f9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
-.box{
-background:white;
-padding:35px;
-width:350px;
-border-radius:8px;
-box-shadow:0 2px 10px rgba(0,0,0,0.2);
-text-align:center;
+/* Color Palette for BPPO */
+:root {
+    --primary-blue: #005BAC;    /* BPPO official blue */
+    --secondary-blue: #1a73e8;  /* hover / accent */
+    --gold-accent: #FFC107;     /* highlights / buttons */
+    --white: #ffffff;
+    --text-dark: #333333;
 }
 
-input{
-width:100%;
-padding:12px;
-margin-bottom:15px;
-border:1px solid #ccc;
-border-radius:5px;
+/* Login Box */
+.box {
+    background: var(--white);
+    padding: 45px 35px;
+    width: 380px;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 18px 35px rgba(0,0,0,0.2);
 }
 
-button{
-width:100%;
-padding:12px;
-background:#1a73e8;
-color:white;
-border:none;
-border-radius:5px;
-cursor:pointer;
-margin-bottom:10px;
+/* Heading */
+.box h2 {
+    margin-bottom: 30px;
+    color: var(--primary-blue);
+    font-weight: 700;
+    font-size: 28px;
 }
 
-button:hover{
-background:#0b57d0;
+/* Inputs */
+input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+input:focus {
+    border-color: var(--secondary-blue);
+    box-shadow: 0 0 8px rgba(26,115,232,0.3);
+    outline: none;
 }
 
-.back-btn{
-background:#ccc;
-color:#333;
-margin-bottom:15px;
+/* Buttons */
+button {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+button:hover { transform: translateY(-2px); }
+
+/* Primary Login Button */
+button[name="login"] {
+    background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
+    color: var(--white);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+button[name="login"]:hover {
+    background: linear-gradient(135deg, var(--primary-blue), #094c9f);
 }
 
-.back-btn:hover{
-background:#999;
-color:white;
+/* Back Button */
+.back-btn {
+    background: var(--gold-accent);
+    color: var(--primary-blue);
+    margin-top: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.back-btn:hover {
+    background: #e6b800;
+    color: var(--white);
 }
 
-.signup-text{
-margin-top:10px;
-font-size:14px;
+/* Signup Text */
+.signup-text {
+    margin-top: 18px;
+    font-size: 14px;
+    color: #555;
 }
+.signup-text a {
+    color: var(--secondary-blue);
+    font-weight: 600;
+    text-decoration: none;
+}
+.signup-text a:hover { text-decoration: underline; }
 
-.signup-text a{
-color:#1a73e8;
-text-decoration:none;
-font-weight:bold;
+/* Footer */
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: #555;
+}
+.footer a { color: var(--primary-blue); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+
+/* Responsive */
+@media (max-width: 420px) {
+    .box { width: 90%; padding: 35px 25px; }
 }
 </style>
 </head>
 <body>
 
 <div class="box">
+    <h2>BPPO Staff Login</h2>
+    <form method="POST">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit" name="login">Login</button>
+    </form>
 
-<h2>Staff Login</h2>
+    <!-- Back to Landing Page Button -->
+    <a href="index.php"><button class="back-btn">← Back to Landing Page</button></a>
 
-<form method="POST">
-
-<input type="text" name="username" placeholder="Username" required>
-<input type="password" name="password" placeholder="Password" required>
-
-<button type="submit" name="login">Login</button>
-
-</form>
-
-<!-- Back to Landing Page Button -->
-<a href="index.php"><button class="back-btn">← Back to Landing Page</button></a>
-
-<div class="signup-text">
-Don't have an account? <a href="register.php">Sign up here</a>
+    <div class="signup-text">
+        Don't have an account? <a href="register.php">Sign up here</a>
+    </div>
 </div>
 
-</div>
+
 
 </body>
 </html>

@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 12, 2026 at 02:24 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Generation Time: Mar 12, 2026 at 04:59 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -43,22 +43,32 @@ CREATE TABLE `cases` (
 
 CREATE TABLE `clients` (
   `id` int(11) NOT NULL,
-  `full_name` varchar(150) NOT NULL,
-  `case_number` varchar(50) NOT NULL,
-  `status` varchar(50) NOT NULL,
-  `date_registered` datetime DEFAULT current_timestamp()
+  `docket_number` varchar(50) DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `cc_number` varchar(50) DEFAULT NULL,
+  `court` varchar(100) DEFAULT NULL,
+  `offense` varchar(100) DEFAULT NULL,
+  `sentence` varchar(100) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `clients`
 --
 
-INSERT INTO `clients` (`id`, `full_name`, `case_number`, `status`, `date_registered`) VALUES
-(1, 'Juan Dela Cruz', 'CASE-2026-001', 'Active', '2026-03-11 15:21:39'),
-(2, 'Maria Santos', 'CASE-2026-002', 'Terminated', '2026-03-11 15:21:39'),
-(3, 'Pedro Reyes', 'CASE-2026-003', 'Active', '2026-03-11 15:21:39'),
-(4, 'Ana Lopez', 'CASE-2026-004', 'Denied', '2026-03-11 15:21:39'),
-(5, 'Carlos Ramirez', 'CASE-2026-005', 'Revoked', '2026-03-11 15:21:39');
+INSERT INTO `clients` (`id`, `docket_number`, `name`, `cc_number`, `court`, `offense`, `sentence`, `address`, `status`) VALUES
+(1, 'D001', 'Juan dela Cruz', 'CC12345', 'Manolo Fortich Court', 'Theft', '6 months', 'Brgy. Alae', 'Active'),
+(2, 'D002', 'Maria Santos', 'CC12346', 'Manolo Fortich Court', 'Fraud', '1 year', 'Brgy. Alae', 'Terminated'),
+(3, 'D003', 'Pedro Reyes', 'CC12347', 'Manolo Fortich Court', 'Assault', '2 years', 'Brgy. Poblacion', 'Revoked'),
+(4, 'D004', 'Ana Lim', 'CC12348', 'Manolo Fortich Court', 'Drug Possession', '1 year', 'Brgy. Poblacion', 'Denied'),
+(5, 'D005', 'Jose Ramos', 'CC12349', 'Manolo Fortich Court', 'Robbery', '3 years', 'Brgy. Alae', 'Active'),
+(6, 'D001', 'Juan dela Cruz', 'CC12345', 'Manolo Fortich Court', 'Theft', '6 months', 'Brgy. Alae', 'Active'),
+(7, 'D002', 'Maria Santos', 'CC12346', 'Manolo Fortich Court', 'Fraud', '1 year', 'Brgy. Alae', 'Terminated'),
+(8, 'D003', 'Pedro Reyes', 'CC12347', 'Manolo Fortich Court', 'Assault', '2 years', 'Brgy. Poblacion', 'Revoked'),
+(9, 'D004', 'Ana Lim', 'CC12348', 'Manolo Fortich Court', 'Drug Possession', '1 year', 'Brgy. Poblacion', 'Denied'),
+(10, 'D005', 'Jose Ramos', 'CC12349', 'Manolo Fortich Court', 'Robbery', '3 years', 'Brgy. Alae', 'Terminated'),
+(11, 'D005', 'Louella Jane Baslao', NULL, 'Manolo Fortich Court', 'Palaaway', NULL, 'agusan', 'Terminated');
 
 -- --------------------------------------------------------
 
@@ -174,7 +184,7 @@ ALTER TABLE `cases`
 -- AUTO_INCREMENT for table `clients`
 --
 ALTER TABLE `clients`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `investigation_records`

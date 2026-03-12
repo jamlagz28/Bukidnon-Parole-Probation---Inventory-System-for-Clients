@@ -25,128 +25,141 @@ if(isset($_POST['login'])){
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inventory System - Login</title>
+
 <style>
-/* Reset some basic styles */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-body {
+body{
     font-family: Arial, sans-serif;
-    background: #f4f4f4;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    background:#f1f3f4;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
 }
 
-/* Container for the login form */
-.container {
-    width: 100%;
-    max-width: 400px;
-    padding: 30px 25px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    text-align: center;
-    animation: fadeIn 0.5s ease;
+.login-box{
+    width:100%;
+    max-width:380px;
+    background:white;
+    padding:35px;
+    border-radius:8px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.15);
 }
 
-/* Headings */
-.container h2 {
-    margin-bottom: 10px;
-    color: #2c7be5;
+.login-box h2{
+    text-align:center;
+    color:#1a73e8;
+    margin-bottom:5px;
 }
 
-.container h3 {
-    margin-bottom: 20px;
-    color: #333;
+.login-box h4{
+    text-align:center;
+    margin-bottom:25px;
+    color:#444;
+    font-weight:normal;
 }
 
-/* Input fields */
-input[type="text"],
-input[type="password"] {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 14px;
+.login-box input{
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:14px;
 }
 
-/* Button styling */
-button {
-    width: 100%;
-    padding: 12px;
-    background: #2c7be5;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background 0.3s ease;
+/* Next button */
+.next-btn{
+    width:100%;
+    padding:12px;
+    background:#ccc;
+    color:white;
+    border:none;
+    border-radius:5px;
+    font-size:15px;
+    cursor:not-allowed;
+    transition:0.3s;
 }
 
-button:hover {
-    background: #1a5bb8;
+.next-btn.active{
+    background:#1a73e8;
+    cursor:pointer;
 }
 
-/* Links */
-a {
-    text-decoration: none;
-    color: #2c7be5;
-    font-weight: bold;
+.next-btn.active:hover{
+    background:#1558b0;
 }
 
-a:hover {
-    text-decoration: underline;
+.bottom{
+    margin-top:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:14px;
 }
 
-/* Small paragraph below button */
-.container p {
-    margin-top: 15px;
-    font-size: 14px;
-    color: #555;
+.create-account{
+    color:#1a73e8;
+    text-decoration:none;
+    font-weight:500;
 }
 
-/* Responsive tweaks */
-@media (max-width: 500px) {
-    .container {
-        padding: 20px 15px;
-    }
-
-    input[type="text"],
-    input[type="password"],
-    button {
-        font-size: 14px;
-        padding: 10px;
-    }
+.create-account:hover{
+    text-decoration:underline;
 }
 
-/* Simple fade-in animation */
-@keyframes fadeIn {
-    from {opacity: 0; transform: translateY(-20px);}
-    to {opacity: 1; transform: translateY(0);}
-}
 </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h2>Inventory System</h2>
-    <h3>Staff Login</h3>
+<div class="login-box">
 
-    <form method="POST">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit" name="login">Login</button>
+<h2>Inventory System</h2>
+<h4>Staff Sign in</h4>
 
-        <p>Don't have an account?</p>
-        <a href="register.php">Register Here</a>
-    </form>
+<form method="POST" id="loginForm">
+
+<input type="text" name="username" id="username" placeholder="Username" required>
+
+<input type="password" name="password" id="password" placeholder="Password" required>
+
+<button type="submit" name="login" id="nextBtn" class="next-btn" disabled>Next</button>
+
+<div class="bottom">
+<a href="register.php" class="create-account">Create account</a>
 </div>
+
+</form>
+
+</div>
+
+<script>
+
+const username = document.getElementById("username");
+const password = document.getElementById("password");
+const button = document.getElementById("nextBtn");
+
+function checkInputs(){
+    if(username.value.trim() !== "" && password.value.trim() !== ""){
+        button.disabled = false;
+        button.classList.add("active");
+    }else{
+        button.disabled = true;
+        button.classList.remove("active");
+    }
+}
+
+username.addEventListener("input", checkInputs);
+password.addEventListener("input", checkInputs);
+
+</script>
 
 </body>
 </html>

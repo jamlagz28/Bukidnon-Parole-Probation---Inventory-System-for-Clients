@@ -56,7 +56,20 @@ th{background:#eee;}
 </head>
 <body>
 
-<div class="header">Parole & Probation Administration System</div>
+<div class="header" style="display:flex; justify-content:space-between; align-items:center;">
+    <span>Parole & Probation Administration System</span>
+    <a href="logout.php" style="
+        padding:8px 15px;
+        background:#dc3545;
+        color:white;
+        border-radius:5px;
+        text-decoration:none;
+        font-weight:bold;
+        transition:0.3s;
+    " onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
+        Logout
+    </a>
+</div>
 <div class="container">
 
 <!-- SEARCH + ADD CLIENT BUTTON -->

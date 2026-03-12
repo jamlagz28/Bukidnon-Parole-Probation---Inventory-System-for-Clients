@@ -7,20 +7,27 @@ if(isset($_POST['login'])){
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    $query = "SELECT * FROM staff WHERE username='$username' AND password='$password'";
-    $result = mysqli_query($conn,$query);
+    // Get user by username
+    $query = "SELECT * FROM staff WHERE username='$username'";
+    $result = mysqli_query($conn, $query);
 
     if(mysqli_num_rows($result) > 0){
         $row = mysqli_fetch_assoc($result);
-        $_SESSION['username'] = $row['username'];
-        $_SESSION['fullname'] = $row['full_name'];
-        $_SESSION['role'] = $row['role'];
-        header("Location: dashboard.php");
-        exit;
-    }else{
+
+        // Verify hashed password
+        if(password_verify($password, $row['password'])){
+            $_SESSION['username'] = $row['username'];
+            $_SESSION['fullname'] = $row['full_name'];
+            $_SESSION['role'] = $row['role'];
+            header("Location: dashboard.php");
+            exit;
+        } else {
+            echo "<script>alert('Invalid Username or Password');</script>";
+        }
+
+    } else {
         echo "<script>alert('Invalid Username or Password');</script>";
     }
-
 }
 ?>
 
@@ -35,7 +42,6 @@ if(isset($_POST['login'])){
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-/* Reset & Fonts */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: 'Inter', sans-serif;
@@ -48,11 +54,10 @@ body {
 
 /* Color Palette for BPPO */
 :root {
-    --primary-blue: #005BAC;    /* BPPO official blue */
-    --secondary-blue: #1a73e8;  /* hover / accent */
-    --gold-accent: #FFC107;     /* highlights / buttons */
+    --primary-blue: #005BAC;
+    --secondary-blue: #1a73e8;
+    --gold-accent: #FFC107;
     --white: #ffffff;
-    --text-dark: #333333;
 }
 
 /* Login Box */
@@ -129,6 +134,17 @@ button[name="login"]:hover {
     color: var(--white);
 }
 
+/* Forgot Password Link */
+.forgot-password {
+    margin: 12px 0;
+}
+.forgot-password a {
+    color: var(--secondary-blue);
+    font-weight: 600;
+    text-decoration: none;
+}
+.forgot-password a:hover { text-decoration: underline; }
+
 /* Signup Text */
 .signup-text {
     margin-top: 18px;
@@ -141,16 +157,6 @@ button[name="login"]:hover {
     text-decoration: none;
 }
 .signup-text a:hover { text-decoration: underline; }
-
-/* Footer */
-.footer {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 13px;
-    color: #555;
-}
-.footer a { color: var(--primary-blue); text-decoration: none; }
-.footer a:hover { text-decoration: underline; }
 
 /* Responsive */
 @media (max-width: 420px) {
@@ -168,15 +174,16 @@ button[name="login"]:hover {
         <button type="submit" name="login">Login</button>
     </form>
 
-    <!-- Back to Landing Page Button -->
+    <div class="forgot-password">
+        <a href="changepassword.php">Forgot Password?</a>
+    </div>
+
     <a href="index.php"><button class="back-btn">← Back to Landing Page</button></a>
 
     <div class="signup-text">
         Don't have an account? <a href="register.php">Sign up here</a>
     </div>
 </div>
-
-
 
 </body>
 </html>

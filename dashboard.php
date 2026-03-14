@@ -1,258 +1,233 @@
-    <?php
-    include 'config/database.php';
+<?php
+include 'config/database.php';
 
-    /* COUNT CASE STATUS */
-    $active = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM clients WHERE status='Active'"));
-    $terminated = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM clients WHERE status='Terminated'"));
-    $revoked = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM clients WHERE status='Revoked'"));
-    $denied = mysqli_num_rows(mysqli_query($conn,"SELECT * FROM clients WHERE status='Denied'"));
+/* ------------------------------
+   CASE STATUS COUNTS
+--------------------------------*/
+$active = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Active'"))['total'];
+$terminated = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Terminated'"))['total'];
+$revoked = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Revoked'"))['total'];
+$denied = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Denied'"))['total'];
 
-    /* ALL CLIENTS ALPHABETICALLY */
-    $all_clients = mysqli_query($conn,"SELECT * FROM clients ORDER BY name ASC");
+/* ------------------------------
+   CLIENT LIST
+--------------------------------*/
+$all_clients = mysqli_query($conn,"SELECT * FROM clients ORDER BY name ASC");
 
-    /* PLACEHOLDER DATA FOR MONTHLY GRAPH */
-    $month_labels = ["January","February","March","April","May","June"];
-    $month_data = [0,0,0,0,0,0]; // Demo placeholder
+/* ------------------------------
+   MONTHLY CLIENT DATA
+--------------------------------*/
+$month_labels = [];
+$month_data = [];
+for($m=1;$m<=12;$m++){
+    $monthName = date("F", mktime(0,0,0,$m,10));
+    $month_labels[] = $monthName;
 
-    /* PLACEHOLDER DATA FOR BARANGAY GRAPH */
-    $barangay_labels = ["Brgy. Alae","Brgy. Poblacion"];
-    $barangay_data = [3,2]; // Demo placeholder
-    ?>
+    $query = mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE MONTH(created_at)='$m'");
+    $row = mysqli_fetch_assoc($query);
+    $month_data[] = $row['total'];
+}
 
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <title>Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+/* ------------------------------
+   BARANGAY CLIENT DATA
+--------------------------------*/
+$barangay_labels = [];
+$barangay_data = [];
+$barangay_map = [];
+$barangay_query = mysqli_query($conn,"SELECT address, COUNT(*) total FROM clients GROUP BY address ORDER BY total DESC");
+while($row=mysqli_fetch_assoc($barangay_query)){
+    $barangay_labels[] = $row['address'];
+    $barangay_data[] = $row['total'];
+    $barangay_map[] = ['barangay'=>$row['address'],'total'=>$row['total']];
+}
+?>
 
-    <style>
-    body{font-family: Arial;margin:0;background:#f4f6f9;}
-    .header{background:#2c3e50;color:white;padding:15px;font-size:20px;}
-    .container{padding:20px;}
-    .search-box{margin-bottom:20px;display:flex;align-items:center;gap:10px;}
-    .search-box input{padding:10px;width:300px;}
-    .search-box button{padding:10px;cursor:pointer;background:#28a745;color:white;border:none;border-radius:5px;}
-    .search-box button:hover{background:#218838;}
-    .cards{display:flex;gap:20px;margin-bottom:30px;}
-    .card{flex:1;background:white;padding:20px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.1);text-align:center;}
-    .card h3{margin:0;}
-    .card p{font-size:22px;margin-top:10px;}
-    .graph-row{display:flex;gap:20px;justify-content:space-between;margin-bottom:50px;}
-    .graph{background:white;padding:15px;border-radius:8px;flex:1;height:260px;}
-    .graph canvas{width:100% !important;height:100% !important;}
-    table{width:100%;border-collapse:collapse;background:white;margin-top:20px;}
-    th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;}
-    th{background:#eee;}
-    .status-dropdown{padding:5px;border-radius:4px;}
-    /* Modal Styles */
-    .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;overflow:auto;background:rgba(0,0,0,0.5);}
-    .modal-content{background:#fff;margin:10% auto;padding:20px;border-radius:8px;width:400px;position:relative;}
-    .close-btn{position:absolute;top:10px;right:15px;font-size:20px;cursor:pointer;}
-    .modal-content input, .modal-content select{width:100%;padding:8px;margin:5px 0;border-radius:4px;border:1px solid #ccc;}
-    .modal-content button{padding:10px;width:100%;background:#28a745;color:white;border:none;border-radius:5px;cursor:pointer;margin-top:10px;}
-    .modal-content button:hover{background:#218838;}
-    </style>
-    </head>
-    <body>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Parole & Probation Administration System</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
+<style>
+body{font-family:Arial;margin:0;background:#f4f6f9;}
+.header{background:#2c3e50;color:white;padding:15px;display:flex;justify-content:space-between;align-items:center;}
+.container{padding:20px;}
+.cards{display:flex;gap:20px;margin-bottom:30px;}
+.card{flex:1;background:white;padding:20px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.1);text-align:center;}
+.card p{font-size:22px;margin-top:10px;}
+.graph-row{display:flex;gap:20px;margin-bottom:40px;}
+.graph{flex:1;background:white;padding:15px;border-radius:8px;height:260px;}
+table{width:100%;border-collapse:collapse;background:white;margin-top:20px;}
+th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;}
+th{background:#eee;}
+.search-box{margin-bottom:20px;position:relative;}
+.search-box input{padding:10px;width:300px;}
+.search-box button{padding:10px;cursor:pointer;background:#28a745;color:white;border:none;border-radius:5px;}
+.search-box button:hover{background:#218838;}
+#searchSuggestions{position:absolute;background:white;border:1px solid #ccc;width:300px;max-height:150px;overflow-y:auto;z-index:100;}
+#searchSuggestions div{padding:8px;cursor:pointer;}
+#searchSuggestions div:hover{background:#f1f1f1;}
+#clientModal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;overflow:auto;background:rgba(0,0,0,0.5);}
+.modal-content{background:#fff;margin:10% auto;padding:20px;border-radius:8px;width:400px;position:relative;}
+.close-btn{position:absolute;top:10px;right:15px;font-size:20px;cursor:pointer;}
+#map{width:100%;height:400px;margin-top:20px;border-radius:8px;}
+</style>
+</head>
+<body>
 
-<<<<<<< HEAD
-<div class="header" style="display:flex; justify-content:space-between; align-items:center;">
-    <span>Parole & Probation Administration System</span>
-    <a href="logout.php" style="
-        padding:8px 15px;
-        background:#dc3545;
-        color:white;
-        border-radius:5px;
-        text-decoration:none;
-        font-weight:bold;
-        transition:0.3s;
-    " onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
-        Logout
-    </a>
+<div class="header">
+<span>Parole & Probation Administration System</span>
+<a href="logout.php" style="background:#dc3545;color:white;padding:8px 15px;border-radius:5px;text-decoration:none;">Logout</a>
 </div>
+
 <div class="container">
-=======
-    <div class="header">Parole & Probation Administration System</div>
-    <div class="container">
->>>>>>> cffe4b8 (added updated dashboard)
 
-    <!-- SEARCH + ADD CLIENT BUTTON -->
-    <div class="search-box">
-    <form action="search.php" method="GET" style="display:flex;gap:10px;">
-    <input type="text" name="search" placeholder="Search by Name, Docket # or CC Number">
-    <button type="submit">Search</button>
-    </form>
-    <button id="addClientBtn">&#x2795; Add Client</button>
-    </div>
+<!-- SEARCH -->
+<div class="search-box">
+<input type="text" id="searchClient" placeholder="Search by Name, Docket # or CC Number">
+<div id="searchSuggestions"></div>
+<button id="exportCsvBtn">Export CSV</button>
+</div>
 
-    <!-- STATISTICS CARDS -->
-    <div class="cards">
-    <div class="card"><h3>Active</h3><p id="activeCount"><?php echo $active; ?></p></div>
-    <div class="card"><h3>Terminated</h3><p id="terminatedCount"><?php echo $terminated; ?></p></div>
-    <div class="card"><h3>Revoked</h3><p id="revokedCount"><?php echo $revoked; ?></p></div>
-    <div class="card"><h3>Denied</h3><p id="deniedCount"><?php echo $denied; ?></p></div>
-    </div>
+<!-- CLIENT INFO DISPLAY -->
+<div id="clientInfo" style="margin-bottom:20px;"></div>
 
-    <!-- GRAPHS SIDE BY SIDE -->
-    <div class="graph-row">
-        <div class="graph"><h3 style="text-align:center;">Case Status</h3><canvas id="caseChart"></canvas></div>
-        <div class="graph"><h3 style="text-align:center;">Clients per Month</h3><canvas id="monthChart"></canvas></div>
-        <div class="graph"><h3 style="text-align:center;">Clients per Barangay</h3><canvas id="barangayChart"></canvas></div>
-    </div>
+<!-- DASHBOARD CARDS -->
+<div class="cards">
+<div class="card"><h3>Active</h3><p id="activeCount"><?php echo $active; ?></p></div>
+<div class="card"><h3>Terminated</h3><p id="terminatedCount"><?php echo $terminated; ?></p></div>
+<div class="card"><h3>Revoked</h3><p id="revokedCount"><?php echo $revoked; ?></p></div>
+<div class="card"><h3>Denied</h3><p id="deniedCount"><?php echo $denied; ?></p></div>
+</div>
 
-    <!-- CLIENT LIST TABLE -->
-    <h3>Client List</h3>
+<!-- CHARTS -->
+<div class="graph-row">
+<div class="graph"><h3 style="text-align:center;">Case Status</h3><canvas id="caseChart"></canvas></div>
+<div class="graph"><h3 style="text-align:center;">Clients Per Month</h3><canvas id="monthChart"></canvas></div>
+<div class="graph"><h3 style="text-align:center;">Clients Per Barangay</h3><canvas id="barangayChart"></canvas></div>
+</div>
 
-    <!-- Filter + CSV Export -->
-    <label for="statusFilter">Filter by Status:</label>
-    <select id="statusFilter">
-    <option value="">All</option>
-    <option value="Active">Active</option>
-    <option value="Terminated">Terminated</option>
-    <option value="Revoked">Revoked</option>
-    <option value="Denied">Denied</option>
-    </select>
+<!-- CLIENT TABLE -->
+<h3>Client List</h3>
+<table id="clientsTable">
+<tr><th>Docket #</th><th>Name</th><th>Offense</th><th>Court</th><th>Status</th></tr>
+<?php while($row=mysqli_fetch_assoc($all_clients)){ ?>
+<tr class="client-row" data-docket="<?php echo $row['docket_number'];?>" data-name="<?php echo $row['name'];?>" data-offense="<?php echo $row['offense'];?>" data-court="<?php echo $row['court'];?>" data-status="<?php echo $row['status'];?>" data-address="<?php echo $row['address'];?>">
+<td><?php echo $row['docket_number'];?></td>
+<td><?php echo $row['name'];?></td>
+<td><?php echo $row['offense'];?></td>
+<td><?php echo $row['court'];?></td>
+<td><?php echo $row['status'];?></td>
+</tr>
+<?php } ?>
+</table>
 
-    <button id="exportCsvBtn" style="margin-left:10px;padding:5px 10px;background:#007bff;color:white;border:none;border-radius:4px;cursor:pointer;">Export CSV</button>
+<!-- GOOGLE MAP -->
+<h3>Clients per Barangay Map</h3>
+<div id="map"></div>
 
-    <table id="clientsTable">
-    <tr>
-    <th>Docket #</th><th>Name</th><th>Offense</th><th>Court</th><th>Status</th>
-    </tr>
-    <?php while($row = mysqli_fetch_assoc($all_clients)){ ?>
-    <tr data-status="<?php echo $row['status']; ?>">
-    <td><?php echo $row['docket_number']; ?></td>
-    <td><?php echo $row['name']; ?></td>
-    <td><?php echo $row['offense']; ?></td>
-    <td><?php echo $row['court']; ?></td>
-    <td><?php echo $row['status']; ?></td>
-    </tr>
-    <?php } ?>
-    </table>
+<!-- CLIENT INFO MODAL -->
+<div id="clientModal">
+<div class="modal-content">
+<span class="close-btn">&times;</span>
+<h3>Client Information</h3>
+<p id="modalDocket"></p>
+<p id="modalName"></p>
+<p id="modalOffense"></p>
+<p id="modalCourt"></p>
+<p id="modalStatus"></p>
+<p id="modalAddress"></p>
+</div>
+</div>
 
-    </div>
+</div>
 
-    <!-- ADD CLIENT MODAL -->
-    <div id="addClientModal" class="modal">
-    <div class="modal-content">
-    <span class="close-btn">&times;</span>
-    <h3>Add New Client</h3>
-    <input type="text" id="docket_number" placeholder="Docket Number" required>
-    <input type="text" id="name" placeholder="Name" required>
-    <input type="text" id="offense" placeholder="Offense" required>
-    <input type="text" id="court" placeholder="Court" required>
-    <select id="status">
-    <option value="Active">Active</option>
-    <option value="Terminated">Terminated</option>
-    <option value="Revoked">Revoked</option>
-    <option value="Denied">Denied</option>
-    </select>
-    <input type="text" id="address" placeholder="Address">
-    <button id="saveClientBtn">Save Client</button>
-    </div>
-    </div>
+<script>
+// ----------------------- CHARTS -----------------------
+const caseChart = new Chart(document.getElementById('caseChart'), {
+type:'bar',
+data:{labels:['Active','Terminated','Revoked','Denied'],datasets:[{data:[<?php echo $active;?>,<?php echo $terminated;?>,<?php echo $revoked;?>,<?php echo $denied;?>],backgroundColor:['#28a745','#17a2b8','#ffc107','#dc3545']}]},
+options:{plugins:{legend:{display:false}},responsive:true}
+});
 
-    <script>
-    // CHARTS (unchanged)
-    const ctxCase = document.getElementById('caseChart');
-    const caseChart = new Chart(ctxCase,{type:'bar',data:{labels:['Active','Terminated','Revoked','Denied'],datasets:[{data:[<?php echo $active;?>,<?php echo $terminated;?>,<?php echo $revoked;?>,<?php echo $denied;?>],backgroundColor:['#28a745','#17a2b8','#ffc107','#dc3545'],borderRadius:6}]},options:{plugins:{legend:{display:false}},responsive:true,maintainAspectRatio:false}});
+new Chart(document.getElementById('monthChart'),{
+type:'line',
+data:{labels:<?php echo json_encode($month_labels); ?>,datasets:[{data:<?php echo json_encode($month_data); ?>,borderColor:'#17a2b8',backgroundColor:'rgba(23,130,184,0.2)',fill:true,tension:0.4}]},
+options:{plugins:{legend:{display:false}},responsive:true}
+});
 
-    const ctxMonth = document.getElementById('monthChart');
-    new Chart(ctxMonth,{type:'line',data:{labels: <?php echo json_encode($month_labels); ?>, datasets:[{label:'Clients per Month', data: <?php echo json_encode($month_data); ?>, borderColor:'#17a2b8', backgroundColor:'rgba(23,130,184,0.2)', tension:0.3, fill:true}]},options:{plugins:{legend:{display:false}},responsive:true,maintainAspectRatio:false}});
+new Chart(document.getElementById('barangayChart'),{
+type:'bar',
+data:{labels:<?php echo json_encode($barangay_labels); ?>,datasets:[{data:<?php echo json_encode($barangay_data); ?>,backgroundColor:'#ffc107'}]},
+options:{plugins:{legend:{display:false}},responsive:true}
+});
 
-    const ctxBarangay = document.getElementById('barangayChart');
-    new Chart(ctxBarangay,{type:'bar',data:{labels: <?php echo json_encode($barangay_labels); ?>, datasets:[{label:'Clients per Barangay', data: <?php echo json_encode($barangay_data); ?>, backgroundColor:'#ffc107', borderRadius:6}]},options:{plugins:{legend:{display:false}},responsive:true,maintainAspectRatio:false, scales:{x:{ticks:{autoSkip:false}}}}});
+// ----------------------- GOOGLE MAP -----------------------
+function initMap(){
+    const map = new google.maps.Map(document.getElementById('map'),{zoom:12,center:{lat:8.2,lng:125.0}});
+    const barangays = <?php echo json_encode($barangay_map); ?>;
+    barangays.forEach(b=>{
+        new google.maps.Marker({
+            position:{lat:8.2 + Math.random()*0.02,lng:125.0 + Math.random()*0.02},
+            map, title:b.barangay + ' ('+b.total+')'
+        });
+    });
+}
+window.onload = initMap;
 
-    // AJAX Status Update (unchanged)
-    $(document).ready(function(){
-    $('.status-dropdown').change(function(){
-        var clientId = $(this).data('client-id');
-        var newStatus = $(this).val();
-        $.ajax({
-            url:'update_status.php', type:'POST', data:{id:clientId,status:newStatus},
-            success:function(response){
-                if(response=='success'){
-                    $.getJSON('get_case_counts.php', function(data){
-                        $('#activeCount').text(data.Active);
-                        $('#terminatedCount').text(data.Terminated);
-                        $('#revokedCount').text(data.Revoked);
-                        $('#deniedCount').text(data.Denied);
-                        caseChart.data.datasets[0].data=[data.Active,data.Terminated,data.Revoked,data.Denied];
-                        caseChart.update();
-                    });
-                } else alert('Update failed!');
+// ----------------------- LIVE SEARCH -----------------------
+$('#searchClient').on('keyup', function(){
+    let val = $(this).val().toLowerCase();
+    if(val.length>0){
+        let suggestions = '';
+        $('#clientsTable tr.client-row').each(function(){
+            let name = $(this).data('name').toLowerCase();
+            if(name.indexOf(val) !== -1){
+                suggestions += '<div>'+$(this).data('name')+'</div>';
             }
         });
+        $('#searchSuggestions').html(suggestions).show();
+    }else $('#searchSuggestions').hide();
+});
+$(document).on('click','#searchSuggestions div',function(){
+    let name = $(this).text();
+    let row = $('#clientsTable tr.client-row').filter(function(){ return $(this).data('name')==name; });
+    if(row.length>0){
+        $('#modalDocket').text('Docket #: '+row.data('docket'));
+        $('#modalName').text('Name: '+row.data('name'));
+        $('#modalOffense').text('Offense: '+row.data('offense'));
+        $('#modalCourt').text('Court: '+row.data('court'));
+        $('#modalStatus').text('Status: '+row.data('status'));
+        $('#modalAddress').text('Address: '+row.data('address'));
+        $('#clientModal').fadeIn();
+        $('#searchSuggestions').hide();
+    }
+});
+
+// CLOSE MODAL
+$('.close-btn').click(()=>$('#clientModal').fadeOut());
+$(window).click(function(e){if(e.target.id=='clientModal') $('#clientModal').fadeOut();});
+
+// ----------------------- EXPORT CSV -----------------------
+$('#exportCsvBtn').click(function(){
+    let csv = [];
+    $('#clientsTable tr:visible').each(function(){
+        let row = [];
+        $(this).find('th, td').each(function(){row.push('"'+$(this).text().trim()+'"');});
+        csv.push(row.join(','));
     });
+    let blob = new Blob([csv.join("\n")], { type:'text/csv;charset=utf-8;' });
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "clients_list.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
+</script>
 
-    // FILTER BY STATUS
-    $('#statusFilter').change(function(){
-        var selected = $(this).val();
-        $('#clientsTable tr').each(function(index){
-            if(index===0) return; // skip header
-            var rowStatus = $(this).data('status');
-            if(selected==="" || rowStatus===selected){
-                $(this).show();
-            } else {
-                $(this).hide();
-            }
-        });
-    });
-
-    // EXPORT TO CSV
-    $('#exportCsvBtn').click(function(){
-        var csv = [];
-        $('#clientsTable tr:visible').each(function(){
-            var row = [];
-            $(this).find('th, td').each(function(){
-                row.push('"'+$(this).text().trim()+'"');
-            });
-            csv.push(row.join(','));
-        });
-        var csvString = csv.join("\n");
-        var blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-        var link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "clients_list.csv";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
-    });
-
-    // MODAL (unchanged)
-    const modal = document.getElementById('addClientModal');
-    const btn = document.getElementById('addClientBtn');
-    const span = document.getElementsByClassName('close-btn')[0];
-
-    btn.onclick = ()=>modal.style.display='block';
-    span.onclick = ()=>modal.style.display='none';
-    window.onclick = (e)=>{if(e.target==modal) modal.style.display='none'}
-
-    // SAVE CLIENT VIA AJAX (unchanged)
-    $('#saveClientBtn').click(function(){
-        let docket = $('#docket_number').val();
-        let name = $('#name').val();
-        let offense = $('#offense').val();
-        let court = $('#court').val();
-        let status = $('#status').val();
-        let address = $('#address').val();
-
-        if(docket && name && offense && court){
-            $.ajax({
-                url:'add_client.php', type:'POST',
-                data:{docket_number:docket,name:name,offense:offense,court:court,status:status,address:address},
-                success:function(response){
-                    if(response=='success'){
-                        alert('Client added successfully!');
-                        modal.style.display='none';
-                        location.reload(); // reload to update table & graphs
-                    } else alert('Failed to add client!');
-                }
-            });
-        } else alert('Please fill all required fields.');
-    });
-    </script>
-    </body>
-    </html>
+</body>
+</html>

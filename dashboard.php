@@ -34,11 +34,22 @@ for($m=1;$m<=12;$m++){
 $barangay_labels = [];
 $barangay_data = [];
 $barangay_map = [];
+
+// Predefined barangay coordinates
+$barangay_coords = [
+    "Alae" => ["lat"=>8.2900, "lng"=>125.0400],
+    "Poblacion" => ["lat"=>8.3000, "lng"=>125.0500],
+    "San Isidro" => ["lat"=>8.3100, "lng"=>125.0600],
+    "Manolo Fortich Proper" => ["lat"=>8.3200, "lng"=>125.0700]
+];
+
 $barangay_query = mysqli_query($conn,"SELECT address, COUNT(*) total FROM clients GROUP BY address ORDER BY total DESC");
 while($row=mysqli_fetch_assoc($barangay_query)){
     $barangay_labels[] = $row['address'];
     $barangay_data[] = $row['total'];
-    $barangay_map[] = ['barangay'=>$row['address'],'total'=>$row['total']];
+    $lat = isset($barangay_coords[$row['address']]) ? $barangay_coords[$row['address']]['lat'] : 8.2;
+    $lng = isset($barangay_coords[$row['address']]) ? $barangay_coords[$row['address']]['lng'] : 125.0;
+    $barangay_map[] = ['barangay'=>$row['address'],'total'=>$row['total'],'lat'=>$lat,'lng'=>$lng];
 }
 ?>
 
@@ -50,7 +61,11 @@ while($row=mysqli_fetch_assoc($barangay_query)){
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <style>
 body{font-family:Arial;margin:0;background:#f4f6f9;}
 .header{background:#2c3e50;color:white;padding:15px;display:flex;justify-content:space-between;align-items:center;}
@@ -63,11 +78,12 @@ body{font-family:Arial;margin:0;background:#f4f6f9;}
 table{width:100%;border-collapse:collapse;background:white;margin-top:20px;}
 th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;}
 th{background:#eee;}
-.search-box{margin-bottom:20px;position:relative;}
-.search-box input{padding:10px;width:300px;}
+.search-box{margin-bottom:20px;position:relative;display:flex;gap:10px;}
+.search-box input{padding:10px;width:250px;}
+.search-box select{padding:10px;border-radius:5px;border:1px solid #ccc;}
 .search-box button{padding:10px;cursor:pointer;background:#28a745;color:white;border:none;border-radius:5px;}
 .search-box button:hover{background:#218838;}
-#searchSuggestions{position:absolute;background:white;border:1px solid #ccc;width:300px;max-height:150px;overflow-y:auto;z-index:100;}
+#searchSuggestions{position:absolute;background:white;border:1px solid #ccc;width:250px;max-height:150px;overflow-y:auto;z-index:100;}
 #searchSuggestions div{padding:8px;cursor:pointer;}
 #searchSuggestions div:hover{background:#f1f1f1;}
 #clientModal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;overflow:auto;background:rgba(0,0,0,0.5);}
@@ -85,11 +101,18 @@ th{background:#eee;}
 
 <div class="container">
 
-<!-- SEARCH -->
+<!-- SEARCH AND EXPORT -->
 <div class="search-box">
-<input type="text" id="searchClient" placeholder="Search by Name, Docket # or CC Number">
-<div id="searchSuggestions"></div>
+<input type="text" id="searchClient" placeholder="Search by Name or Docket #">
+<select id="statusFilter">
+    <option value="All">All</option>
+    <option value="Active">Active</option>
+    <option value="Terminated">Terminated</option>
+    <option value="Revoked">Revoked</option>
+    <option value="Denied">Denied</option>
+</select>
 <button id="exportCsvBtn">Export CSV</button>
+<div id="searchSuggestions"></div>
 </div>
 
 <!-- CLIENT INFO DISPLAY -->
@@ -125,7 +148,7 @@ th{background:#eee;}
 <?php } ?>
 </table>
 
-<!-- GOOGLE MAP -->
+<!-- LEAFLET MAP -->
 <h3>Clients per Barangay Map</h3>
 <div id="map"></div>
 
@@ -165,18 +188,17 @@ data:{labels:<?php echo json_encode($barangay_labels); ?>,datasets:[{data:<?php 
 options:{plugins:{legend:{display:false}},responsive:true}
 });
 
-// ----------------------- GOOGLE MAP -----------------------
-function initMap(){
-    const map = new google.maps.Map(document.getElementById('map'),{zoom:12,center:{lat:8.2,lng:125.0}});
-    const barangays = <?php echo json_encode($barangay_map); ?>;
-    barangays.forEach(b=>{
-        new google.maps.Marker({
-            position:{lat:8.2 + Math.random()*0.02,lng:125.0 + Math.random()*0.02},
-            map, title:b.barangay + ' ('+b.total+')'
-        });
-    });
-}
-window.onload = initMap;
+// ----------------------- LEAFLET MAP -----------------------
+var map = L.map('map').setView([8.2,125.0], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+var barangays = <?php echo json_encode($barangay_map); ?>;
+barangays.forEach(function(b){
+    L.marker([b.lat, b.lng]).addTo(map)
+     .bindPopup('<b>'+b.barangay+'</b><br>Total Clients: '+b.total);
+});
 
 // ----------------------- LIVE SEARCH -----------------------
 $('#searchClient').on('keyup', function(){
@@ -192,6 +214,7 @@ $('#searchClient').on('keyup', function(){
         $('#searchSuggestions').html(suggestions).show();
     }else $('#searchSuggestions').hide();
 });
+
 $(document).on('click','#searchSuggestions div',function(){
     let name = $(this).text();
     let row = $('#clientsTable tr.client-row').filter(function(){ return $(this).data('name')==name; });
@@ -211,14 +234,20 @@ $(document).on('click','#searchSuggestions div',function(){
 $('.close-btn').click(()=>$('#clientModal').fadeOut());
 $(window).click(function(e){if(e.target.id=='clientModal') $('#clientModal').fadeOut();});
 
-// ----------------------- EXPORT CSV -----------------------
+// ----------------------- EXPORT CSV WITH FILTER -----------------------
 $('#exportCsvBtn').click(function(){
+    let status = $('#statusFilter').val();
     let csv = [];
-    $('#clientsTable tr:visible').each(function(){
-        let row = [];
-        $(this).find('th, td').each(function(){row.push('"'+$(this).text().trim()+'"');});
-        csv.push(row.join(','));
+    $('#clientsTable tr.client-row').each(function(){
+        let rowStatus = $(this).data('status');
+        if(status==='All' || rowStatus===status){
+            let row = [];
+            $(this).find('td').each(function(){row.push('"'+$(this).text().trim()+'"');});
+            csv.push(row.join(','));
+        }
     });
+    // Add header
+    csv.unshift('"Docket #","Name","Offense","Court","Status"');
     let blob = new Blob([csv.join("\n")], { type:'text/csv;charset=utf-8;' });
     let link = document.createElement("a");
     link.href = URL.createObjectURL(blob);

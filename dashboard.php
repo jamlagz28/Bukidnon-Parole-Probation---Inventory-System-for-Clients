@@ -278,6 +278,8 @@ $recent_uploads = mysqli_query($conn,"
             cursor: pointer;
             border-bottom: 1px solid #f1f5f9;
             transition: background 0.2s;
+            display: flex;
+            align-items: center;
         }
 
         .suggestion-item:last-child {
@@ -289,14 +291,7 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .suggestion-item strong {
-            color: #3b82f6;
-        }
-
-        .search-results {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-left: 1rem;
-            white-space: nowrap;
+            color: #0f172a;
         }
 
         .search-filters {
@@ -714,32 +709,24 @@ $recent_uploads = mysqli_query($conn,"
                     <i class="fas fa-users"></i>
                     <span>Clients</span>
                 </a>
+                <a href="pi_list.php" class="nav-item">
+                    <i class="fas fa-file-lines"></i>
+                    <span>PI Cases</span>
+                </a>
+                <a href="ps_list.php" class="nav-item">
+                    <i class="fas fa-gavel"></i>
+                    <span>PS Cases</span>
+                </a>
                 <a href="monthly_reports.php" class="nav-item">
                     <i class="fas fa-camera"></i>
                     <span>Monthly Reports</span>
-                </a>
-                <a href="pre_investigation.php" class="nav-item">
-                    <i class="fas fa-file-lines"></i>
-                    <span>Pre-Investigation</span>
                 </a>
                 <?php if($user_role == 'main' || $user_role == 'admin'): ?>
                 <a href="staff_management.php" class="nav-item">
                     <i class="fas fa-user-tie"></i>
                     <span>Staff</span>
                 </a>
-                <a href="activity_logs.php" class="nav-item">
-                    <i class="fas fa-history"></i>
-                    <span>Activity Logs</span>
-                </a>
                 <?php endif; ?>
-                <a href="reports.php" class="nav-item">
-                    <i class="fas fa-file-pdf"></i>
-                    <span>Reports</span>
-                </a>
-                <a href="settings.php" class="nav-item">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
-                </a>
             </div>
         </div>
 
@@ -753,8 +740,7 @@ $recent_uploads = mysqli_query($conn,"
                 <div class="search-wrapper">
                     <div class="search-container">
                         <span class="search-icon"><i class="fas fa-search"></i></span>
-                        <input type="text" id="searchInput" class="search-input" placeholder="Search by name, docket #, offense, court, or address..." autocomplete="off">
-                        <span class="search-results" id="searchResults"></span>
+                        <input type="text" id="searchInput" class="search-input" placeholder="Search clients..." autocomplete="off">
                     </div>
                     
                     <!-- Live Search Suggestions Dropdown -->
@@ -859,9 +845,17 @@ $recent_uploads = mysqli_query($conn,"
                     <i class="fas fa-plus" style="margin-right: 8px;"></i>
                     Add New Client
                 </a>
+                <a href="pi_add.php" class="upload-btn" style="text-decoration: none; background: #f59e0b;">
+                    <i class="fas fa-file-lines" style="margin-right: 8px;"></i>
+                    Add PI Case
+                </a>
+                <a href="ps_add.php" class="upload-btn" style="text-decoration: none; background: #10b981;">
+                    <i class="fas fa-gavel" style="margin-right: 8px;"></i>
+                    Add PS Case
+                </a>
                 <button id="exportCsvBtn" class="export-btn">
                     <i class="fas fa-download" style="margin-right: 8px;"></i>
-                    Export Current View
+                    Export
                 </button>
             </div>
 
@@ -985,8 +979,14 @@ $recent_uploads = mysqli_query($conn,"
                                 <a href="edit_probationer.php?id=<?php echo $row['id']; ?>" class="action-link">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="view_reports.php?id=<?php echo $row['id']; ?>" class="action-link">
-                                    <i class="fas fa-camera"></i>
+                                <a href="client_details.php?id=<?php echo $row['id']; ?>" class="action-link">
+                                    <i class="fas fa-eye"></i> View All
+                                </a>
+                            </td>
+                            <?php else: ?>
+                            <td>
+                                <a href="client_details.php?id=<?php echo $row['id']; ?>" class="action-link">
+                                    <i class="fas fa-eye"></i> View Details
                                 </a>
                             </td>
                             <?php endif; ?>
@@ -1118,68 +1118,19 @@ $recent_uploads = mysqli_query($conn,"
                 }
             });
 
-            // ============ FIXED LIVE SEARCH ============
+            // ============ UPDATED LIVE SEARCH - ONLY SHOW CLIENTS ============
             const searchInput = document.getElementById('searchInput');
             const tableRows = document.querySelectorAll('.client-row');
-            const resultsSpan = document.getElementById('searchResults');
-            const tableResults = document.getElementById('tableResults');
             const filterBadges = document.querySelectorAll('.filter-badge');
             const suggestionsDiv = document.getElementById('searchSuggestions');
             let currentFilter = 'all';
             let searchTimeout;
 
-            // Function to filter table based on search and filter
-            function filterTable() {
-                const searchTerm = searchInput.value.toLowerCase().trim();
-                let visibleCount = 0;
-
-                tableRows.forEach(row => {
-                    // Get all text content from the row
-                    const docket = row.cells[0].textContent.toLowerCase();
-                    const name = row.cells[1].textContent.toLowerCase();
-                    const offense = row.cells[2].textContent.toLowerCase();
-                    const court = row.cells[3].textContent.toLowerCase();
-                    const address = row.cells[4].textContent.toLowerCase();
-                    const status = row.cells[5].textContent.trim();
-
-                    // Check if matches search
-                    const matchesSearch = searchTerm === '' || 
-                        docket.includes(searchTerm) || 
-                        name.includes(searchTerm) || 
-                        offense.includes(searchTerm) || 
-                        court.includes(searchTerm) || 
-                        address.includes(searchTerm);
-
-                    // Check if matches filter
-                    const matchesFilter = currentFilter === 'all' || status === currentFilter;
-
-                    // Show/hide row
-                    if (matchesSearch && matchesFilter) {
-                        row.style.display = '';
-                        visibleCount++;
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-
-                // Update results count
-                const totalRows = tableRows.length;
-                resultsSpan.textContent = `${visibleCount} of ${totalRows} results`;
-                if (tableResults) {
-                    tableResults.textContent = `Showing ${visibleCount} clients`;
-                }
-
-                // Hide suggestions when search is done
-                setTimeout(() => {
-                    suggestionsDiv.style.display = 'none';
-                }, 200);
-            }
-
-            // Function to show suggestions
-            function showSuggestions() {
+            // Function to fetch search suggestions from server - ONLY CLIENTS
+            function fetchSuggestions() {
                 const searchTerm = searchInput.value.trim();
                 
-                if (searchTerm.length < 1) {
+                if (searchTerm.length < 2) {
                     suggestionsDiv.style.display = 'none';
                     return;
                 }
@@ -1189,44 +1140,24 @@ $recent_uploads = mysqli_query($conn,"
 
                 // Set timeout to avoid too many requests
                 searchTimeout = setTimeout(() => {
-                    // Filter rows for suggestions
-                    let suggestions = [];
-                    let seen = new Set();
-
-                    tableRows.forEach(row => {
-                        const name = row.cells[1].textContent;
-                        const docket = row.cells[0].textContent;
-                        
-                        if (name.toLowerCase().includes(searchTerm.toLowerCase()) && !seen.has(name)) {
-                            suggestions.push({ type: 'name', value: name, docket: docket });
-                            seen.add(name);
+                    $.ajax({
+                        url: 'live_search.php',
+                        method: 'GET',
+                        data: { q: searchTerm },
+                        success: function(data) {
+                            if (data.trim()) {
+                                suggestionsDiv.innerHTML = data;
+                                suggestionsDiv.style.display = 'block';
+                            } else {
+                                suggestionsDiv.style.display = 'none';
+                            }
                         }
                     });
-
-                    // Display suggestions
-                    if (suggestions.length > 0) {
-                        let html = '';
-                        suggestions.slice(0, 5).forEach(s => {
-                            const highlighted = s.value.replace(new RegExp(searchTerm, 'gi'), match => `<strong>${match}</strong>`);
-                            html += `<div class="suggestion-item" data-value="${s.value}">
-                                <i class="fas fa-user" style="margin-right: 8px; color:#64748b;"></i>
-                                ${highlighted} <span style="color:#94a3b8; font-size:0.8rem;">(${s.docket})</span>
-                            </div>`;
-                        });
-                        suggestionsDiv.innerHTML = html;
-                        suggestionsDiv.style.display = 'block';
-                    } else {
-                        suggestionsDiv.innerHTML = '<div class="suggestion-item" style="color:#64748b;">No matches found</div>';
-                        suggestionsDiv.style.display = 'block';
-                    }
                 }, 300);
             }
 
             // Search input events
-            searchInput.addEventListener('input', function() {
-                filterTable();
-                showSuggestions();
-            });
+            searchInput.addEventListener('input', fetchSuggestions);
 
             searchInput.addEventListener('keyup', function(e) {
                 if (e.key === 'Escape') {
@@ -1234,12 +1165,10 @@ $recent_uploads = mysqli_query($conn,"
                 }
             });
 
-            // Click on suggestion
+            // UPDATED: Click on suggestion - GO TO CLIENT DETAILS PAGE
             $(document).on('click', '.suggestion-item', function() {
-                const value = $(this).data('value');
-                searchInput.value = value;
-                suggestionsDiv.style.display = 'none';
-                filterTable();
+                const id = $(this).data('id');
+                window.location.href = 'client_details.php?id=' + id;
             });
 
             // Click outside to hide suggestions
@@ -1249,7 +1178,7 @@ $recent_uploads = mysqli_query($conn,"
                 }
             });
 
-            // Filter badge clicks
+            // Filter badge clicks (for client table only)
             filterBadges.forEach(badge => {
                 badge.addEventListener('click', function() {
                     // Remove active class from all badges
@@ -1261,8 +1190,21 @@ $recent_uploads = mysqli_query($conn,"
                     // Update current filter
                     currentFilter = this.getAttribute('data-filter');
                     
-                    // Apply filter
-                    filterTable();
+                    // Apply filter to client table
+                    let visibleCount = 0;
+                    tableRows.forEach(row => {
+                        const status = row.cells[5].textContent.trim();
+                        const matchesFilter = currentFilter === 'all' || status === currentFilter;
+                        if (matchesFilter) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                    
+                    // Update visible count
+                    document.getElementById('tableResults').textContent = `Showing ${visibleCount} clients`;
                 });
             });
 
@@ -1332,8 +1274,12 @@ $recent_uploads = mysqli_query($conn,"
                 }
             });
 
-            // Initial filter
-            filterTable();
+            // Initial count
+            let initialVisible = 0;
+            tableRows.forEach(row => {
+                if (row.style.display !== 'none') initialVisible++;
+            });
+            document.getElementById('tableResults').textContent = `Showing ${initialVisible} clients`;
         });
     </script>
 </body>

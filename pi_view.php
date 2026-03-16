@@ -2,6 +2,7 @@
 session_start();
 include 'config/database.php';
 
+// Check if user is logged in
 if(!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit();
@@ -23,11 +24,8 @@ $row = mysqli_fetch_assoc($case);
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PI Case Details</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>View PI Case</title>
     <style>
-        /* Add your styles here - similar to dashboard */
         .view-only-badge {
             background: #e2e8f0;
             color: #475569;
@@ -37,6 +35,7 @@ $row = mysqli_fetch_assoc($case);
             display: inline-flex;
             align-items: center;
             gap: 0.25rem;
+            margin-left: 1rem;
         }
         .action-buttons {
             margin-top: 2rem;
@@ -47,7 +46,7 @@ $row = mysqli_fetch_assoc($case);
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
             text-decoration: none;
-            font-size: 0.95rem;
+            display: inline-block;
         }
         .btn-primary {
             background: #0f172a;
@@ -67,7 +66,7 @@ $row = mysqli_fetch_assoc($case);
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <div class="header" style="display: flex; align-items: center;">
             <h1>PI Case Details</h1>
             <?php if(!$can_edit): ?>
                 <span class="view-only-badge">
@@ -85,11 +84,15 @@ $row = mysqli_fetch_assoc($case);
             <p><strong>Offense:</strong> <?php echo $row['offense']; ?></p>
             <p><strong>Sentence:</strong> <?php echo $row['sentence']; ?></p>
             <p><strong>Address:</strong> <?php echo $row['address']; ?></p>
+            <p><strong>Investigator:</strong> <?php echo $row['investigator']; ?></p>
+            <p><strong>Date Filed:</strong> <?php echo $row['date_filed']; ?></p>
             <p><strong>Status:</strong> <?php echo $row['status']; ?></p>
+            <p><strong>Remarks:</strong> <?php echo $row['remarks']; ?></p>
         </div>
         
         <div class="action-buttons">
-            <a href="dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
+            <a href="pi_list.php" class="btn btn-secondary">Back to List</a>
+            
             <?php if($can_edit): ?>
                 <a href="pi_edit.php?id=<?php echo $id; ?>" class="btn btn-primary">Edit Case</a>
             <?php else: ?>
@@ -98,4 +101,4 @@ $row = mysqli_fetch_assoc($case);
         </div>
     </div>
 </body>
-</html>s
+</html>

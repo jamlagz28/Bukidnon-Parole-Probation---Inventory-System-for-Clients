@@ -4,23 +4,26 @@ include("config/database.php");
 
 if(isset($_POST['login'])){
 
-    $username = $_POST['username'];
+    $username = mysqli_real_escape_string($conn, $_POST['username']);
     $password = $_POST['password'];
 
     // Get user by username
-    $query = "SELECT * FROM staff WHERE username='$username'";
+    $query = "SELECT * FROM staff WHERE username='$username' LIMIT 1";
     $result = mysqli_query($conn, $query);
 
     if(mysqli_num_rows($result) > 0){
         $row = mysqli_fetch_assoc($result);
 
-        // Verify hashed password
-        if(password_verify($password, $row['password'])){
+        // If password in DB is hashed
+        if(password_verify($password, $row['password']) || $password == $row['password']){
+
             $_SESSION['username'] = $row['username'];
-            $_SESSION['fullname'] = $row['full_name'];
+            $_SESSION['fullname'] = $row['fullname']; // FIXED COLUMN NAME
             $_SESSION['role'] = $row['role'];
+
             header("Location: dashboard.php");
             exit;
+
         } else {
             echo "<script>alert('Invalid Username or Password');</script>";
         }
@@ -38,7 +41,6 @@ if(isset($_POST['login'])){
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BPPO Staff Login</title>
 
-<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
@@ -52,7 +54,6 @@ body {
     min-height: 100vh;
 }
 
-/* Color Palette for BPPO */
 :root {
     --primary-blue: #005BAC;
     --secondary-blue: #1a73e8;
@@ -60,7 +61,6 @@ body {
     --white: #ffffff;
 }
 
-/* Login Box */
 .box {
     background: var(--white);
     padding: 45px 35px;
@@ -70,12 +70,12 @@ body {
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 .box:hover {
     transform: translateY(-5px);
     box-shadow: 0 18px 35px rgba(0,0,0,0.2);
 }
 
-/* Heading */
 .box h2 {
     margin-bottom: 30px;
     color: var(--primary-blue);
@@ -83,7 +83,6 @@ body {
     font-size: 28px;
 }
 
-/* Inputs */
 input {
     width: 100%;
     padding: 14px;
@@ -93,13 +92,13 @@ input {
     font-size: 15px;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+
 input:focus {
     border-color: var(--secondary-blue);
     box-shadow: 0 0 8px rgba(26,115,232,0.3);
     outline: none;
 }
 
-/* Buttons */
 button {
     width: 100%;
     padding: 14px;
@@ -110,55 +109,57 @@ button {
     cursor: pointer;
     transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 button:hover { transform: translateY(-2px); }
 
-/* Primary Login Button */
 button[name="login"] {
     background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
     color: var(--white);
     box-shadow: 0 6px 15px rgba(0,0,0,0.2);
 }
+
 button[name="login"]:hover {
     background: linear-gradient(135deg, var(--primary-blue), #094c9f);
 }
 
-/* Back Button */
 .back-btn {
     background: var(--gold-accent);
     color: var(--primary-blue);
     margin-top: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+
 .back-btn:hover {
     background: #e6b800;
     color: var(--white);
 }
 
-/* Forgot Password Link */
 .forgot-password {
     margin: 12px 0;
 }
+
 .forgot-password a {
     color: var(--secondary-blue);
     font-weight: 600;
     text-decoration: none;
 }
+
 .forgot-password a:hover { text-decoration: underline; }
 
-/* Signup Text */
 .signup-text {
     margin-top: 18px;
     font-size: 14px;
     color: #555;
 }
+
 .signup-text a {
     color: var(--secondary-blue);
     font-weight: 600;
     text-decoration: none;
 }
+
 .signup-text a:hover { text-decoration: underline; }
 
-/* Responsive */
 @media (max-width: 420px) {
     .box { width: 90%; padding: 35px 25px; }
 }
@@ -168,6 +169,7 @@ button[name="login"]:hover {
 
 <div class="box">
     <h2>BPPO Staff Login</h2>
+
     <form method="POST">
         <input type="text" name="username" placeholder="Username" required>
         <input type="password" name="password" placeholder="Password" required>
@@ -178,11 +180,14 @@ button[name="login"]:hover {
         <a href="changepassword.php">Forgot Password?</a>
     </div>
 
-    <a href="index.php"><button class="back-btn">← Back to Landing Page</button></a>
+    <a href="index.php">
+        <button class="back-btn" type="button">← Back to Landing Page</button>
+    </a>
 
     <div class="signup-text">
         Don't have an account? <a href="register.php">Sign up here</a>
     </div>
+
 </div>
 
 </body>

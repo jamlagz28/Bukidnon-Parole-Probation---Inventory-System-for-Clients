@@ -27,9 +27,15 @@ $revoked = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM cli
 $denied = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Denied'"))['total'];
 
 /* ------------------------------
-   CLIENT LIST
+   CLIENT LIST - ALL STATUSES
 --------------------------------*/
-$all_clients = mysqli_query($conn,"SELECT * FROM clients ORDER BY name ASC");
+$all_clients = mysqli_query($conn,"SELECT * FROM clients ORDER BY 
+    CASE status 
+        WHEN 'Active' THEN 1 
+        WHEN 'Terminated' THEN 2 
+        WHEN 'Revoked' THEN 3 
+        ELSE 4 
+    END, name ASC");
 
 /* ------------------------------
    MONTHLY CLIENT DATA
@@ -57,13 +63,14 @@ while($row=mysqli_fetch_assoc($barangay_query)){
 }
 
 /* ------------------------------
-   HANDLE PHOTO UPLOAD
+   HANDLE PHOTO UPLOAD - ALL STATUSES CAN UPLOAD
 --------------------------------*/
 if(isset($_POST['upload_photo'])){
     $probationer_id = $_POST['probationer_id'];
     $month = $_POST['month'];
     $year = $_POST['year'];
     
+    // Check if report exists
     $check = mysqli_query($conn, "SELECT id FROM monthly_reports WHERE probationer_id='$probationer_id' AND report_month='$month' AND report_year='$year'");
     
     if(mysqli_num_rows($check) > 0){
@@ -84,19 +91,23 @@ if(isset($_POST['upload_photo'])){
             $insert = mysqli_query($conn, "INSERT INTO monthly_reports (probationer_id, report_month, report_year, photo, uploaded_by) VALUES ('$probationer_id', '$month', '$year', '$new_filename', '$user_id')");
             if($insert){
                 $success = "Monthly report uploaded successfully!";
+            } else {
+                $error = "Database error: " . mysqli_error($conn);
             }
+        } else {
+            $error = "Error uploading file!";
         }
     }
 }
 
 /* ------------------------------
-   GET RECENT UPLOADS
+   GET RECENT UPLOADS - FROM ALL STATUSES
 --------------------------------*/
 $recent_uploads = mysqli_query($conn,"
-    SELECT mr.*, c.name, c.docket_number 
+    SELECT mr.*, c.name, c.docket_number, c.status
     FROM monthly_reports mr 
     JOIN clients c ON mr.probationer_id = c.id 
-    ORDER BY mr.upload_date DESC LIMIT 5
+    ORDER BY mr.upload_date DESC LIMIT 10
 ");
 ?>
 
@@ -118,6 +129,10 @@ $recent_uploads = mysqli_query($conn,"
     
     <!-- jQuery (for AJAX) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Select2 for searchable dropdown -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
         * {
@@ -437,42 +452,144 @@ $recent_uploads = mysqli_query($conn,"
             color: #0f172a;
         }
 
-        /* Upload Area */
-        .upload-area {
+        /* Upload Area - IMPROVED */
+        .upload-container {
             background: white;
-            border: 1px dashed #cbd5e1;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
             padding: 1.5rem;
             margin-bottom: 2rem;
+        }
+
+        .upload-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 1.5rem;
             display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
             align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .upload-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .upload-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Select2 Customization */
+        .select2-container--default .select2-selection--single {
+            height: 42px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 28px;
+            color: #1e293b;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+        }
+        
+        .select2-dropdown {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .select2-results__option {
+            padding: 0.75rem 1rem;
+        }
+        
+        .select2-results__option--highlighted {
+            background: #f1f5f9 !important;
+            color: #0f172a !important;
         }
 
         .upload-select {
+            width: 100%;
             padding: 0.625rem;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             background: white;
             color: #1e293b;
             font-size: 0.95rem;
-            min-width: 180px;
+            height: 42px;
         }
 
         .upload-btn {
             background: #0f172a;
             color: white;
             border: none;
-            padding: 0.625rem 1.25rem;
+            padding: 0.75rem 1rem;
             border-radius: 8px;
             font-size: 0.95rem;
             cursor: pointer;
             transition: background 0.2s;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .upload-btn:hover {
             background: #1e293b;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+        }
+
+        .file-name {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Quick Search Section */
+        .quick-search {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .quick-search-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .status-filter {
+            width: 200px;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
         }
 
         /* Tables */
@@ -550,6 +667,11 @@ $recent_uploads = mysqli_query($conn,"
             color: #0f172a;
         }
 
+        .upload-link {
+            color: #0f172a;
+            font-weight: 500;
+        }
+
         /* Export Button */
         .export-btn {
             padding: 0.5rem 1rem;
@@ -565,6 +687,15 @@ $recent_uploads = mysqli_query($conn,"
         .export-btn:hover {
             background: #f8fafc;
             border-color: #94a3b8;
+        }
+
+        .print-btn {
+            background: #64748b;
+            color: white;
+        }
+        
+        .print-btn:hover {
+            background: #475569;
         }
 
         /* Messages */
@@ -633,8 +764,8 @@ $recent_uploads = mysqli_query($conn,"
 
         /* Recent Uploads */
         .upload-thumb {
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             border-radius: 6px;
             object-fit: cover;
             cursor: pointer;
@@ -674,6 +805,10 @@ $recent_uploads = mysqli_query($conn,"
             .search-wrapper {
                 order: 3;
                 width: 100%;
+            }
+            
+            .upload-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -762,6 +897,9 @@ $recent_uploads = mysqli_query($conn,"
                     <div class="avatar">
                         <i class="fas fa-user"></i>
                     </div>
+                    <button onclick="window.print()" class="export-btn print-btn" style="margin-right: 0.5rem;">
+                        <i class="fas fa-print"></i> Print
+                    </button>
                     <a href="profile.php" class="logout-btn" style="margin:0 0.5rem;">
                         <i class="fas fa-user-circle"></i>
                     </a>
@@ -840,7 +978,7 @@ $recent_uploads = mysqli_query($conn,"
             </div>
 
             <!-- Quick Actions Row -->
-            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
                 <a href="add_probationer.php" class="upload-btn" style="text-decoration: none;">
                     <i class="fas fa-plus" style="margin-right: 8px;"></i>
                     Add New Client
@@ -855,57 +993,122 @@ $recent_uploads = mysqli_query($conn,"
                 </a>
                 <button id="exportCsvBtn" class="export-btn">
                     <i class="fas fa-download" style="margin-right: 8px;"></i>
-                    Export
+                    Export CSV
+                </button>
+                <button onclick="window.print()" class="export-btn print-btn">
+                    <i class="fas fa-print"></i> Print Page
                 </button>
             </div>
 
-            <!-- Quick Upload -->
-            <div class="section-header">
-                <h2 class="section-title">Monthly Photo Report</h2>
-                <a href="monthly_reports.php" class="section-link">View all →</a>
-            </div>
+            <!-- IMPROVED UPLOAD SECTION WITH SEARCHABLE DROPDOWN -->
+            <div class="upload-container">
+                <div class="upload-title">
+                    <i class="fas fa-cloud-upload-alt" style="color: #0f172a;"></i>
+                    Monthly Photo Report Upload
+                </div>
 
-            <form method="POST" enctype="multipart/form-data" class="upload-area">
-                <select name="probationer_id" class="upload-select" required>
-                    <option value="">Select probationer</option>
-                    <?php
-                    $active_clients = mysqli_query($conn,"SELECT id, name, docket_number FROM clients WHERE status='Active' ORDER BY name ASC");
-                    while($c = mysqli_fetch_assoc($active_clients)){
-                        echo "<option value='{$c['id']}'>{$c['name']} ({$c['docket_number']})</option>";
-                    }
-                    ?>
-                </select>
-                
-                <select name="month" class="upload-select" required>
-                    <option value="">Month</option>
-                    <?php for($m=1;$m<=12;$m++): ?>
-                        <option value="<?php echo $m; ?>"><?php echo date("F", mktime(0,0,0,$m,10)); ?></option>
-                    <?php endfor; ?>
-                </select>
-                
-                <select name="year" class="upload-select" required>
-                    <option value="">Year</option>
-                    <?php for($y=date('Y'); $y>=date('Y')-2; $y--): ?>
-                        <option value="<?php echo $y; ?>"><?php echo $y; ?></option>
-                    <?php endfor; ?>
-                </select>
-                
-                <input type="file" name="photo" accept="image/*" style="display: none;" id="photoInput">
-                <button type="button" class="upload-btn" onclick="document.getElementById('photoInput').click()">
-                    <i class="fas fa-cloud-upload-alt" style="margin-right: 8px;"></i>
-                    Choose Photo
-                </button>
-                <button type="submit" name="upload_photo" class="upload-btn">
-                    <i class="fas fa-check" style="margin-right: 8px;"></i>
-                    Upload
-                </button>
-            </form>
+                <!-- Quick Search for Clients -->
+                <div class="quick-search">
+                    <input type="text" id="quickClientSearch" class="quick-search-input" placeholder="🔍 Quick: Type client name or docket # to find and select...">
+                    <select id="statusFilterUpload" class="status-filter">
+                        <option value="all">All Statuses</option>
+                        <option value="Active">Active</option>
+                        <option value="Terminated">Terminated</option>
+                        <option value="Revoked">Revoked</option>
+                        <option value="Denied">Denied</option>
+                    </select>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                    <div class="upload-grid">
+                        <div class="upload-group">
+                            <label class="upload-label">
+                                <i class="fas fa-user"></i> Select Client <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select name="probationer_id" id="clientSelect" class="upload-select" required>
+                                <option value="">🔍 Search for a client...</option>
+                                <?php
+                                // Get ALL clients regardless of status
+                                $all_status_clients = mysqli_query($conn,"SELECT id, name, docket_number, status FROM clients ORDER BY name ASC");
+                                while($c = mysqli_fetch_assoc($all_status_clients)){
+                                    $status_color = '';
+                                    $status_icon = '';
+                                    
+                                    if($c['status'] == 'Active') {
+                                        $status_color = 'style="color: #059669;"';
+                                        $status_icon = '🟢';
+                                    } else if($c['status'] == 'Terminated') {
+                                        $status_color = 'style="color: #0284c7;"';
+                                        $status_icon = '🔵';
+                                    } else if($c['status'] == 'Revoked') {
+                                        $status_color = 'style="color: #d97706;"';
+                                        $status_icon = '🟠';
+                                    } else if($c['status'] == 'Denied') {
+                                        $status_color = 'style="color: #dc2626;"';
+                                        $status_icon = '🔴';
+                                    }
+                                    
+                                    echo "<option value='{$c['id']}' data-status='{$c['status']}' {$status_color}>{$status_icon} {$c['name']} ({$c['docket_number']}) - [{$c['status']}]</option>";
+                                }
+                                ?>
+                            </select>
+                            <div class="file-name" id="selectedClientDisplay"></div>
+                        </div>
+                        
+                        <div class="upload-group">
+                            <label class="upload-label">
+                                <i class="fas fa-calendar"></i> Month <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select name="month" class="upload-select" required>
+                                <option value="">Select Month</option>
+                                <?php for($m=1;$m<=12;$m++): ?>
+                                    <option value="<?php echo $m; ?>"><?php echo date("F", mktime(0,0,0,$m,10)); ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="upload-group">
+                            <label class="upload-label">
+                                <i class="fas fa-calendar-alt"></i> Year <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select name="year" class="upload-select" required>
+                                <option value="">Select Year</option>
+                                <?php for($y=date('Y'); $y>=date('Y')-2; $y--): ?>
+                                    <option value="<?php echo $y; ?>"><?php echo $y; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="upload-group">
+                            <label class="upload-label">
+                                <i class="fas fa-image"></i> Photo <span style="color: #ef4444;">*</span>
+                            </label>
+                            <div class="file-input-wrapper">
+                                <input type="file" name="photo" accept="image/*" style="display: none;" id="photoInput">
+                                <button type="button" class="upload-btn" onclick="document.getElementById('photoInput').click()" style="width: 100%;">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    Choose Photo
+                                </button>
+                                <div class="file-name" id="fileSelected">No file selected</div>
+                            </div>
+                        </div>
+                        
+                        <div class="upload-group">
+                            <label class="upload-label">&nbsp;</label>
+                            <button type="submit" name="upload_photo" class="upload-btn" style="width: 100%; background: #059669;">
+                                <i class="fas fa-check"></i>
+                                Upload Report
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
             <!-- Recent Uploads -->
             <?php if(mysqli_num_rows($recent_uploads) > 0): ?>
             <div style="margin-bottom: 2rem;">
                 <div class="section-header">
-                    <h2 class="section-title">Recent Uploads</h2>
+                    <h2 class="section-title">Recent Uploads (All Statuses)</h2>
                 </div>
                 <div class="table-container">
                     <table>
@@ -913,6 +1116,7 @@ $recent_uploads = mysqli_query($conn,"
                             <tr>
                                 <th>Probationer</th>
                                 <th>Docket #</th>
+                                <th>Status</th>
                                 <th>Month/Year</th>
                                 <th>Photo</th>
                                 <th>Uploaded</th>
@@ -923,11 +1127,16 @@ $recent_uploads = mysqli_query($conn,"
                             <tr>
                                 <td><?php echo htmlspecialchars($upload['name']); ?></td>
                                 <td><?php echo htmlspecialchars($upload['docket_number']); ?></td>
+                                <td>
+                                    <span class="status-badge status-<?php echo $upload['status']; ?>">
+                                        <?php echo $upload['status']; ?>
+                                    </span>
+                                </td>
                                 <td><?php echo date("F Y", mktime(0,0,0,$upload['report_month'],1,$upload['report_year'])); ?></td>
                                 <td>
                                     <img src="uploads/<?php echo $upload['photo']; ?>" class="upload-thumb" onclick="window.open('uploads/<?php echo $upload['photo']; ?>')">
                                 </td>
-                                <td><?php echo date("M d", strtotime($upload['upload_date'])); ?></td>
+                                <td><?php echo date("M d, Y", strtotime($upload['upload_date'])); ?></td>
                             </tr>
                             <?php endwhile; ?>
                         </tbody>
@@ -938,7 +1147,7 @@ $recent_uploads = mysqli_query($conn,"
 
             <!-- Client List -->
             <div class="section-header">
-                <h2 class="section-title">Client List</h2>
+                <h2 class="section-title">Complete Client List (All Statuses)</h2>
                 <span id="tableResults" style="color:#64748b; font-size:0.9rem;"></span>
             </div>
 
@@ -953,9 +1162,7 @@ $recent_uploads = mysqli_query($conn,"
                             <th>Court</th>
                             <th>Address</th>
                             <th>Status</th>
-                            <?php if($user_role == 'main' || $user_role == 'admin'): ?>
-                            <th>Actions</th>
-                            <?php endif; ?>
+                            <th>Quick Upload</th>
                         </tr>
                     </thead>
                     <tbody id="clientTableBody">
@@ -974,22 +1181,11 @@ $recent_uploads = mysqli_query($conn,"
                                     <?php echo $row['status']; ?>
                                 </span>
                             </td>
-                            <?php if($user_role == 'main' || $user_role == 'admin'): ?>
                             <td>
-                                <a href="edit_probationer.php?id=<?php echo $row['id']; ?>" class="action-link">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="client_details.php?id=<?php echo $row['id']; ?>" class="action-link">
-                                    <i class="fas fa-eye"></i> View All
+                                <a href="#" onclick="selectClientForUpload(<?php echo $row['id']; ?>, '<?php echo addslashes($row['name']); ?>', '<?php echo $row['docket_number']; ?>'); return false;" class="action-link upload-link">
+                                    <i class="fas fa-camera"></i> Upload Now
                                 </a>
                             </td>
-                            <?php else: ?>
-                            <td>
-                                <a href="client_details.php?id=<?php echo $row['id']; ?>" class="action-link">
-                                    <i class="fas fa-eye"></i> View Details
-                                </a>
-                            </td>
-                            <?php endif; ?>
                         </tr>
                         <?php } ?>
                     </tbody>
@@ -1118,7 +1314,99 @@ $recent_uploads = mysqli_query($conn,"
                 }
             });
 
-            // ============ UPDATED LIVE SEARCH - ONLY SHOW CLIENTS ============
+            // ============ SEARCHABLE DROPDOWN with SELECT2 ============
+            if (typeof $.fn.select2 !== 'undefined') {
+                $('#clientSelect').select2({
+                    placeholder: '🔍 Type to search for a client...',
+                    allowClear: true,
+                    width: '100%',
+                    theme: 'default',
+                    matcher: function(params, data) {
+                        // If there are no search terms, return all options
+                        if ($.trim(params.term) === '') {
+                            return data;
+                        }
+
+                        // Convert search term to lowercase
+                        var term = params.term.toLowerCase();
+                        
+                        // Check if the option text contains the search term
+                        if (data.text.toLowerCase().indexOf(term) > -1) {
+                            return data;
+                        }
+                        
+                        // Return null if no match
+                        return null;
+                    }
+                });
+            }
+
+            // ============ QUICK CLIENT SEARCH ============
+            $('#quickClientSearch').on('keyup', function() {
+                var searchTerm = $(this).val();
+                
+                // Open Select2 dropdown and trigger search
+                $('#clientSelect').select2('open');
+                
+                // Set the search term in Select2 search box
+                setTimeout(function() {
+                    $('.select2-search__field').val(searchTerm).trigger('keyup');
+                }, 100);
+            });
+
+            // ============ STATUS FILTER FOR UPLOAD DROPDOWN ============
+            $('#statusFilterUpload').on('change', function() {
+                const selectedStatus = $(this).val();
+                
+                $('#clientSelect option').each(function() {
+                    const option = $(this);
+                    const status = option.data('status');
+                    
+                    if (selectedStatus === 'all' || status === selectedStatus) {
+                        option.show();
+                    } else {
+                        option.hide();
+                    }
+                });
+                
+                // Refresh Select2 to reflect changes
+                if (typeof $.fn.select2 !== 'undefined') {
+                    $('#clientSelect').select2('destroy').select2({
+                        placeholder: '🔍 Type to search for a client...',
+                        allowClear: true,
+                        width: '100%'
+                    });
+                }
+            });
+
+            // ============ SELECT CLIENT FUNCTION ============
+            window.selectClientForUpload = function(id, name, docket) {
+                // Set the select value
+                $('#clientSelect').val(id).trigger('change');
+                
+                // Show confirmation
+                $('#selectedClientDisplay').text('Selected: ' + name + ' (' + docket + ')').css('color', '#059669');
+                
+                // Scroll to upload section
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+                
+                // Highlight the upload section
+                $('.upload-container').css('border', '2px solid #059669').css('transition', 'border 0.5s');
+                setTimeout(function() {
+                    $('.upload-container').css('border', '1px solid #e2e8f0');
+                }, 2000);
+            };
+
+            // ============ FILE INPUT DISPLAY ============
+            document.getElementById('photoInput').addEventListener('change', function(e) {
+                const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+                document.getElementById('fileSelected').textContent = '📷 ' + fileName;
+            });
+
+            // ============ LIVE SEARCH ============
             const searchInput = document.getElementById('searchInput');
             const tableRows = document.querySelectorAll('.client-row');
             const filterBadges = document.querySelectorAll('.filter-badge');
@@ -1126,7 +1414,6 @@ $recent_uploads = mysqli_query($conn,"
             let currentFilter = 'all';
             let searchTimeout;
 
-            // Function to fetch search suggestions from server - ONLY CLIENTS
             function fetchSuggestions() {
                 const searchTerm = searchInput.value.trim();
                 
@@ -1135,10 +1422,7 @@ $recent_uploads = mysqli_query($conn,"
                     return;
                 }
 
-                // Clear previous timeout
                 clearTimeout(searchTimeout);
-
-                // Set timeout to avoid too many requests
                 searchTimeout = setTimeout(() => {
                     $.ajax({
                         url: 'live_search.php',
@@ -1156,41 +1440,31 @@ $recent_uploads = mysqli_query($conn,"
                 }, 300);
             }
 
-            // Search input events
             searchInput.addEventListener('input', fetchSuggestions);
-
             searchInput.addEventListener('keyup', function(e) {
                 if (e.key === 'Escape') {
                     suggestionsDiv.style.display = 'none';
                 }
             });
 
-            // UPDATED: Click on suggestion - GO TO CLIENT DETAILS PAGE
             $(document).on('click', '.suggestion-item', function() {
                 const id = $(this).data('id');
                 window.location.href = 'client_details.php?id=' + id;
             });
 
-            // Click outside to hide suggestions
             $(document).click(function(e) {
                 if (!$(e.target).closest('.search-wrapper').length) {
                     suggestionsDiv.style.display = 'none';
                 }
             });
 
-            // Filter badge clicks (for client table only)
+            // Filter badge clicks
             filterBadges.forEach(badge => {
                 badge.addEventListener('click', function() {
-                    // Remove active class from all badges
                     filterBadges.forEach(b => b.classList.remove('active'));
-                    
-                    // Add active class to clicked badge
                     this.classList.add('active');
-                    
-                    // Update current filter
                     currentFilter = this.getAttribute('data-filter');
                     
-                    // Apply filter to client table
                     let visibleCount = 0;
                     tableRows.forEach(row => {
                         const status = row.cells[5].textContent.trim();
@@ -1203,7 +1477,6 @@ $recent_uploads = mysqli_query($conn,"
                         }
                     });
                     
-                    // Update visible count
                     document.getElementById('tableResults').textContent = `Showing ${visibleCount} clients`;
                 });
             });
@@ -1249,10 +1522,8 @@ $recent_uploads = mysqli_query($conn,"
                 document.getElementById('clientModal').classList.remove('active');
             };
 
-            // Click row to show modal
             tableRows.forEach(row => {
                 row.addEventListener('click', function(e) {
-                    // Don't open modal if clicking on action links
                     if (e.target.tagName === 'A' || e.target.closest('a')) {
                         return;
                     }
@@ -1267,14 +1538,12 @@ $recent_uploads = mysqli_query($conn,"
                 });
             });
 
-            // Close modal when clicking outside
             window.addEventListener('click', function(e) {
                 if (e.target.classList.contains('modal')) {
                     closeModal();
                 }
             });
 
-            // Initial count
             let initialVisible = 0;
             tableRows.forEach(row => {
                 if (row.style.display !== 'none') initialVisible++;

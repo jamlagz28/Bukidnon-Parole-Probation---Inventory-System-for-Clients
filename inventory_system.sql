@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 16, 2026 at 04:55 AM
+-- Generation Time: Mar 18, 2026 at 08:40 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -69,26 +69,33 @@ CREATE TABLE `clients` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
-  `payment` decimal(10,2) DEFAULT 0.00
+  `payment` decimal(10,2) DEFAULT 0.00,
+  `pi_case_id` int(11) DEFAULT NULL,
+  `ps_case_id` int(11) DEFAULT NULL,
+  `case_status` varchar(50) DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `clients`
 --
 
-INSERT INTO `clients` (`id`, `docket_number`, `name`, `cc_number`, `court`, `offense`, `sentence`, `address`, `status`, `created_at`, `start_date`, `end_date`, `payment`) VALUES
-(1, 'D001', 'Juan dela Cruz', 'CC12345', 'Manolo Fortich Court', 'Theft', '6 months', 'Brgy. Alae', 'Active', '2026-03-14 11:26:23', NULL, NULL, 0.00),
-(2, 'D002', 'Maria Santos', 'CC12346', 'Manolo Fortich Court', 'Fraud', '1 year', 'Brgy. Alae', 'Terminated', '2026-03-14 11:26:23', NULL, NULL, 0.00),
-(3, 'D003', 'Pedro Reyes', 'CC12347', 'Manolo Fortich Court', 'Assault', '2 years', 'Brgy. Poblacion', 'Revoked', '2026-03-14 11:26:23', NULL, NULL, 0.00),
-(4, 'D004', 'Ana Lim', 'CC12348', 'Manolo Fortich Court', 'Drug Possession', '1 year', 'Brgy. Poblacion', 'Denied', '2026-03-14 11:26:23', NULL, NULL, 0.00),
-(5, 'D005', 'Jose Ramos', 'CC12349', 'Manolo Fortich Court', 'Robbery', '3 years', 'Brgy. Alae', 'Active', '2026-03-14 11:26:23', NULL, NULL, 0.00),
-(6, 'D001', 'Juan dela Cruz', 'CC12345', 'Manolo Fortich Court', 'Theft', '6 months', 'Brgy. Alae', 'Active', '2026-03-14 11:26:23', NULL, NULL, 0.00),
-(7, 'D002', 'Maria Santos', 'CC12346', 'Manolo Fortich Court', 'Fraud', '1 year', 'Brgy. Alae', 'Terminated', '2026-03-14 11:26:23', NULL, NULL, 0.00),
-(8, 'D003', 'Pedro Reyes', 'CC12347', 'Manolo Fortich Court', 'Assault', '2 years', 'Brgy. Poblacion', 'Revoked', '2026-03-14 11:26:23', NULL, NULL, 0.00),
-(9, 'D004', 'Ana Lim', 'CC12348', 'Manolo Fortich Court', 'Drug Possession', '1 year', 'Brgy. Poblacion', 'Denied', '2026-03-14 11:26:23', NULL, NULL, 0.00),
-(10, 'D005', 'Jose Ramos', 'CC12349', 'Manolo Fortich Court', 'Robbery', '3 years', 'Brgy. Alae', 'Terminated', '2026-03-14 11:26:23', NULL, NULL, 0.00),
-(12, 'D006', 'Louella Jane Baslao', NULL, 'Manolo Fortich Court', 'Palaaway', NULL, 'agusan', 'Active', '2026-03-14 11:26:23', NULL, NULL, 0.00),
-(13, 'D006', 'zenn', 'wawd', 'Manolo Fortich Court', 'drugs', '10 years', 'agusan', 'Active', '2026-03-16 03:17:37', '2026-03-16', '2026-03-16', 0.00);
+INSERT INTO `clients` (`id`, `docket_number`, `name`, `cc_number`, `court`, `offense`, `sentence`, `address`, `status`, `created_at`, `start_date`, `end_date`, `payment`, `pi_case_id`, `ps_case_id`, `case_status`) VALUES
+(1, 'D001', 'Juan dela Cruz', 'CC12345', 'Manolo Fortich Court', 'Theft', '6 months', 'Brgy. Alae', 'Pending', '2026-03-14 11:26:23', NULL, NULL, 0.00, NULL, NULL, 'Pending'),
+(2, 'D002', 'Maria Santos', 'CC12346', 'Manolo Fortich Court', 'Fraud', '1 year', 'Brgy. Alae', 'Terminated', '2026-03-14 11:26:23', NULL, NULL, 0.00, NULL, NULL, 'Pending'),
+(3, 'D003', 'Pedro Reyes', 'CC12347', 'Manolo Fortich Court', 'Assault', '2 years', 'Brgy. Poblacion', 'Revoked', '2026-03-14 11:26:23', NULL, NULL, 0.00, NULL, NULL, 'Pending'),
+(4, 'D004', 'Ana Lim', 'CC12348', 'Manolo Fortich Court', 'Drug Possession', '1 year', 'Brgy. Poblacion', 'Denied', '2026-03-14 11:26:23', NULL, NULL, 0.00, NULL, NULL, 'Pending'),
+(5, 'D005', 'Jose Ramos', 'CC12349', 'Manolo Fortich Court', 'Robbery', '3 years', 'Brgy. Alae', 'Pending', '2026-03-14 11:26:23', NULL, NULL, 0.00, NULL, NULL, 'Pending'),
+(6, 'D001', 'Juan dela Cruz', 'CC12345', 'Manolo Fortich Court', 'Theft', '6 months', 'Brgy. Alae', 'Pending', '2026-03-14 11:26:23', NULL, NULL, 0.00, NULL, NULL, 'Pending'),
+(7, 'D002', 'Maria Santos', 'CC12346', 'Manolo Fortich Court', 'Fraud', '1 year', 'Brgy. Alae', 'Terminated', '2026-03-14 11:26:23', NULL, NULL, 0.00, NULL, NULL, 'Pending'),
+(8, 'D003', 'Pedro Reyes', 'CC12347', 'Manolo Fortich Court', 'Assault', '2 years', 'Brgy. Poblacion', 'Revoked', '2026-03-14 11:26:23', NULL, NULL, 0.00, NULL, NULL, 'Pending'),
+(9, 'D004', 'Ana Lim', 'CC12348', 'Manolo Fortich Court', 'Drug Possession', '1 year', 'Brgy. Poblacion', 'Denied', '2026-03-14 11:26:23', NULL, NULL, 0.00, NULL, NULL, 'Pending'),
+(10, 'D005', 'Jose Ramos', 'CC12349', 'Manolo Fortich Court', 'Robbery', '3 years', 'Brgy. Alae', 'Terminated', '2026-03-14 11:26:23', NULL, NULL, 0.00, NULL, NULL, 'Pending'),
+(12, 'D006', 'Louella Jane Baslao', NULL, 'Manolo Fortich Court', 'Palaaway', NULL, 'agusan', 'Pending', '2026-03-14 11:26:23', NULL, NULL, 0.00, NULL, NULL, 'Pending'),
+(13, 'D006', 'zenn', 'wawd', 'Manolo Fortich Court', 'drugs', '10 years', 'agusan', 'Pending', '2026-03-16 03:17:37', '2026-03-16', '2026-03-16', 0.00, NULL, NULL, 'Pending'),
+(14, 'D090', 'loue', '12', 'Manolo Fortich Court', 'drugs', '10 years', 'agusan', 'Pending', '2026-03-17 06:50:36', '2026-03-17', '2026-03-17', 0.00, NULL, NULL, 'Pending'),
+(15, 'dsfds', 'Hello', '5325', 'dgsd', 'gdsg', 'fdsfds', 'sdfsdf', 'Pending', '2026-03-17 07:52:40', '1111-11-11', '1111-11-11', 0.00, NULL, NULL, 'Pending'),
+(16, 'pi-2026-01-0002', 'sha', '1234-112', 'rtc 11', 'ra 9165', '0-4-0', 'manolo', 'Active', '2026-03-17 07:55:53', '0000-00-00', '2222-02-22', 0.00, NULL, 5, 'Pending'),
+(20, 'D017', 'stev', '1234-112', 'rtc 11', 'ggg', '0-4-0', 'manolo', 'Pending', '2026-03-18 03:32:22', '2026-03-18', '2027-03-18', 0.00, 7, NULL, 'Pending');
 
 -- --------------------------------------------------------
 
@@ -143,7 +150,8 @@ CREATE TABLE `monthly_reports` (
 --
 
 INSERT INTO `monthly_reports` (`id`, `probationer_id`, `report_month`, `report_year`, `photo`, `uploaded_by`, `upload_date`) VALUES
-(1, 5, 12, 2026, 'report_5_2026_12.jpg', 1, '2026-03-16 03:23:03');
+(2, 13, 5, 2026, 'report_13_2026_5.jpg', 1, '2026-03-16 04:11:29'),
+(3, 5, 11, 2026, 'report_5_2026_11.jpg', 1, '2026-03-16 05:06:42');
 
 -- --------------------------------------------------------
 
@@ -166,8 +174,17 @@ CREATE TABLE `pre_investigation` (
   `remarks` text DEFAULT NULL,
   `created_by` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  `client_id` int(11) DEFAULT NULL,
+  `converted_to_ps` tinyint(4) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `pre_investigation`
+--
+
+INSERT INTO `pre_investigation` (`id`, `docket_number`, `name`, `cc_number`, `court`, `offense`, `sentence`, `address`, `investigator`, `date_filed`, `status`, `remarks`, `created_by`, `created_at`, `updated_at`, `client_id`, `converted_to_ps`) VALUES
+(7, 'PI-D017', 'stev', '1234-112', 'rtc 11', 'ggg', '0-4-0', 'manolo', 'Trisha', '2026-03-18', 'Pending', '', NULL, '2026-03-18 03:32:22', NULL, 20, 0);
 
 -- --------------------------------------------------------
 
@@ -208,8 +225,19 @@ CREATE TABLE `probation_supervision` (
   `next_payment_date` date DEFAULT NULL,
   `created_by` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  `client_id` int(11) DEFAULT NULL,
+  `source_pi_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `probation_supervision`
+--
+
+INSERT INTO `probation_supervision` (`id`, `docket_number`, `name`, `offense`, `payment`, `address`, `start_date`, `end_date`, `supervising_officer`, `status`, `monthly_fee`, `last_payment_date`, `next_payment_date`, `created_by`, `created_at`, `updated_at`, `client_id`, `source_pi_id`) VALUES
+(6, 'D0015', 'sha', 'dwwa', 0.01, 'manolo', '2026-03-18', '2026-03-18', 'trisha', 'Active', 500.00, NULL, '2026-04-18', 1, '2026-03-18 03:48:50', NULL, NULL, NULL),
+(7, 'D017', 'stev', 'daw', 0.01, 'manolo', '2026-03-18', '2026-03-18', 'trisha', 'Active', 500.00, NULL, '2026-04-18', 1, '2026-03-18 03:56:32', NULL, NULL, NULL),
+(8, 'D006', 'stev', 'dwa', 0.01, 'agusan', '2026-03-18', '2026-03-18', 'trisha', 'Active', 500.00, NULL, '2026-04-18', 1, '2026-03-18 07:26:30', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -245,7 +273,6 @@ CREATE TABLE `staff` (
 
 INSERT INTO `staff` (`id`, `fullname`, `username`, `password`, `role`) VALUES
 (1, 'Trezsha Hazarmaveth G. Pablo', 'Admin', 'admin123', 'main'),
-(2, 'Administrator', 'admin', 'admin123', NULL),
 (4, 'Administrator', 'admin', 'admin123', 'staff'),
 (5, 'stev', 'zenn', 'admin', 'staff');
 
@@ -339,7 +366,7 @@ ALTER TABLE `cases`
 -- AUTO_INCREMENT for table `clients`
 --
 ALTER TABLE `clients`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `investigation_records`
@@ -351,25 +378,25 @@ ALTER TABLE `investigation_records`
 -- AUTO_INCREMENT for table `monthly_reports`
 --
 ALTER TABLE `monthly_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `pre_investigation`
 --
 ALTER TABLE `pre_investigation`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `probation_payments`
 --
 ALTER TABLE `probation_payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `probation_supervision`
 --
 ALTER TABLE `probation_supervision`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `profiles`

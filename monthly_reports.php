@@ -48,16 +48,43 @@ $reports = mysqli_query($conn, "
     FROM monthly_reports mr
     JOIN clients c ON mr.probationer_id = c.id
     LEFT JOIN staff s ON mr.uploaded_by = s.id
-    ORDER BY mr.upload_date DESC
+    ORDER BY mr.report_year DESC, mr.report_month DESC, mr.upload_date DESC
 ");
 
 // Get summary stats
 $total_reports = mysqli_num_rows($reports);
-$reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
+
+// Get reports count for current year
+$current_year = date('Y');
+$reports_this_year = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT COUNT(*) as total FROM monthly_reports 
-    WHERE MONTH(upload_date) = MONTH(CURRENT_DATE()) 
-    AND YEAR(upload_date) = YEAR(CURRENT_DATE())
+    WHERE report_year = $current_year
 "))['total'];
+
+// Get min and max year from database for accuracy
+$year_range_query = mysqli_query($conn, "
+    SELECT 
+        MIN(report_year) as min_year,
+        MAX(report_year) as max_year,
+        COUNT(DISTINCT report_year) as year_count
+    FROM monthly_reports
+");
+$year_stats = mysqli_fetch_assoc($year_range_query);
+$min_year_db = $year_stats['min_year'] ?? $current_year;
+$max_year_db = $year_stats['max_year'] ?? $current_year;
+$years_with_data = $year_stats['year_count'] ?? 0;
+
+// Create year array from 2020 to 2030
+$start_year = 2020;
+$end_year = 2030;
+$years = range($start_year, $end_year);
+
+// Get counts per year for display
+$year_counts = [];
+foreach($years as $year) {
+    $count_query = mysqli_query($conn, "SELECT COUNT(*) as total FROM monthly_reports WHERE report_year = $year");
+    $year_counts[$year] = mysqli_fetch_assoc($count_query)['total'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -65,7 +92,7 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Monthly Reports</title>
+    <title>Monthly Reports 2020-2030</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -149,6 +176,12 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
             color: #0f172a;
         }
 
+        .page-subtitle {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
         .user-info {
             display: flex;
             align-items: center;
@@ -186,7 +219,7 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -202,6 +235,9 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
             color: #64748b;
             font-size: 0.9rem;
             margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .stat-value {
@@ -210,14 +246,27 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
             color: #0f172a;
         }
 
-        .search-bar {
+        .stat-note {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        .filter-section {
             margin-bottom: 1.5rem;
             display: flex;
             gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
         }
 
         .search-input {
             flex: 1;
+            min-width: 250px;
             padding: 0.75rem 1rem;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
@@ -230,6 +279,55 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
             border-radius: 8px;
             background: white;
             min-width: 150px;
+            font-weight: 500;
+        }
+
+        .year-option {
+            padding: 0.5rem;
+        }
+
+        .year-option.has-data {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .year-option.no-data {
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .filter-info {
+            color: #64748b;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .year-stats {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .year-pill {
+            background: #f1f5f9;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .year-pill.has-data {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .year-pill i {
+            font-size: 0.7rem;
         }
 
         .table-container {
@@ -266,10 +364,12 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
             border-radius: 8px;
             cursor: pointer;
             transition: transform 0.2s;
+            border: 1px solid #e2e8f0;
         }
 
         .report-thumb:hover {
             transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .status-badge {
@@ -298,6 +398,16 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
         .status-Denied {
             background: #fef2f2;
             color: #dc2626;
+        }
+
+        .year-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            background: #f1f5f9;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+            color: #475569;
         }
 
         .action-link {
@@ -357,12 +467,65 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
             cursor: pointer;
         }
 
+        .clear-filter {
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .clear-filter:hover {
+            text-decoration: underline;
+        }
+
+        .year-range-info {
+            background: #f8fafc;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .year-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+
+        .dot-active {
+            background: #10b981;
+        }
+
+        .dot-inactive {
+            background: #cbd5e1;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 display: none;
             }
             .main {
                 margin-left: 0;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -382,7 +545,13 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
 
         <div class="main">
             <div class="top-bar">
-                <h1 class="page-title">All Monthly Reports</h1>
+                <div>
+                    <h1 class="page-title">Monthly Reports (2020-2030)</h1>
+                    <div class="page-subtitle">
+                        <i class="fas fa-calendar-alt"></i> 
+                        Complete decade coverage
+                    </div>
+                </div>
                 <div class="user-info">
                     <?php if(!$can_delete): ?>
                         <span class="view-only-badge">
@@ -407,31 +576,85 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
                 </div>
             <?php endif; ?>
 
+            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">Total Reports</div>
+                    <div class="stat-label">
+                        <i class="fas fa-image"></i> Total Reports
+                    </div>
                     <div class="stat-value"><?php echo $total_reports; ?></div>
+                    <div class="stat-note">across all years</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Reports This Month</div>
-                    <div class="stat-value"><?php echo $reports_this_month; ?></div>
+                    <div class="stat-label">
+                        <i class="fas fa-calendar-check"></i> <?php echo $current_year; ?> Reports
+                    </div>
+                    <div class="stat-value"><?php echo $reports_this_year; ?></div>
+                    <div class="stat-note">current year</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Active Clients</div>
-                    <div class="stat-value"><?php echo mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM clients WHERE status='Active'"))['total']; ?></div>
+                    <div class="stat-label">
+                        <i class="fas fa-chart-line"></i> Year Range
+                    </div>
+                    <div class="stat-value"><?php echo $min_year_db; ?> - <?php echo $max_year_db; ?></div>
+                    <div class="stat-note">years with data</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i class="fas fa-layer-group"></i> Active Years
+                    </div>
+                    <div class="stat-value"><?php echo $years_with_data; ?></div>
+                    <div class="stat-note">out of 11 years</div>
                 </div>
             </div>
 
-            <div class="search-bar">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search by client name or docket...">
-                <select id="monthFilter" class="filter-select">
-                    <option value="all">All Months</option>
-                    <?php for($m=1;$m<=12;$m++): ?>
-                        <option value="<?php echo $m; ?>"><?php echo date("F", mktime(0,0,0,$m,1)); ?></option>
-                    <?php endfor; ?>
+            <!-- Year Range Visualization -->
+            <div class="year-range-info">
+                <span><i class="fas fa-calendar-alt"></i> Years with reports:</span>
+                <div class="year-stats">
+                    <?php foreach($years as $year): ?>
+                        <?php $has_data = $year_counts[$year] > 0; ?>
+                        <span class="year-pill <?php echo $has_data ? 'has-data' : ''; ?>" 
+                              title="<?php echo $year; ?>: <?php echo $year_counts[$year]; ?> reports">
+                            <span class="year-dot <?php echo $has_data ? 'dot-active' : 'dot-inactive'; ?>"></span>
+                            <?php echo $year; ?>
+                            <?php if($has_data): ?>
+                                <span style="font-weight: 600;">(<?php echo $year_counts[$year]; ?>)</span>
+                            <?php endif; ?>
+                        </span>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <input type="text" id="searchInput" class="search-input" 
+                       placeholder="🔍 Search by client name or docket number...">
+                
+                <select id="yearFilter" class="filter-select">
+                    <option value="all">📅 All Years (2020-2030)</option>
+                    <?php foreach($years as $year): ?>
+                        <?php $has_data = $year_counts[$year] > 0; ?>
+                        <option value="<?php echo $year; ?>" class="year-option <?php echo $has_data ? 'has-data' : 'no-data'; ?>">
+                            <?php echo $year; ?> 
+                            <?php if($has_data): ?>
+                                (<?php echo $year_counts[$year]; ?> reports)
+                            <?php else: ?>
+                                (no data)
+                            <?php endif; ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
+
+                <div class="filter-info">
+                    <span id="resultCount"><?php echo $total_reports; ?></span> reports found
+                    <span class="clear-filter" onclick="clearFilters()">
+                        <i class="fas fa-times-circle"></i> Clear filters
+                    </span>
+                </div>
             </div>
 
+            <!-- Reports Table -->
             <div class="table-container">
                 <table id="reportsTable">
                     <thead>
@@ -439,7 +662,7 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
                             <th>Photo</th>
                             <th>Client</th>
                             <th>Docket #</th>
-                            <th>Month/Year</th>
+                            <th>Period</th>
                             <th>Uploaded By</th>
                             <th>Upload Date</th>
                             <th>Status</th>
@@ -447,14 +670,23 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while($row = mysqli_fetch_assoc($reports)): ?>
-                        <tr class="report-row" data-month="<?php echo $row['report_month']; ?>">
+                        <?php 
+                        mysqli_data_seek($reports, 0);
+                        if($total_reports > 0):
+                            while($row = mysqli_fetch_assoc($reports)): 
+                        ?>
+                        <tr class="report-row" data-year="<?php echo $row['report_year']; ?>" data-month="<?php echo $row['report_month']; ?>">
                             <td>
                                 <img src="uploads/<?php echo $row['photo']; ?>" class="report-thumb" onclick="openModal('uploads/<?php echo $row['photo']; ?>')">
                             </td>
-                            <td><?php echo htmlspecialchars($row['name']); ?></td>
+                            <td>
+                                <strong><?php echo htmlspecialchars($row['name']); ?></strong>
+                            </td>
                             <td><?php echo htmlspecialchars($row['docket_number']); ?></td>
-                            <td><?php echo date("F Y", mktime(0,0,0,$row['report_month'],1,$row['report_year'])); ?></td>
+                            <td>
+                                <?php echo date("F Y", mktime(0,0,0,$row['report_month'],1,$row['report_year'])); ?>
+                                <span class="year-badge"><?php echo $row['report_year']; ?></span>
+                            </td>
                             <td><?php echo $row['uploaded_by_name'] ?? 'Unknown'; ?></td>
                             <td><?php echo date("M d, Y", strtotime($row['upload_date'])); ?></td>
                             <td>
@@ -466,14 +698,14 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
                                 <a href="uploads/<?php echo $row['photo']; ?>" download class="action-link" title="Download">
                                     <i class="fas fa-download"></i>
                                 </a>
-                                <a href="view_reports.php?id=<?php echo $row['probationer_id']; ?>" class="action-link" title="View Client Reports">
-                                    <i class="fas fa-external-link-alt"></i>
+                                <a href="client_details.php?id=<?php echo $row['probationer_id']; ?>" class="action-link" title="View Client">
+                                    <i class="fas fa-eye"></i>
                                 </a>
                                 
                                 <!-- Delete button - Only visible to admin/main -->
                                 <?php if($can_delete): ?>
                                 <a href="?delete=<?php echo $row['id']; ?>" class="action-link delete" title="Delete" 
-                                   onclick="return confirm('⚠️ Are you sure you want to delete this image?\n\nThis action cannot be undone!')">
+                                   onclick="return confirm('⚠️ Are you sure you want to delete this image?\n\nClient: <?php echo addslashes($row['name']); ?>\nPeriod: <?php echo date("F Y", mktime(0,0,0,$row['report_month'],1,$row['report_year'])); ?>\n\nThis action cannot be undone!')">
                                     <i class="fas fa-trash"></i>
                                 </a>
                                 <?php else: ?>
@@ -483,22 +715,52 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
                                 <?php endif; ?>
                             </td>
                         </tr>
-                        <?php endwhile; ?>
-                        
-                        <?php if(mysqli_num_rows($reports) == 0): ?>
+                        <?php 
+                            endwhile;
+                        else: 
+                        ?>
                         <tr>
-                            <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
-                                <i class="fas fa-camera" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
-                                No reports found. Upload your first report from the dashboard.
+                            <td colspan="8" style="text-align: center; padding: 3rem; color: #64748b;">
+                                <i class="fas fa-camera" style="font-size: 3rem; margin-bottom: 1rem; display: block; color: #94a3b8;"></i>
+                                <p style="font-size: 1.1rem;">No reports found for 2020-2030</p>
+                                <p style="margin-top: 0.5rem;">Upload your first report from the dashboard.</p>
+                                <a href="dashboard.php" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1.5rem; background: #0f172a; color: white; text-decoration: none; border-radius: 8px;">
+                                    <i class="fas fa-arrow-left"></i> Go to Dashboard
+                                </a>
                             </td>
                         </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
             </div>
+
+            <!-- Year Summary -->
+            <?php if($total_reports > 0): ?>
+            <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; color: #64748b; font-size: 0.85rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <i class="fas fa-chart-bar"></i> 
+                    Reports by year: 
+                    <?php 
+                    $active_years = [];
+                    foreach($years as $year) {
+                        if($year_counts[$year] > 0) {
+                            $active_years[] = "$year ({$year_counts[$year]})";
+                        }
+                    }
+                    echo implode(' • ', $active_years);
+                    ?>
+                </div>
+                <div>
+                    <i class="fas fa-database"></i> 
+                    Total: <?php echo $total_reports; ?> reports | 
+                    Range: <?php echo $min_year_db; ?>-<?php echo $max_year_db; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 
+    <!-- Image Modal -->
     <div class="modal" id="imageModal" onclick="closeModal()">
         <span class="modal-close">&times;</span>
         <img id="modalImage" src="">
@@ -521,25 +783,84 @@ $reports_this_month = mysqli_fetch_assoc(mysqli_query($conn, "
             }
         });
 
-        // Live search and filter
-        document.getElementById('searchInput').addEventListener('input', filterTable);
-        document.getElementById('monthFilter').addEventListener('change', filterTable);
+        // Live search and year filter
+        const searchInput = document.getElementById('searchInput');
+        const yearFilter = document.getElementById('yearFilter');
+        const rows = document.querySelectorAll('.report-row');
+        const resultCountSpan = document.getElementById('resultCount');
 
         function filterTable() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const monthFilter = document.getElementById('monthFilter').value;
-            const rows = document.querySelectorAll('.report-row');
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedYear = yearFilter.value;
+            let visibleCount = 0;
 
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
-                const month = row.dataset.month;
+                const year = row.dataset.year;
                 
                 const matchesSearch = text.includes(searchTerm);
-                const matchesMonth = monthFilter === 'all' || month === monthFilter;
+                const matchesYear = selectedYear === 'all' || year === selectedYear;
 
-                row.style.display = matchesSearch && matchesMonth ? '' : 'none';
+                if (matchesSearch && matchesYear) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
             });
+
+            // Update result count
+            resultCountSpan.textContent = visibleCount;
+            
+            // Show "no results" message if needed
+            const tbody = document.querySelector('#reportsTable tbody');
+            let noResultsRow = document.getElementById('noResultsRow');
+            
+            if (visibleCount === 0 && rows.length > 0) {
+                if (!noResultsRow) {
+                    noResultsRow = document.createElement('tr');
+                    noResultsRow.id = 'noResultsRow';
+                    noResultsRow.innerHTML = '<td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">📭 No reports match your filters for 2020-2030</td>';
+                    tbody.appendChild(noResultsRow);
+                }
+            } else if (noResultsRow) {
+                noResultsRow.remove();
+            }
         }
+
+        // Clear all filters
+        window.clearFilters = function() {
+            searchInput.value = '';
+            yearFilter.value = 'all';
+            filterTable();
+        };
+
+        // Add event listeners
+        searchInput.addEventListener('input', filterTable);
+        yearFilter.addEventListener('change', filterTable);
+
+        // Initial filter
+        filterTable();
+
+        // Keyboard shortcut: ESC to clear filters when search is focused
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && this.value !== '') {
+                this.value = '';
+                filterTable();
+            }
+        });
+
+        // Double-click on year pills to filter
+        document.querySelectorAll('.year-pill').forEach(pill => {
+            pill.addEventListener('dblclick', function() {
+                const yearText = this.textContent.match(/\d{4}/);
+                if (yearText) {
+                    const year = yearText[0];
+                    yearFilter.value = year;
+                    filterTable();
+                }
+            });
+        });
     </script>
 </body>
 </html>

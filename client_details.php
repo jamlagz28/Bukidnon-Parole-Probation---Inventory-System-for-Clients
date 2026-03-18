@@ -20,14 +20,68 @@ if(mysqli_num_rows($client_query) == 0) {
 }
 $client = mysqli_fetch_assoc($client_query);
 
-// Get PI cases for this client
-$pi_cases = mysqli_query($conn, "SELECT * FROM pre_investigation WHERE name LIKE '%{$client['name']}%' ORDER BY created_at DESC");
+// FIXED: Get PI cases ONLY for THIS client using client_id
+$pi_cases = mysqli_query($conn, "SELECT * FROM pre_investigation WHERE client_id='$client_id' ORDER BY created_at DESC");
 
-// Get PS cases for this client
-$ps_cases = mysqli_query($conn, "SELECT * FROM probation_supervision WHERE name LIKE '%{$client['name']}%' ORDER BY created_at DESC");
+// FIXED: Get PS cases ONLY for THIS client using client_id
+$ps_cases = mysqli_query($conn, "SELECT * FROM probation_supervision WHERE client_id='$client_id' ORDER BY created_at DESC");
 
 // Get monthly reports
 $reports = mysqli_query($conn, "SELECT * FROM monthly_reports WHERE probationer_id='$client_id' ORDER BY report_year DESC, report_month DESC");
+
+// Handle Add PS Case
+if(isset($_POST['add_ps_quick']) && $can_edit) {
+    $docket_number = mysqli_real_escape_string($conn, $_POST['docket_number']);
+    $offense = mysqli_real_escape_string($conn, $_POST['offense']);
+    $payment = floatval($_POST['payment']);
+    $start_date = $_POST['start_date'];
+    $end_date = $_POST['end_date'];
+    $supervising_officer = mysqli_real_escape_string($conn, $_POST['supervising_officer']);
+    $monthly_fee = floatval($_POST['monthly_fee']);
+    
+    $next_payment_date = date('Y-m-d', strtotime($start_date . ' +1 month'));
+    
+    $user_query = mysqli_query($conn, "SELECT id FROM staff WHERE username='{$_SESSION['username']}'");
+    $user = mysqli_fetch_assoc($user_query);
+    $created_by = $user['id'];
+    
+    mysqli_begin_transaction($conn);
+    
+    // Insert PS case - linked to THIS client_id
+    $ps_query = "INSERT INTO probation_supervision (
+        client_id, docket_number, name, offense, payment, address, 
+        start_date, end_date, supervising_officer, status, monthly_fee, 
+        next_payment_date, created_by
+    ) VALUES (
+        '$client_id', '$docket_number', '{$client['name']}', '$offense', '$payment', 
+        '{$client['address']}', '$start_date', '$end_date', '$supervising_officer', 
+        'Active', '$monthly_fee', '$next_payment_date', '$created_by'
+    )";
+    
+    if(mysqli_query($conn, $ps_query)) {
+        $ps_id = mysqli_insert_id($conn);
+        
+        // UPDATE CLIENT TO ACTIVE
+        mysqli_query($conn, "UPDATE clients SET status = 'Active' WHERE id = '$client_id'");
+        
+        // Update any pending PI cases to Approved
+        mysqli_query($conn, "UPDATE pre_investigation SET status = 'Approved' WHERE client_id = '$client_id' AND status = 'Pending'");
+        
+        mysqli_commit($conn);
+        $success = "PS Case added successfully! Client is now ACTIVE.";
+        
+        // Refresh data
+        $client_query = mysqli_query($conn, "SELECT * FROM clients WHERE id='$client_id'");
+        $client = mysqli_fetch_assoc($client_query);
+        $ps_cases = mysqli_query($conn, "SELECT * FROM probation_supervision WHERE client_id='$client_id' ORDER BY created_at DESC");
+    } else {
+        mysqli_rollback($conn);
+        $error = "Error adding PS case: " . mysqli_error($conn);
+    }
+}
+
+$today = date('Y-m-d');
+$next_year = date('Y-m-d', strtotime('+1 year'));
 ?>
 
 <!DOCTYPE html>
@@ -192,6 +246,23 @@ $reports = mysqli_query($conn, "SELECT * FROM monthly_reports WHERE probationer_
             color: #0f172a;
         }
 
+        /* Messages */
+        .message {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .message.success {
+            background: #ecfdf3;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .message.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
         /* Client Profile Card */
         .client-profile {
             background: white;
@@ -203,7 +274,7 @@ $reports = mysqli_query($conn, "SELECT * FROM monthly_reports WHERE probationer_
         }
 
         .profile-header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: <?php echo ($client['status'] == 'Pending') ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'; ?>;
             padding: 2rem;
             color: white;
             position: relative;
@@ -591,6 +662,14 @@ $reports = mysqli_query($conn, "SELECT * FROM monthly_reports WHERE probationer_
                 <i class="fas fa-arrow-left"></i> Back to Previous Page
             </a>
 
+            <!-- Messages -->
+            <?php if(isset($success)): ?>
+                <div class="message success"><?php echo $success; ?></div>
+            <?php endif; ?>
+            <?php if(isset($error)): ?>
+                <div class="message error"><?php echo $error; ?></div>
+            <?php endif; ?>
+
             <!-- Client Profile Card -->
             <div class="client-profile">
                 <div class="profile-header">
@@ -654,13 +733,17 @@ $reports = mysqli_query($conn, "SELECT * FROM monthly_reports WHERE probationer_
                                 <i class="fas fa-clock"></i>
                                 Supervision Period
                             </div>
+                            <?php
+                            // Get the latest PS case dates if they exist
+                            $latest_ps = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM probation_supervision WHERE client_id='$client_id' ORDER BY created_at DESC LIMIT 1"));
+                            ?>
                             <div class="info-row">
                                 <span class="info-label">Start Date:</span>
-                                <span class="info-value"><?php echo $client['start_date'] ? date('F d, Y', strtotime($client['start_date'])) : 'N/A'; ?></span>
+                                <span class="info-value"><?php echo ($latest_ps) ? date('F d, Y', strtotime($latest_ps['start_date'])) : 'N/A'; ?></span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label">End Date:</span>
-                                <span class="info-value"><?php echo $client['end_date'] ? date('F d, Y', strtotime($client['end_date'])) : 'N/A'; ?></span>
+                                <span class="info-value"><?php echo ($latest_ps) ? date('F d, Y', strtotime($latest_ps['end_date'])) : 'N/A'; ?></span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label">Status:</span>
@@ -683,7 +766,7 @@ $reports = mysqli_query($conn, "SELECT * FROM monthly_reports WHERE probationer_
                         Pre-Investigation Cases
                     </h2>
                     <?php if($can_edit): ?>
-                        <a href="pi_add.php?client_name=<?php echo urlencode($client['name']); ?>" class="view-all">
+                        <a href="pi_add.php?client_id=<?php echo $client_id; ?>" class="view-all">
                             <i class="fas fa-plus"></i> Add New PI Case
                         </a>
                     <?php endif; ?>
@@ -718,7 +801,7 @@ $reports = mysqli_query($conn, "SELECT * FROM monthly_reports WHERE probationer_
                                         <a href="pi_view.php?id=<?php echo $pi['id']; ?>" class="action-link" title="View Details">
                                             <i class="fas fa-eye"></i> View
                                         </a>
-                                        <?php if($can_edit): ?>
+                                        <?php if($can_edit && $pi['status'] == 'Pending'): ?>
                                         <a href="pi_edit.php?id=<?php echo $pi['id']; ?>" class="action-link" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
@@ -737,7 +820,7 @@ $reports = mysqli_query($conn, "SELECT * FROM monthly_reports WHERE probationer_
                 <?php endif; ?>
             </div>
 
-            <!-- PS Cases Section -->
+            <!-- PS Cases Section - ONLY SHOWS CASES FOR THIS CLIENT -->
             <div class="cards-section">
                 <div class="section-header">
                     <h2>
@@ -745,7 +828,7 @@ $reports = mysqli_query($conn, "SELECT * FROM monthly_reports WHERE probationer_
                         Probation Supervision Cases
                     </h2>
                     <?php if($can_edit): ?>
-                        <a href="ps_add.php?client_name=<?php echo urlencode($client['name']); ?>" class="view-all">
+                        <a href="ps_add.php?client_id=<?php echo $client_id; ?>" class="view-all">
                             <i class="fas fa-plus"></i> Add New PS Case
                         </a>
                     <?php endif; ?>

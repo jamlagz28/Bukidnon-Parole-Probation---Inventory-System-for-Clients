@@ -23,7 +23,7 @@ if(isset($_POST['add_client'])) {
     // Start transaction
     mysqli_begin_transaction($conn);
     
-    // Get form data
+    // Get form data - ONLY PI FIELDS (NO start_date, end_date)
     $docket_number = mysqli_real_escape_string($conn, $_POST['docket_number']);
     $name = mysqli_real_escape_string($conn, $_POST['name']);
     $cc_number = mysqli_real_escape_string($conn, $_POST['cc_number']);
@@ -31,8 +31,9 @@ if(isset($_POST['add_client'])) {
     $offense = mysqli_real_escape_string($conn, $_POST['offense']);
     $sentence = mysqli_real_escape_string($conn, $_POST['sentence']);
     $address = mysqli_real_escape_string($conn, $_POST['address']);
-    $start_date = $_POST['start_date'];
-    $end_date = $_POST['end_date'];
+    $investigator = mysqli_real_escape_string($conn, $_POST['investigator']);
+    $date_filed = $_POST['date_filed'];
+    $remarks = mysqli_real_escape_string($conn, $_POST['remarks']);
     
     // CHECK IF CLIENT ALREADY EXISTS (by name)
     $check_client = mysqli_query($conn, "SELECT id FROM clients WHERE name = '$name'");
@@ -55,9 +56,11 @@ if(isset($_POST['add_client'])) {
             $update_pi = "UPDATE pre_investigation SET status = 'Approved' WHERE id = '$pi_id'";
             mysqli_query($conn, $update_pi);
             
-            // 2. Create PS case (ACTIVE)
+            // 2. Create PS case (ACTIVE) - with default dates
             $ps_docket = "PS-" . $docket_number;
             $monthly_fee = 500.00;
+            $start_date = date('Y-m-d'); // Today
+            $end_date = date('Y-m-d', strtotime('+1 year')); // One year from now
             
             $ps_query = "INSERT INTO probation_supervision (
                 client_id, docket_number, name, offense, address, 
@@ -70,8 +73,8 @@ if(isset($_POST['add_client'])) {
             if(mysqli_query($conn, $ps_query)) {
                 $ps_id = mysqli_insert_id($conn);
                 
-                // 3. Update client with PS case ID
-                mysqli_query($conn, "UPDATE clients SET ps_case_id = '$ps_id' WHERE id = '$client_id'");
+                // 3. Update client with PS case ID and set status to Active
+                mysqli_query($conn, "UPDATE clients SET ps_case_id = '$ps_id', status = 'Active' WHERE id = '$client_id'");
                 
                 mysqli_commit($conn);
                 header("Location: clients.php?msg=converted_to_ps");
@@ -82,9 +85,6 @@ if(isset($_POST['add_client'])) {
             }
         } else {
             // No pending PI found, create new PI case
-            $investigator = mysqli_real_escape_string($conn, $_POST['investigator']);
-            $date_filed = $_POST['date_filed'];
-            $remarks = mysqli_real_escape_string($conn, $_POST['remarks']);
             $pi_docket = "PI-" . $docket_number;
             
             $pi_query = "INSERT INTO pre_investigation (
@@ -96,6 +96,7 @@ if(isset($_POST['add_client'])) {
             )";
             
             if(mysqli_query($conn, $pi_query)) {
+                // Client status remains PENDING
                 mysqli_commit($conn);
                 header("Location: clients.php?msg=pi_added");
                 exit();
@@ -107,17 +108,14 @@ if(isset($_POST['add_client'])) {
         
     } else {
         // ========== NEW CLIENT ==========
-        // 1. Insert into clients table
-        $client_query = "INSERT INTO clients (docket_number, name, cc_number, court, offense, sentence, address, start_date, end_date, status) 
-                         VALUES ('$docket_number', '$name', '$cc_number', '$court', '$offense', '$sentence', '$address', '$start_date', '$end_date', 'Active')";
+        // 1. Insert into clients table - NO start_date, end_date, status = 'Pending'
+        $client_query = "INSERT INTO clients (docket_number, name, cc_number, court, offense, sentence, address, status) 
+                         VALUES ('$docket_number', '$name', '$cc_number', '$court', '$offense', '$sentence', '$address', 'Pending')";
         
         if(mysqli_query($conn, $client_query)) {
             $client_id = mysqli_insert_id($conn);
             
             // 2. Create PI case (PENDING)
-            $investigator = mysqli_real_escape_string($conn, $_POST['investigator']);
-            $date_filed = $_POST['date_filed'];
-            $remarks = mysqli_real_escape_string($conn, $_POST['remarks']);
             $pi_docket = "PI-" . $docket_number;
             
             $pi_query = "INSERT INTO pre_investigation (
@@ -149,7 +147,6 @@ if(isset($_POST['add_client'])) {
 }
 
 $today = date('Y-m-d');
-$next_year = date('Y-m-d', strtotime('+1 year'));
 ?>
 
 <!DOCTYPE html>
@@ -165,22 +162,13 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
         .info { background: #f0f9ff; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; color: #0369a1; font-size: 0.95rem; }
         .form-group { margin-bottom: 1.5rem; }
         label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569; }
-        input, select, textarea { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; }
+        input, select, textarea { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: 'Inter', sans-serif; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .btn { background: #0f172a; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; }
+        .btn { background: #0f172a; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
         .btn:hover { background: #1e293b; }
         .error { background: #fef2f2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
         .back-link { display: inline-block; margin-bottom: 1rem; color: #64748b; text-decoration: none; }
-        .workflow-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            margin-left: 0.5rem;
-        }
-        .badge-pi { background: #f59e0b; color: white; }
-        .badge-ps { background: #10b981; color: white; }
+        .section-title { font-size: 1.1rem; font-weight: 600; color: #0f172a; margin: 1.5rem 0 1rem 0; }
     </style>
 </head>
 <body>
@@ -189,9 +177,8 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
         <h1>Add New Client</h1>
         <div class="info">
             <i class="fas fa-info-circle"></i> 
-            <strong>Automatic Workflow:</strong><br>
-            • New client → Creates PI case (PENDING)<br>
-            • Existing client → Converts to PS case (ACTIVE) and removes from PI pending
+            <strong>PI Case Only:</strong> This form only adds client information and creates a PENDING PI case.<br>
+            PS details (Start Date, End Date) will be added automatically when converting to PS.
         </div>
 
         <?php if(isset($error)): ?>
@@ -199,10 +186,12 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
         <?php endif; ?>
 
         <form method="POST">
+            <div class="section-title">Client Information (PI Case)</div>
+            
             <div class="form-row">
                 <div class="form-group">
                     <label>Docket Number *</label>
-                    <input type="text" name="docket_number" required>
+                    <input type="text" name="docket_number" placeholder="e.g., 2024-001" required>
                 </div>
                 <div class="form-group">
                     <label>Full Name *</label>
@@ -228,7 +217,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
 
             <div class="form-group">
                 <label>Sentence *</label>
-                <input type="text" name="sentence" required>
+                <input type="text" name="sentence" placeholder="e.g., 6 months probation" required>
             </div>
 
             <div class="form-group">
@@ -236,19 +225,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                 <input type="text" name="address" required>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Start Date *</label>
-                    <input type="date" name="start_date" value="<?php echo $today; ?>" required>
-                </div>
-                <div class="form-group">
-                    <label>End Date *</label>
-                    <input type="date" name="end_date" value="<?php echo $next_year; ?>" required>
-                </div>
-            </div>
-
-            <!-- PI Case Information -->
-            <h3 style="margin: 2rem 0 1rem; color: #0f172a;">Investigator Information</h3>
+            <div class="section-title">Investigator Information</div>
             
             <div class="form-row">
                 <div class="form-group">
@@ -263,12 +240,12 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
 
             <div class="form-group">
                 <label>Remarks</label>
-                <textarea name="remarks" rows="2"></textarea>
+                <textarea name="remarks" rows="2" placeholder="Optional notes"></textarea>
             </div>
 
             <div style="margin-top: 2rem;">
                 <button type="submit" name="add_client" class="btn">
-                    <i class="fas fa-save"></i> Add Client
+                    <i class="fas fa-save"></i> Add Client & Create PI Case
                 </button>
             </div>
         </form>

@@ -20,10 +20,10 @@ if(mysqli_num_rows($client_query) == 0) {
 }
 $client = mysqli_fetch_assoc($client_query);
 
-// FIXED: Get PI cases ONLY for THIS client using client_id
+// Get PI cases ONLY for THIS client
 $pi_cases = mysqli_query($conn, "SELECT * FROM pre_investigation WHERE client_id='$client_id' ORDER BY created_at DESC");
 
-// FIXED: Get PS cases ONLY for THIS client using client_id
+// Get PS cases ONLY for THIS client
 $ps_cases = mysqli_query($conn, "SELECT * FROM probation_supervision WHERE client_id='$client_id' ORDER BY created_at DESC");
 
 // Get monthly reports
@@ -47,7 +47,7 @@ if(isset($_POST['add_ps_quick']) && $can_edit) {
     
     mysqli_begin_transaction($conn);
     
-    // Insert PS case - linked to THIS client_id
+    // Insert PS case
     $ps_query = "INSERT INTO probation_supervision (
         client_id, docket_number, name, offense, payment, address, 
         start_date, end_date, supervising_officer, status, monthly_fee, 
@@ -77,6 +77,118 @@ if(isset($_POST['add_ps_quick']) && $can_edit) {
     } else {
         mysqli_rollback($conn);
         $error = "Error adding PS case: " . mysqli_error($conn);
+    }
+}
+
+// Handle Edit PI Case
+if(isset($_POST['edit_pi']) && $can_edit) {
+    $pi_id = mysqli_real_escape_string($conn, $_POST['pi_id']);
+    $docket_number = mysqli_real_escape_string($conn, $_POST['docket_number']);
+    $offense = mysqli_real_escape_string($conn, $_POST['offense']);
+    $investigator = mysqli_real_escape_string($conn, $_POST['investigator']);
+    $date_filed = $_POST['date_filed'];
+    $status = $_POST['status'];
+    $remarks = mysqli_real_escape_string($conn, $_POST['remarks']);
+    
+    $update_query = "UPDATE pre_investigation SET 
+        docket_number = '$docket_number',
+        offense = '$offense',
+        investigator = '$investigator',
+        date_filed = '$date_filed',
+        status = '$status',
+        remarks = '$remarks'
+        WHERE id = '$pi_id' AND client_id = '$client_id'";
+    
+    if(mysqli_query($conn, $update_query)) {
+        $success = "PI Case updated successfully!";
+        // Refresh PI cases
+        $pi_cases = mysqli_query($conn, "SELECT * FROM pre_investigation WHERE client_id='$client_id' ORDER BY created_at DESC");
+    } else {
+        $error = "Error updating PI case: " . mysqli_error($conn);
+    }
+}
+
+// Handle Edit PS Case - with status options: Active, Terminated, Revoked, Denied
+if(isset($_POST['edit_ps']) && $can_edit) {
+    $ps_id = mysqli_real_escape_string($conn, $_POST['ps_id']);
+    $docket_number = mysqli_real_escape_string($conn, $_POST['docket_number']);
+    $offense = mysqli_real_escape_string($conn, $_POST['offense']);
+    $payment = floatval($_POST['payment']);
+    $start_date = $_POST['start_date'];
+    $end_date = $_POST['end_date'];
+    $supervising_officer = mysqli_real_escape_string($conn, $_POST['supervising_officer']);
+    $status = $_POST['status'];
+    $monthly_fee = floatval($_POST['monthly_fee']);
+    
+    mysqli_begin_transaction($conn);
+    
+    // Update PS case
+    $update_query = "UPDATE probation_supervision SET 
+        docket_number = '$docket_number',
+        offense = '$offense',
+        payment = '$payment',
+        start_date = '$start_date',
+        end_date = '$end_date',
+        supervising_officer = '$supervising_officer',
+        status = '$status',
+        monthly_fee = '$monthly_fee',
+        updated_at = NOW()
+        WHERE id = '$ps_id' AND client_id = '$client_id'";
+    
+    if(mysqli_query($conn, $update_query)) {
+        
+        // Update client status based on this PS case status
+        if($status == 'Active') {
+            mysqli_query($conn, "UPDATE clients SET status = 'Active' WHERE id = '$client_id'");
+        } elseif($status == 'Terminated' || $status == 'Revoked' || $status == 'Denied') {
+            // Check if client has any other Active PS cases
+            $check_active = mysqli_query($conn, "SELECT id FROM probation_supervision WHERE client_id = '$client_id' AND status = 'Active' AND id != '$ps_id'");
+            if(mysqli_num_rows($check_active) == 0) {
+                // No other active PS cases, set client to this status
+                mysqli_query($conn, "UPDATE clients SET status = '$status' WHERE id = '$client_id'");
+            }
+        }
+        
+        mysqli_commit($conn);
+        $success = "PS Case updated successfully!";
+        
+        // Refresh data
+        $client_query = mysqli_query($conn, "SELECT * FROM clients WHERE id='$client_id'");
+        $client = mysqli_fetch_assoc($client_query);
+        $ps_cases = mysqli_query($conn, "SELECT * FROM probation_supervision WHERE client_id='$client_id' ORDER BY created_at DESC");
+    } else {
+        mysqli_rollback($conn);
+        $error = "Error updating PS case: " . mysqli_error($conn);
+    }
+}
+
+// Handle Edit Client Information
+if(isset($_POST['edit_client']) && $can_edit) {
+    $docket_number = mysqli_real_escape_string($conn, $_POST['docket_number']);
+    $name = mysqli_real_escape_string($conn, $_POST['name']);
+    $cc_number = mysqli_real_escape_string($conn, $_POST['cc_number']);
+    $court = mysqli_real_escape_string($conn, $_POST['court']);
+    $offense = mysqli_real_escape_string($conn, $_POST['offense']);
+    $sentence = mysqli_real_escape_string($conn, $_POST['sentence']);
+    $address = mysqli_real_escape_string($conn, $_POST['address']);
+    
+    $update_query = "UPDATE clients SET 
+        docket_number = '$docket_number',
+        name = '$name',
+        cc_number = '$cc_number',
+        court = '$court',
+        offense = '$offense',
+        sentence = '$sentence',
+        address = '$address'
+        WHERE id = '$client_id'";
+    
+    if(mysqli_query($conn, $update_query)) {
+        $success = "Client information updated successfully!";
+        // Refresh client data
+        $client_query = mysqli_query($conn, "SELECT * FROM clients WHERE id='$client_id'");
+        $client = mysqli_fetch_assoc($client_query);
+    } else {
+        $error = "Error updating client: " . mysqli_error($conn);
     }
 }
 
@@ -113,7 +225,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
 
         /* Print Styles */
         @media print {
-            .sidebar, .top-bar, .action-buttons, .no-print {
+            .sidebar, .top-bar, .action-buttons, .no-print, .modal {
                 display: none !important;
             }
             .main {
@@ -274,10 +386,20 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
         }
 
         .profile-header {
-            background: <?php echo ($client['status'] == 'Pending') ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'; ?>;
+            background: <?php 
+                if($client['status'] == 'Pending') echo 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+                elseif($client['status'] == 'Active') echo 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                elseif($client['status'] == 'Terminated') echo 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                elseif($client['status'] == 'Revoked') echo 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+                elseif($client['status'] == 'Denied') echo 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                else echo 'linear-gradient(135deg, #64748b 0%, #475569 100%)';
+            ?>;
             padding: 2rem;
             color: white;
             position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
 
         .profile-header::after {
@@ -302,6 +424,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             display: flex;
             align-items: center;
             gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .status-badge {
@@ -312,6 +435,23 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             font-weight: 500;
             background: rgba(255,255,255,0.2);
             color: white;
+        }
+
+        .edit-profile-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        .edit-profile-btn:hover {
+            background: rgba(255,255,255,0.3);
         }
 
         .profile-body {
@@ -441,6 +581,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             background: #f8fafc;
         }
 
+        /* Status Badge Colors - Match Client Profile */
         .status-badge {
             display: inline-block;
             padding: 0.25rem 0.75rem;
@@ -449,29 +590,40 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             font-weight: 500;
         }
 
-        .status-Active, .status-Approved {
-            background: #ecfdf3;
-            color: #059669;
+        .status-Pending {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fde68a;
         }
 
-        .status-Terminated, .status-Rejected {
-            background: #fef2f2;
-            color: #dc2626;
+        .status-Active {
+            background: #ecfdf3;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status-Terminated {
+            background: #e0f2fe;
+            color: #0284c7;
+            border: 1px solid #bae6fd;
         }
 
         .status-Revoked {
             background: #fffbeb;
             color: #d97706;
+            border: 1px solid #fde68a;
         }
 
-        .status-Pending {
-            background: #fffbeb;
-            color: #d97706;
+        .status-Denied {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
         }
 
-        .status-Completed {
-            background: #e0f2fe;
-            color: #0284c7;
+        .status-Approved {
+            background: #ecfdf3;
+            color: #059669;
+            border: 1px solid #a7f3d0;
         }
 
         .action-link {
@@ -484,6 +636,14 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
 
         .action-link:hover {
             color: #0f172a;
+        }
+
+        .edit-link {
+            color: #3b82f6;
+            cursor: pointer;
+        }
+        .edit-link:hover {
+            color: #2563eb;
         }
 
         .view-only-badge {
@@ -525,6 +685,142 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             color: #94a3b8;
         }
 
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-header h2 {
+            font-size: 1.3rem;
+            color: #0f172a;
+        }
+        .modal-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .modal-close:hover {
+            color: #ef4444;
+        }
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .modal-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .modal-form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-form-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 0.25rem;
+        }
+        .modal-form-group input,
+        .modal-form-group select,
+        .modal-form-group textarea {
+            padding: 0.7rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+        }
+        .modal-form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .modal-btn {
+            background: #0f172a;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .modal-btn:hover {
+            background: #1e293b;
+        }
+
+        /* Quick Add PS Form */
+        .quick-add-ps {
+            background: white;
+            border: 2px dashed #10b981;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .quick-add-ps h3 {
+            color: #10b981;
+            margin-bottom: 1rem;
+        }
+        .quick-add-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .quick-add-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .quick-add-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 0.25rem;
+        }
+        .quick-add-group input {
+            padding: 0.6rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+        .quick-add-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .quick-add-btn:hover {
+            background: #059669;
+        }
+
         /* Action Buttons */
         .action-buttons {
             display: flex;
@@ -544,6 +840,8 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             align-items: center;
             gap: 0.5rem;
             transition: all 0.2s;
+            border: none;
+            cursor: pointer;
         }
 
         .btn-primary {
@@ -602,6 +900,12 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             .info-grid {
                 grid-template-columns: 1fr;
             }
+            .quick-add-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-form-row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -610,32 +914,13 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo">
-                <i class="fas fa-scale-balanced" style="margin-right: 8px;"></i>
-                PPA System
+                <i class="fas fa-scale-balanced"></i> PPA System
             </div>
-            
-            <div style="margin-top: 2rem;">
-                <a href="dashboard.php" class="nav-item">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="clients.php" class="nav-item">
-                    <i class="fas fa-users"></i>
-                    <span>Clients</span>
-                </a>
-                <a href="pi_list.php" class="nav-item">
-                    <i class="fas fa-file-lines"></i>
-                    <span>PI Cases</span>
-                </a>
-                <a href="ps_list.php" class="nav-item">
-                    <i class="fas fa-gavel"></i>
-                    <span>PS Cases</span>
-                </a>
-                <a href="monthly_reports.php" class="nav-item">
-                    <i class="fas fa-camera"></i>
-                    <span>Monthly Reports</span>
-                </a>
-            </div>
+            <a href="dashboard.php" class="nav-item">Dashboard</a>
+            <a href="clients.php" class="nav-item">Clients</a>
+            <a href="pi_list.php" class="nav-item">PI Cases</a>
+            <a href="ps_list.php" class="nav-item">PS Cases</a>
+            <a href="monthly_reports.php" class="nav-item">Monthly Reports</a>
         </div>
 
         <!-- Main Content -->
@@ -644,131 +929,92 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             <div class="top-bar">
                 <h1 class="page-title">Client Profile</h1>
                 <div class="user-menu">
-                    <span class="user-name"><?php echo htmlspecialchars($fullname); ?></span>
-                    <div class="avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <button onclick="window.print()" class="btn print-btn" style="margin-right: 0.5rem; padding: 0.5rem 1rem;">
-                        <i class="fas fa-print"></i> Print
-                    </button>
-                    <a href="logout.php" class="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </a>
+                    <span><?php echo htmlspecialchars($fullname); ?></span>
+                    <div class="avatar"><i class="fas fa-user"></i></div>
+                    <button onclick="window.print()" class="btn print-btn"><i class="fas fa-print"></i> Print</button>
+                    <a href="logout.php"><i class="fas fa-sign-out-alt"></i></a>
                 </div>
             </div>
 
             <!-- Back Link -->
-            <a href="javascript:history.back()" class="back-link">
-                <i class="fas fa-arrow-left"></i> Back to Previous Page
-            </a>
+            <a href="javascript:history.back()" class="back-link"><i class="fas fa-arrow-left"></i> Back</a>
 
             <!-- Messages -->
-            <?php if(isset($success)): ?>
-                <div class="message success"><?php echo $success; ?></div>
-            <?php endif; ?>
-            <?php if(isset($error)): ?>
-                <div class="message error"><?php echo $error; ?></div>
-            <?php endif; ?>
+            <?php if(isset($success)): ?><div class="message success"><?php echo $success; ?></div><?php endif; ?>
+            <?php if(isset($error)): ?><div class="message error"><?php echo $error; ?></div><?php endif; ?>
 
             <!-- Client Profile Card -->
             <div class="client-profile">
                 <div class="profile-header">
-                    <div class="profile-name"><?php echo htmlspecialchars($client['name']); ?></div>
-                    <div class="profile-docket">
-                        <span>Docket #: <?php echo $client['docket_number']; ?></span>
-                        <span class="status-badge"><?php echo $client['status']; ?></span>
-                        <?php if(!$can_edit): ?>
-                            <span class="view-only-badge" style="background: rgba(255,255,255,0.2); color: white;">
-                                <i class="fas fa-eye"></i> View Only Mode
-                            </span>
-                        <?php endif; ?>
+                    <div>
+                        <div class="profile-name"><?php echo htmlspecialchars($client['name']); ?></div>
+                        <div class="profile-docket">
+                            <span>Docket #: <?php echo $client['docket_number']; ?></span>
+                            <span class="status-badge"><?php echo $client['status']; ?></span>
+                        </div>
                     </div>
+                    <?php if($can_edit): ?>
+                    <button class="edit-profile-btn" onclick="openModal('editClientModal')">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="profile-body">
                     <div class="info-grid">
                         <!-- Personal Information -->
                         <div class="info-section">
-                            <div class="section-title">
-                                <i class="fas fa-user-circle"></i>
-                                Personal Information
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">CC Number:</span>
-                                <span class="info-value"><?php echo $client['cc_number'] ?: 'N/A'; ?></span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Address:</span>
-                                <span class="info-value"><?php echo $client['address']; ?></span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Court:</span>
-                                <span class="info-value"><?php echo $client['court']; ?></span>
-                            </div>
+                            <div class="section-title"><i class="fas fa-user-circle"></i> Personal Information</div>
+                            <div class="info-row"><span class="info-label">CC Number:</span><span class="info-value"><?php echo $client['cc_number'] ?: 'N/A'; ?></span></div>
+                            <div class="info-row"><span class="info-label">Address:</span><span class="info-value"><?php echo $client['address']; ?></span></div>
+                            <div class="info-row"><span class="info-label">Court:</span><span class="info-value"><?php echo $client['court']; ?></span></div>
                         </div>
 
                         <!-- Case Information -->
                         <div class="info-section">
-                            <div class="section-title">
-                                <i class="fas fa-gavel"></i>
-                                Case Information
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Offense:</span>
-                                <span class="info-value"><?php echo $client['offense']; ?></span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Sentence:</span>
-                                <span class="info-value"><?php echo $client['sentence']; ?></span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Date Added:</span>
-                                <span class="info-value"><?php echo date('F d, Y', strtotime($client['created_at'])); ?></span>
-                            </div>
+                            <div class="section-title"><i class="fas fa-gavel"></i> Case Information</div>
+                            <div class="info-row"><span class="info-label">Offense:</span><span class="info-value"><?php echo $client['offense']; ?></span></div>
+                            <div class="info-row"><span class="info-label">Sentence:</span><span class="info-value"><?php echo $client['sentence']; ?></span></div>
+                            <div class="info-row"><span class="info-label">Date Added:</span><span class="info-value"><?php echo date('F d, Y', strtotime($client['created_at'])); ?></span></div>
                         </div>
 
                         <!-- Supervision Period -->
                         <div class="info-section">
-                            <div class="section-title">
-                                <i class="fas fa-clock"></i>
-                                Supervision Period
-                            </div>
-                            <?php
-                            // Get the latest PS case dates if they exist
-                            $latest_ps = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM probation_supervision WHERE client_id='$client_id' ORDER BY created_at DESC LIMIT 1"));
-                            ?>
-                            <div class="info-row">
-                                <span class="info-label">Start Date:</span>
-                                <span class="info-value"><?php echo ($latest_ps) ? date('F d, Y', strtotime($latest_ps['start_date'])) : 'N/A'; ?></span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">End Date:</span>
-                                <span class="info-value"><?php echo ($latest_ps) ? date('F d, Y', strtotime($latest_ps['end_date'])) : 'N/A'; ?></span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Status:</span>
-                                <span class="info-value">
-                                    <span class="status-badge status-<?php echo $client['status']; ?>">
-                                        <?php echo $client['status']; ?>
-                                    </span>
-                                </span>
-                            </div>
+                            <div class="section-title"><i class="fas fa-clock"></i> Supervision Period</div>
+                            <?php $latest_ps = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM probation_supervision WHERE client_id='$client_id' ORDER BY created_at DESC LIMIT 1")); ?>
+                            <div class="info-row"><span class="info-label">Start Date:</span><span class="info-value"><?php echo ($latest_ps) ? date('F d, Y', strtotime($latest_ps['start_date'])) : 'N/A'; ?></span></div>
+                            <div class="info-row"><span class="info-label">End Date:</span><span class="info-value"><?php echo ($latest_ps) ? date('F d, Y', strtotime($latest_ps['end_date'])) : 'N/A'; ?></span></div>
+                            <div class="info-row"><span class="info-label">Status:</span><span class="info-value"><span class="status-badge status-<?php echo $client['status']; ?>"><?php echo $client['status']; ?></span></span></div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Quick Add PS Form for Pending Clients -->
+            <?php if($client['status'] == 'Pending' && $can_edit): ?>
+            <div class="quick-add-ps">
+                <h3><i class="fas fa-plus-circle"></i> Add PS Case to Activate Client</h3>
+                <form method="POST">
+                    <div class="quick-add-grid">
+                        <div class="quick-add-group"><label>Docket #</label><input type="text" name="docket_number" placeholder="PS-<?php echo date('Y'); ?>-001" required></div>
+                        <div class="quick-add-group"><label>Offense</label><input type="text" name="offense" value="<?php echo $client['offense']; ?>" required></div>
+                        <div class="quick-add-group"><label>Start Date</label><input type="date" name="start_date" value="<?php echo $today; ?>" required></div>
+                        <div class="quick-add-group"><label>End Date</label><input type="date" name="end_date" value="<?php echo $next_year; ?>" required></div>
+                        <div class="quick-add-group"><label>Officer</label><input type="text" name="supervising_officer" required></div>
+                        <div class="quick-add-group"><label>Payment</label><input type="number" name="payment" value="0.00" step="0.01"></div>
+                        <div class="quick-add-group"><label>Monthly Fee</label><input type="number" name="monthly_fee" value="500.00" step="0.01"></div>
+                    </div>
+                    <button type="submit" name="add_ps_quick" class="quick-add-btn">Add PS Case & Activate</button>
+                </form>
+            </div>
+            <?php endif; ?>
+
             <!-- PI Cases Section -->
             <div class="cards-section">
                 <div class="section-header">
-                    <h2>
-                        <i class="fas fa-file-lines" style="color: #f59e0b;"></i>
-                        Pre-Investigation Cases
-                    </h2>
-                    <?php if($can_edit): ?>
-                        <a href="pi_add.php?client_id=<?php echo $client_id; ?>" class="view-all">
-                            <i class="fas fa-plus"></i> Add New PI Case
-                        </a>
+                    <h2><i class="fas fa-file-lines" style="color:#f59e0b;"></i> Pre-Investigation Cases</h2>
+                    <?php if($can_edit && $client['status'] == 'Pending'): ?>
+                        <a href="pi_add.php?client_id=<?php echo $client_id; ?>" class="view-all"><i class="fas fa-plus"></i> Add PI</a>
                     <?php endif; ?>
                 </div>
 
@@ -788,23 +1034,15 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                             <tbody>
                                 <?php while($pi = mysqli_fetch_assoc($pi_cases)): ?>
                                 <tr>
-                                    <td><strong><?php echo $pi['docket_number']; ?></strong></td>
+                                    <td><?php echo $pi['docket_number']; ?></td>
                                     <td><?php echo $pi['offense']; ?></td>
                                     <td><?php echo $pi['investigator']; ?></td>
-                                    <td><?php echo date('F d, Y', strtotime($pi['date_filed'])); ?></td>
+                                    <td><?php echo date('M d, Y', strtotime($pi['date_filed'])); ?></td>
+                                    <td><span class="status-badge status-<?php echo $pi['status']; ?>"><?php echo $pi['status']; ?></span></td>
                                     <td>
-                                        <span class="status-badge status-<?php echo $pi['status']; ?>">
-                                            <?php echo $pi['status']; ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="pi_view.php?id=<?php echo $pi['id']; ?>" class="action-link" title="View Details">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                        <?php if($can_edit && $pi['status'] == 'Pending'): ?>
-                                        <a href="pi_edit.php?id=<?php echo $pi['id']; ?>" class="action-link" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
+                                        <a href="pi_view.php?id=<?php echo $pi['id']; ?>" class="action-link">View</a>
+                                        <?php if($can_edit): ?>
+                                        <span class="action-link edit-link" onclick='openEditPIModal(<?php echo json_encode($pi); ?>)'>Edit</span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -813,88 +1051,59 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                         </table>
                     </div>
                 <?php else: ?>
-                    <div class="no-data">
-                        <i class="fas fa-folder-open"></i>
-                        <p>No pre-investigation cases found for this client.</p>
-                    </div>
+                    <div class="no-data"><i class="fas fa-folder-open"></i><p>No PI cases found</p></div>
                 <?php endif; ?>
             </div>
 
-            <!-- PS Cases Section - ONLY SHOWS CASES FOR THIS CLIENT -->
+            <!-- PS Cases Section -->
+            <?php if(mysqli_num_rows($ps_cases) > 0): ?>
             <div class="cards-section">
                 <div class="section-header">
-                    <h2>
-                        <i class="fas fa-gavel" style="color: #10b981;"></i>
-                        Probation Supervision Cases
-                    </h2>
+                    <h2><i class="fas fa-gavel" style="color:#10b981;"></i> Probation Supervision Cases</h2>
                     <?php if($can_edit): ?>
-                        <a href="ps_add.php?client_id=<?php echo $client_id; ?>" class="view-all">
-                            <i class="fas fa-plus"></i> Add New PS Case
-                        </a>
+                        <a href="ps_add.php?client_id=<?php echo $client_id; ?>" class="view-all"><i class="fas fa-plus"></i> Add PS</a>
                     <?php endif; ?>
                 </div>
 
-                <?php if(mysqli_num_rows($ps_cases) > 0): ?>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Docket #</th>
-                                    <th>Offense</th>
-                                    <th>Payment</th>
-                                    <th>Period</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php while($ps = mysqli_fetch_assoc($ps_cases)): ?>
-                                <tr>
-                                    <td><strong><?php echo $ps['docket_number']; ?></strong></td>
-                                    <td><?php echo $ps['offense']; ?></td>
-                                    <td>₱<?php echo number_format($ps['payment'], 2); ?></td>
-                                    <td>
-                                        <?php echo date('M d, Y', strtotime($ps['start_date'])); ?> - 
-                                        <?php echo date('M d, Y', strtotime($ps['end_date'])); ?>
-                                    </td>
-                                    <td>
-                                        <span class="status-badge status-<?php echo $ps['status']; ?>">
-                                            <?php echo $ps['status']; ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="ps_view.php?id=<?php echo $ps['id']; ?>" class="action-link" title="View Details">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                        <?php if($can_edit): ?>
-                                        <a href="ps_payment.php?id=<?php echo $ps['id']; ?>" class="action-link" title="Record Payment">
-                                            <i class="fas fa-money-bill"></i>
-                                        </a>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="no-data">
-                        <i class="fas fa-folder-open"></i>
-                        <p>No probation supervision cases found for this client.</p>
-                    </div>
-                <?php endif; ?>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Docket #</th>
+                                <th>Offense</th>
+                                <th>Payment</th>
+                                <th>Period</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while($ps = mysqli_fetch_assoc($ps_cases)): ?>
+                            <tr>
+                                <td><?php echo $ps['docket_number']; ?></td>
+                                <td><?php echo $ps['offense']; ?></td>
+                                <td>₱<?php echo number_format($ps['payment'], 2); ?></td>
+                                <td><?php echo date('M d, Y', strtotime($ps['start_date'])); ?> - <?php echo date('M d, Y', strtotime($ps['end_date'])); ?></td>
+                                <td><span class="status-badge status-<?php echo $ps['status']; ?>"><?php echo $ps['status']; ?></span></td>
+                                <td>
+                                    <a href="ps_view.php?id=<?php echo $ps['id']; ?>" class="action-link">View</a>
+                                    <?php if($can_edit): ?>
+                                    <span class="action-link edit-link" onclick='openEditPSModal(<?php echo json_encode($ps); ?>)'>Edit</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+            <?php endif; ?>
 
             <!-- Monthly Reports Section -->
             <div class="cards-section">
                 <div class="section-header">
-                    <h2>
-                        <i class="fas fa-camera" style="color: #3b82f6;"></i>
-                        Monthly Reports
-                    </h2>
-                    <a href="dashboard.php" class="view-all">
-                        <i class="fas fa-upload"></i> Upload New Report
-                    </a>
+                    <h2><i class="fas fa-camera" style="color:#3b82f6;"></i> Monthly Reports</h2>
+                    <a href="dashboard.php" class="view-all"><i class="fas fa-upload"></i> Upload</a>
                 </div>
 
                 <?php if(mysqli_num_rows($reports) > 0): ?>
@@ -902,55 +1111,179 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Reporting Period</th>
+                                    <th>Period</th>
                                     <th>Photo</th>
                                     <th>Upload Date</th>
-                                    <th>Uploaded By</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php while($report = mysqli_fetch_assoc($reports)): ?>
                                 <tr>
                                     <td><?php echo date("F Y", mktime(0,0,0,$report['report_month'],1,$report['report_year'])); ?></td>
-                                    <td>
-                                        <img src="uploads/<?php echo $report['photo']; ?>" class="photo-thumb" onclick="window.open('uploads/<?php echo $report['photo']; ?>')" title="Click to view full image">
-                                    </td>
-                                    <td><?php echo date("F d, Y h:i A", strtotime($report['upload_date'])); ?></td>
-                                    <td>Staff #<?php echo $report['uploaded_by']; ?></td>
+                                    <td><img src="uploads/<?php echo $report['photo']; ?>" class="photo-thumb" onclick="window.open('uploads/<?php echo $report['photo']; ?>')"></td>
+                                    <td><?php echo date("M d, Y", strtotime($report['upload_date'])); ?></td>
                                 </tr>
                                 <?php endwhile; ?>
                             </tbody>
                         </table>
                     </div>
                 <?php else: ?>
-                    <div class="no-data">
-                        <i class="fas fa-camera"></i>
-                        <p>No monthly reports found for this client.</p>
-                    </div>
+                    <div class="no-data"><i class="fas fa-camera"></i><p>No reports found</p></div>
                 <?php endif; ?>
             </div>
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <a href="dashboard.php" class="btn btn-secondary">
-                    <i class="fas fa-home"></i> Back to Dashboard
-                </a>
-                
+                <a href="dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
                 <?php if($can_edit): ?>
-                    <a href="edit_probationer.php?id=<?php echo $client['id']; ?>" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Edit Client Information
-                    </a>
-                <?php else: ?>
-                    <span class="btn btn-disabled">
-                        <i class="fas fa-lock"></i> Edit (View Only Mode)
-                    </span>
+                    <button onclick="openModal('editClientModal')" class="btn btn-primary">Edit Client</button>
                 <?php endif; ?>
-
-                <button onclick="window.print()" class="btn btn-secondary print-btn">
-                    <i class="fas fa-print"></i> Print Profile
-                </button>
+                <button onclick="window.print()" class="btn print-btn">Print</button>
             </div>
         </div>
     </div>
+
+    <!-- Edit Client Modal -->
+    <div class="modal" id="editClientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Client</h2>
+                <span class="modal-close" onclick="closeModal('editClientModal')">&times;</span>
+            </div>
+            <form method="POST" class="modal-form">
+                <div class="modal-form-group"><label>Docket Number</label><input type="text" name="docket_number" value="<?php echo $client['docket_number']; ?>" required></div>
+                <div class="modal-form-group"><label>Full Name</label><input type="text" name="name" value="<?php echo $client['name']; ?>" required></div>
+                <div class="modal-form-row">
+                    <div class="modal-form-group"><label>CC Number</label><input type="text" name="cc_number" value="<?php echo $client['cc_number']; ?>"></div>
+                    <div class="modal-form-group"><label>Court</label><input type="text" name="court" value="<?php echo $client['court']; ?>" required></div>
+                </div>
+                <div class="modal-form-group"><label>Offense</label><textarea name="offense" required><?php echo $client['offense']; ?></textarea></div>
+                <div class="modal-form-row">
+                    <div class="modal-form-group"><label>Sentence</label><input type="text" name="sentence" value="<?php echo $client['sentence']; ?>" required></div>
+                    <div class="modal-form-group"><label>Address</label><input type="text" name="address" value="<?php echo $client['address']; ?>" required></div>
+                </div>
+                <button type="submit" name="edit_client" class="modal-btn">Update Client</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit PI Modal -->
+    <div class="modal" id="editPIModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit PI Case</h2>
+                <span class="modal-close" onclick="closeModal('editPIModal')">&times;</span>
+            </div>
+            <form method="POST" class="modal-form" id="editPIForm">
+                <input type="hidden" name="pi_id" id="edit_pi_id">
+                <div class="modal-form-group"><label>Docket Number</label><input type="text" name="docket_number" id="edit_pi_docket" required></div>
+                <div class="modal-form-group"><label>Offense</label><textarea name="offense" id="edit_pi_offense" required></textarea></div>
+                <div class="modal-form-row">
+                    <div class="modal-form-group"><label>Investigator</label><input type="text" name="investigator" id="edit_pi_investigator" required></div>
+                    <div class="modal-form-group"><label>Date Filed</label><input type="date" name="date_filed" id="edit_pi_date_filed" required></div>
+                </div>
+                <div class="modal-form-row">
+                    <div class="modal-form-group"><label>Status</label>
+                        <select name="status" id="edit_pi_status">
+                            <option value="Pending">Pending</option>
+                            <option value="For Review">For Review</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div class="modal-form-group"><label>Remarks</label><input type="text" name="remarks" id="edit_pi_remarks"></div>
+                </div>
+                <button type="submit" name="edit_pi" class="modal-btn">Update PI Case</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit PS Modal - Status Options: Active, Terminated, Revoked, Denied -->
+    <div class="modal" id="editPSModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit PS Case</h2>
+                <span class="modal-close" onclick="closeModal('editPSModal')">&times;</span>
+            </div>
+            <form method="POST" class="modal-form" id="editPSForm">
+                <input type="hidden" name="ps_id" id="edit_ps_id">
+                <div class="modal-form-group"><label>Docket Number</label><input type="text" name="docket_number" id="edit_ps_docket" required></div>
+                <div class="modal-form-group"><label>Offense</label><textarea name="offense" id="edit_ps_offense" required></textarea></div>
+                <div class="modal-form-row">
+                    <div class="modal-form-group"><label>Payment</label><input type="number" name="payment" id="edit_ps_payment" step="0.01" required></div>
+                    <div class="modal-form-group"><label>Monthly Fee</label><input type="number" name="monthly_fee" id="edit_ps_monthly_fee" step="0.01" required></div>
+                </div>
+                <div class="modal-form-row">
+                    <div class="modal-form-group"><label>Start Date</label><input type="date" name="start_date" id="edit_ps_start_date" required></div>
+                    <div class="modal-form-group"><label>End Date</label><input type="date" name="end_date" id="edit_ps_end_date" required></div>
+                </div>
+                <div class="modal-form-row">
+                    <div class="modal-form-group"><label>Supervising Officer</label><input type="text" name="supervising_officer" id="edit_ps_officer" required></div>
+                    <div class="modal-form-group"><label>Status</label>
+                        <select name="status" id="edit_ps_status">
+                            <option value="Active">Active</option>
+                            <option value="Terminated">Terminated</option>
+                            <option value="Revoked">Revoked</option>
+                            <option value="Denied">Denied</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" name="edit_ps" class="modal-btn">Update PS Case</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        // Open Edit PI Modal with data
+        function openEditPIModal(pi) {
+            document.getElementById('edit_pi_id').value = pi.id;
+            document.getElementById('edit_pi_docket').value = pi.docket_number;
+            document.getElementById('edit_pi_offense').value = pi.offense;
+            document.getElementById('edit_pi_investigator').value = pi.investigator;
+            document.getElementById('edit_pi_date_filed').value = pi.date_filed;
+            document.getElementById('edit_pi_status').value = pi.status;
+            document.getElementById('edit_pi_remarks').value = pi.remarks || '';
+            openModal('editPIModal');
+        }
+        
+        // Open Edit PS Modal with data
+        function openEditPSModal(ps) {
+            document.getElementById('edit_ps_id').value = ps.id;
+            document.getElementById('edit_ps_docket').value = ps.docket_number;
+            document.getElementById('edit_ps_offense').value = ps.offense;
+            document.getElementById('edit_ps_payment').value = ps.payment;
+            document.getElementById('edit_ps_monthly_fee').value = ps.monthly_fee;
+            document.getElementById('edit_ps_start_date').value = ps.start_date;
+            document.getElementById('edit_ps_end_date').value = ps.end_date;
+            document.getElementById('edit_ps_officer').value = ps.supervising_officer;
+            document.getElementById('edit_ps_status').value = ps.status;
+            openModal('editPSModal');
+        }
+        
+        // Close modals when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+        
+        // Close with ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

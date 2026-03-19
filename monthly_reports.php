@@ -91,10 +91,13 @@ foreach($years as $year) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Reports 2020-2030</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>Monthly Reports 2020-2030 - Parole & Probation System</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
@@ -106,80 +109,182 @@ foreach($years as $year) {
 
         body {
             font-family: 'Inter', sans-serif;
-            background: #f8fafc;
+            background: #f5f7fa;
             color: #1e293b;
+            line-height: 1.6;
+            overflow-x: hidden;
         }
 
+        /* Color Theme Variables */
+        :root {
+            --primary-dark: #1e4a3d;      /* Dark Green */
+            --primary: #2e6b5e;           /* Medium Green */
+            --primary-light: #d1fae5;      /* Light Green for backgrounds */
+            --accent-yellow: #fbbf24;      /* Yellow */
+            --accent-yellow-light: #fef3c7;
+            --accent-red: #dc2626;         /* Red */
+            --accent-red-light: #fee2e2;
+            --neutral-white: #ffffff;
+            --neutral-light: #f8fafc;
+            --neutral-border: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --sidebar-width: 280px;
+            --sidebar-width-mobile: 240px;
+            --header-height: 70px;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.03);
+            --card-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+        }
+
+        /* App Layout */
         .app {
             display: flex;
             min-height: 100vh;
+            position: relative;
+            width: 100%;
         }
 
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 101;
+            background: var(--primary-dark);
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--box-shadow);
+            border: none;
+            font-size: 1.5rem;
+        }
+
+        .menu-toggle i {
+            color: white;
+        }
+
+        /* Sidebar Overlay for Mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 99;
+            backdrop-filter: blur(3px);
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* Sidebar - Dark Green Theme */
         .sidebar {
-            width: 260px;
-            background: white;
-            border-right: 1px solid #e2e8f0;
+            width: var(--sidebar-width);
+            background: var(--primary-dark);
             padding: 2rem 1.5rem;
             position: fixed;
             height: 100vh;
+            overflow-y: auto;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            z-index: 100;
         }
 
         .logo {
-            font-weight: 600;
-            font-size: 1.25rem;
-            color: #0f172a;
-            margin-bottom: 2rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 2.5rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo i {
+            color: var(--accent-yellow);
+            font-size: 1.8rem;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            color: #64748b;
+            gap: 1rem;
+            padding: 0.875rem 1rem;
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 0.25rem;
-        }
-
-        .nav-item:hover {
-            background: #f1f5f9;
-            color: #0f172a;
-        }
-
-        .nav-item.active {
-            background: #f1f5f9;
-            color: #0f172a;
+            transition: all 0.3s ease;
             font-weight: 500;
         }
 
-        .main {
-            flex: 1;
-            margin-left: 260px;
-            padding: 2rem;
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
         }
 
+        .nav-item.active {
+            background: white;
+            color: var(--primary-dark);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .nav-item i {
+            width: 24px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            width: calc(100% - var(--sidebar-width));
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Top Bar */
         .top-bar {
             background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            padding: 1.25rem 2rem;
             margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--neutral-border);
         }
 
         .page-title {
-            font-size: 1.25rem;
-            font-weight: 500;
-            color: #0f172a;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            font-weight: 600;
+            color: var(--primary-dark);
+            position: relative;
+            padding-left: 1rem;
+            border-left: 4px solid var(--accent-yellow);
         }
 
         .page-subtitle {
             font-size: 0.85rem;
-            color: #64748b;
+            color: var(--text-muted);
             margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .user-info {
@@ -188,35 +293,85 @@ foreach($years as $year) {
             gap: 1rem;
         }
 
-        .view-only-badge {
-            background: #e2e8f0;
-            color: #475569;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
+        .user-name {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.95rem;
         }
 
+        .avatar {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 2px 8px rgba(46,107,94,0.25);
+        }
+
+        .logout-btn {
+            color: var(--text-muted);
+            transition: all 0.2s;
+            font-size: 1.2rem;
+        }
+
+        .logout-btn:hover {
+            color: var(--accent-red);
+            transform: scale(1.1);
+        }
+
+        .view-only-badge {
+            background: var(--accent-yellow-light);
+            color: #b45309;
+            padding: 0.35rem 1rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid #fde68a;
+        }
+
+        /* Messages */
         .message {
             padding: 1rem 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+            font-size: 0.95rem;
+            border-left: 4px solid;
         }
 
         .message.success {
             background: #ecfdf3;
             color: #065f46;
-            border: 1px solid #a7f3d0;
+            border-color: #059669;
         }
 
         .message.error {
-            background: #fef2f2;
+            background: var(--accent-red-light);
             color: #991b1b;
-            border: 1px solid #fecaca;
+            border-color: var(--accent-red);
         }
 
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Stats Grid - Enhanced Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -227,215 +382,416 @@ foreach($years as $year) {
         .stat-card {
             background: white;
             padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--neutral-border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent-yellow));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
             border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .stat-icon.yellow {
+            background: var(--accent-yellow-light);
+            color: #b45309;
+        }
+
+        .stat-icon.red {
+            background: var(--accent-red-light);
+            color: var(--accent-red);
         }
 
         .stat-label {
-            color: #64748b;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
         .stat-value {
-            font-size: 2rem;
-            font-weight: 500;
-            color: #0f172a;
+            font-size: clamp(1.5rem, 5vw, 2.25rem);
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--primary-dark);
         }
 
         .stat-note {
             font-size: 0.8rem;
-            color: #64748b;
-            margin-top: 0.25rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }
 
-        .filter-section {
+        /* Year Range Visualization */
+        .year-range-info {
+            background: white;
+            padding: 1.25rem 1.5rem;
+            border-radius: var(--border-radius);
             margin-bottom: 1.5rem;
             display: flex;
-            gap: 1rem;
             align-items: center;
+            gap: 1.5rem;
             flex-wrap: wrap;
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--neutral-border);
         }
 
-        .search-input {
-            flex: 1;
-            min-width: 250px;
-            padding: 0.75rem 1rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 0.95rem;
-        }
-
-        .filter-select {
-            padding: 0.75rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            background: white;
-            min-width: 150px;
+        .year-range-info span:first-child {
+            color: var(--text-secondary);
             font-weight: 500;
-        }
-
-        .year-option {
-            padding: 0.5rem;
-        }
-
-        .year-option.has-data {
-            font-weight: 600;
-            color: #0f172a;
-        }
-
-        .year-option.no-data {
-            color: #94a3b8;
-            font-style: italic;
-        }
-
-        .filter-info {
-            color: #64748b;
-            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
         .year-stats {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
+            flex: 1;
         }
 
         .year-pill {
             background: #f1f5f9;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
+            padding: 0.35rem 0.9rem;
+            border-radius: 30px;
             font-size: 0.8rem;
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.4rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
         }
 
         .year-pill.has-data {
-            background: #dbeafe;
-            color: #1e40af;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            border-color: var(--primary);
+            font-weight: 500;
         }
 
-        .year-pill i {
-            font-size: 0.7rem;
+        .year-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
+        .year-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-active {
+            background: var(--primary-dark);
+        }
+
+        .dot-inactive {
+            background: #cbd5e1;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--neutral-border);
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--neutral-border);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(46,107,94,0.1);
+        }
+
+        .filter-select {
+            padding: 0.75rem;
+            border: 1px solid var(--neutral-border);
+            border-radius: 10px;
+            background: #f8fafc;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 180px;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: white;
+        }
+
+        .filter-info {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+
+        .clear-filter {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            background: var(--primary-light);
+            transition: all 0.2s;
+        }
+
+        .clear-filter:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Table Container */
         .table-container {
             background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
+            border-radius: var(--border-radius);
             overflow: hidden;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--neutral-border);
+            margin-bottom: 1.5rem;
         }
 
-        table {
+        /* Modern Table Design */
+        .reports-table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        th {
+        .reports-table thead tr {
+            background: linear-gradient(90deg, #f8fafc, white);
+        }
+
+        .reports-table th {
             text-align: left;
-            padding: 1rem 1.5rem;
-            background: #f8fafc;
-            color: #475569;
-            font-weight: 500;
-            font-size: 0.9rem;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 1.25rem 1.5rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--neutral-border);
+            white-space: nowrap;
         }
 
-        td {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #f1f5f9;
+        .reports-table td {
+            padding: 1.25rem 1.5rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            border-bottom: 1px solid var(--neutral-border);
+            transition: background 0.2s;
         }
 
+        .reports-table tbody tr {
+            transition: all 0.2s;
+        }
+
+        .reports-table tbody tr:hover {
+            background: #faf9fe;
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .reports-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Report Thumbnail */
         .report-thumb {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: transform 0.2s;
-            border: 1px solid #e2e8f0;
+            transition: all 0.3s;
+            border: 2px solid var(--neutral-border);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .report-thumb:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transform: scale(1.5);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            z-index: 10;
+            position: relative;
+            border-color: var(--primary);
         }
 
+        /* Status Badges */
         .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .status-Active {
             background: #ecfdf3;
             color: #059669;
+            border: 1px solid #a7f3d0;
         }
 
         .status-Terminated {
             background: #e0f2fe;
             color: #0284c7;
+            border: 1px solid #bae6fd;
         }
 
         .status-Revoked {
-            background: #fffbeb;
-            color: #d97706;
+            background: var(--accent-yellow-light);
+            color: #b45309;
+            border: 1px solid #fde68a;
         }
 
         .status-Denied {
-            background: #fef2f2;
-            color: #dc2626;
+            background: var(--accent-red-light);
+            color: var(--accent-red);
+            border: 1px solid #fecaca;
         }
 
+        /* Year Badge */
         .year-badge {
             display: inline-block;
-            padding: 0.2rem 0.5rem;
-            background: #f1f5f9;
-            border-radius: 12px;
+            padding: 0.2rem 0.6rem;
+            background: var(--primary-light);
+            border-radius: 20px;
             font-size: 0.7rem;
             margin-left: 0.5rem;
-            color: #475569;
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .action-link {
-            color: #64748b;
+            color: var(--text-muted);
             text-decoration: none;
-            margin: 0 0.5rem;
-            font-size: 1rem;
-            transition: color 0.2s;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: #f8fafc;
         }
 
         .action-link:hover {
-            color: #0f172a;
-        }
-
-        .action-link.delete {
-            color: #dc2626;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            transform: translateY(-2px);
         }
 
         .action-link.delete:hover {
-            color: #991b1b;
+            background: var(--accent-red-light);
+            color: var(--accent-red);
+        }
+
+        .action-link.download:hover {
+            background: #e0f2fe;
+            color: #0284c7;
         }
 
         .action-link.disabled {
             color: #cbd5e1;
+            background: #f1f5f9;
             pointer-events: none;
             cursor: not-allowed;
+            opacity: 0.6;
         }
 
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -443,10 +799,11 @@ foreach($years as $year) {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            backdrop-filter: blur(8px);
         }
 
         .modal.active {
@@ -456,100 +813,480 @@ foreach($years as $year) {
         .modal img {
             max-width: 90%;
             max-height: 90%;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            border: 3px solid white;
         }
 
         .modal-close {
             position: absolute;
-            top: 1rem;
+            top: 1.5rem;
             right: 2rem;
             color: white;
-            font-size: 2rem;
+            font-size: 3rem;
             cursor: pointer;
-        }
-
-        .clear-filter {
-            color: #3b82f6;
-            text-decoration: none;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
-        .clear-filter:hover {
-            text-decoration: underline;
-        }
-
-        .year-range-info {
-            background: #f8fafc;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: #475569;
-            margin-bottom: 1rem;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
+            justify-content: center;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transition: all 0.2s;
         }
 
-        .year-dot {
+        .modal-close:hover {
+            background: var(--accent-red);
+            transform: rotate(90deg);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state .btn-primary {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background: var(--primary-dark);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .empty-state .btn-primary:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(30,74,61,0.3);
+        }
+
+        /* Year Summary */
+        .year-summary {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--neutral-border);
+        }
+
+        .year-summary i {
+            color: var(--accent-yellow);
+        }
+
+        .year-summary span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 4px;
         }
 
-        .dot-active {
-            background: #10b981;
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
         }
 
-        .dot-inactive {
-            background: #cbd5e1;
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
         }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                display: none;
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ============ RESPONSIVE BREAKPOINTS ============ */
+
+        /* Large Desktop (1200px and above) */
+        @media (min-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
             }
-            .main {
-                margin-left: 0;
-            }
+        }
+
+        /* Desktop (992px to 1199px) */
+        @media (max-width: 1199px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
+            .reports-table th,
+            .reports-table td {
+                padding: 1rem;
+            }
+        }
+
+        /* Tablet (768px to 991px) */
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: var(--sidebar-width-mobile);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .menu-toggle {
+                display: flex;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+            
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 1.5rem;
+                padding-top: calc(var(--header-height) + 1rem);
+            }
+            
+            .top-bar {
+                margin-top: 0;
+            }
+            
+            .stats-grid {
+                gap: 1rem;
+            }
+            
+            .reports-table {
+                min-width: 900px;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
             .filter-section {
                 flex-direction: column;
                 align-items: stretch;
             }
+            
+            .search-wrapper {
+                width: 100%;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+            
+            .filter-info {
+                margin-left: 0;
+                justify-content: space-between;
+            }
         }
 
-        @media (max-width: 480px) {
+        /* Mobile Landscape (576px to 767px) */
+        @media (max-width: 767px) {
+            .main {
+                padding: 1rem;
+                padding-top: calc(var(--header-height) + 1rem);
+            }
+            
+            .top-bar {
+                padding: 1rem 1.25rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .user-info {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .user-name {
+                display: none;
+            }
+            
             .stats-grid {
                 grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            
+            .stat-card {
+                padding: 1.25rem;
+            }
+            
+            .year-range-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .year-stats {
+                width: 100%;
+            }
+            
+            .filter-section {
+                padding: 1.25rem;
+            }
+            
+            .reports-table th,
+            .reports-table td {
+                padding: 0.875rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .report-thumb {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .status-badge {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+            }
+            
+            .action-link {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+            
+            .year-summary {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* Mobile Portrait (up to 575px) */
+        @media (max-width: 575px) {
+            .main {
+                padding: 0.75rem;
+                padding-top: calc(var(--header-height) + 1rem);
+            }
+            
+            .top-bar {
+                padding: 0.875rem 1rem;
+            }
+            
+            .page-title {
+                font-size: 1.1rem;
+                padding-left: 0.75rem;
+            }
+            
+            .page-subtitle {
+                font-size: 0.8rem;
+            }
+            
+            .avatar {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .logout-btn {
+                font-size: 1rem;
+            }
+            
+            .view-only-badge {
+                padding: 0.25rem 0.75rem;
+                font-size: 0.7rem;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.25rem;
+            }
+            
+            .stat-value {
+                font-size: 1.75rem;
+            }
+            
+            .message {
+                padding: 0.875rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .year-pill {
+                padding: 0.25rem 0.7rem;
+                font-size: 0.7rem;
+            }
+            
+            .modal-close {
+                top: 1rem;
+                right: 1rem;
+                font-size: 2rem;
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        /* Small Mobile (up to 375px) */
+        @media (max-width: 375px) {
+            .main {
+                padding: 0.5rem;
+            }
+            
+            .top-bar {
+                padding: 0.75rem;
+            }
+            
+            .avatar {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .stat-card {
+                padding: 0.875rem;
+            }
+            
+            .stat-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1.1rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .stat-label {
+                font-size: 0.8rem;
+            }
+            
+            .reports-table th,
+            .reports-table td {
+                padding: 0.75rem;
+                font-size: 0.85rem;
+            }
+            
+            .report-thumb {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .action-link {
+                width: 28px;
+                height: 28px;
+                font-size: 0.85rem;
+            }
+            
+            .year-summary {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar, .menu-toggle, .sidebar-overlay, .filter-section,
+            .action-link, .modal, .logout-btn, .avatar {
+                display: none !important;
+            }
+            
+            .main {
+                margin-left: 0;
+                padding: 0.5in;
+            }
+            
+            .top-bar {
+                border: none;
+                box-shadow: none;
+            }
+            
+            .stat-card, .table-container {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+            
+            .report-thumb {
+                max-width: 1in;
+                max-height: 1in;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <div class="app">
-        <div class="sidebar">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
             <div class="logo">
-                <i class="fas fa-scale-balanced"></i> PPA System
+                <i class="fas fa-scale-balanced"></i>
+                <span>PPA System</span>
             </div>
-            <a href="dashboard.php" class="nav-item"><i class="fas fa-chart-pie"></i> Dashboard</a>
-            <a href="clients.php" class="nav-item"><i class="fas fa-users"></i> Clients</a>
-            <a href="pi_list.php" class="nav-item"><i class="fas fa-file-lines"></i> PI Cases</a>
-            <a href="ps_list.php" class="nav-item"><i class="fas fa-gavel"></i> PS Cases</a>
-            <a href="monthly_reports.php" class="nav-item active"><i class="fas fa-camera"></i> Monthly Reports</a>
+            
+            <nav>
+                <a href="dashboard.php" class="nav-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="clients.php" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Clients</span>
+                </a>
+                <a href="pi_list.php" class="nav-item">
+                    <i class="fas fa-file-lines"></i>
+                    <span>PI Cases</span>
+                </a>
+                <a href="ps_list.php" class="nav-item">
+                    <i class="fas fa-gavel"></i>
+                    <span>PS Cases</span>
+                </a>
+                <a href="monthly_reports.php" class="nav-item active">
+                    <i class="fas fa-camera"></i>
+                    <span>Monthly Reports</span>
+                </a>
+                <?php if($user_role == 'main' || $user_role == 'admin'): ?>
+                <a href="staff_management.php" class="nav-item">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Staff</span>
+                </a>
+                <?php endif; ?>
+            </nav>
         </div>
 
+        <!-- Main Content -->
         <div class="main">
+            <!-- Top Bar -->
             <div class="top-bar">
                 <div>
-                    <h1 class="page-title">Monthly Reports (2020-2030)</h1>
+                    <h1 class="page-title">Monthly Reports</h1>
                     <div class="page-subtitle">
                         <i class="fas fa-calendar-alt"></i> 
-                        Complete decade coverage
+                        Complete decade coverage: 2020 - 2030
                     </div>
                 </div>
                 <div class="user-info">
@@ -558,64 +1295,106 @@ foreach($years as $year) {
                             <i class="fas fa-eye"></i> View Only
                         </span>
                     <?php endif; ?>
-                    <span><?php echo htmlspecialchars($fullname); ?></span>
-                    <a href="logout.php"><i class="fas fa-sign-out-alt"></i></a>
+                    <span class="user-name"><?php echo htmlspecialchars($fullname); ?></span>
+                    <div class="avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <a href="logout.php" class="logout-btn" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
                 </div>
             </div>
 
             <!-- Success/Error Messages -->
             <?php if(isset($_GET['msg']) && $_GET['msg'] == 'deleted'): ?>
                 <div class="message success">
-                    <i class="fas fa-check-circle"></i> Image deleted successfully!
+                    <i class="fas fa-check-circle fa-lg"></i>
+                    <span>Image deleted successfully!</span>
                 </div>
             <?php endif; ?>
             
             <?php if(isset($_GET['msg']) && $_GET['msg'] == 'error'): ?>
                 <div class="message error">
-                    <i class="fas fa-exclamation-circle"></i> Error deleting image.
+                    <i class="fas fa-exclamation-circle fa-lg"></i>
+                    <span>Error deleting image.</span>
                 </div>
             <?php endif; ?>
 
-            <!-- Stats Cards -->
+            <!-- Stats Cards - Enhanced -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">
-                        <i class="fas fa-image"></i> Total Reports
+                    <div class="stat-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="stat-label">
+                            <i class="fas fa-chart-bar"></i> Total Reports
+                        </div>
                     </div>
                     <div class="stat-value"><?php echo $total_reports; ?></div>
-                    <div class="stat-note">across all years</div>
+                    <div class="stat-note">
+                        <i class="fas fa-calendar-alt"></i> across all years
+                    </div>
                 </div>
+                
                 <div class="stat-card">
-                    <div class="stat-label">
-                        <i class="fas fa-calendar-check"></i> <?php echo $current_year; ?> Reports
+                    <div class="stat-header">
+                        <div class="stat-icon yellow">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-label">
+                            <i class="fas fa-calendar-alt"></i> <?php echo $current_year; ?> Reports
+                        </div>
                     </div>
                     <div class="stat-value"><?php echo $reports_this_year; ?></div>
-                    <div class="stat-note">current year</div>
+                    <div class="stat-note">
+                        <i class="fas fa-chart-line"></i> current year
+                    </div>
                 </div>
+                
                 <div class="stat-card">
-                    <div class="stat-label">
-                        <i class="fas fa-chart-line"></i> Year Range
+                    <div class="stat-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-label">
+                            <i class="fas fa-calendar-range"></i> Year Range
+                        </div>
                     </div>
                     <div class="stat-value"><?php echo $min_year_db; ?> - <?php echo $max_year_db; ?></div>
-                    <div class="stat-note">years with data</div>
+                    <div class="stat-note">
+                        <i class="fas fa-database"></i> years with data
+                    </div>
                 </div>
+                
                 <div class="stat-card">
-                    <div class="stat-label">
-                        <i class="fas fa-layer-group"></i> Active Years
+                    <div class="stat-header">
+                        <div class="stat-icon red">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div class="stat-label">
+                            <i class="fas fa-calendar-alt"></i> Active Years
+                        </div>
                     </div>
                     <div class="stat-value"><?php echo $years_with_data; ?></div>
-                    <div class="stat-note">out of 11 years</div>
+                    <div class="stat-note">
+                        <i class="fas fa-calendar-alt"></i> out of 11 years
+                    </div>
                 </div>
             </div>
 
-            <!-- Year Range Visualization -->
+            <!-- Year Range Visualization - Enhanced -->
             <div class="year-range-info">
-                <span><i class="fas fa-calendar-alt"></i> Years with reports:</span>
+                <span>
+                    <i class="fas fa-calendar-alt" style="color: var(--accent-yellow);"></i>
+                    Years with reports:
+                </span>
                 <div class="year-stats">
                     <?php foreach($years as $year): ?>
                         <?php $has_data = $year_counts[$year] > 0; ?>
                         <span class="year-pill <?php echo $has_data ? 'has-data' : ''; ?>" 
-                              title="<?php echo $year; ?>: <?php echo $year_counts[$year]; ?> reports">
+                              title="<?php echo $year; ?>: <?php echo $year_counts[$year]; ?> reports"
+                              onclick="filterByYear(<?php echo $year; ?>)">
                             <span class="year-dot <?php echo $has_data ? 'dot-active' : 'dot-inactive'; ?>"></span>
                             <?php echo $year; ?>
                             <?php if($has_data): ?>
@@ -626,16 +1405,19 @@ foreach($years as $year) {
                 </div>
             </div>
 
-            <!-- Filter Section -->
+            <!-- Filter Section - Enhanced -->
             <div class="filter-section">
-                <input type="text" id="searchInput" class="search-input" 
-                       placeholder="🔍 Search by client name or docket number...">
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input" 
+                           placeholder="Search by client name or docket number...">
+                </div>
                 
                 <select id="yearFilter" class="filter-select">
                     <option value="all">📅 All Years (2020-2030)</option>
                     <?php foreach($years as $year): ?>
                         <?php $has_data = $year_counts[$year] > 0; ?>
-                        <option value="<?php echo $year; ?>" class="year-option <?php echo $has_data ? 'has-data' : 'no-data'; ?>">
+                        <option value="<?php echo $year; ?>" class="year-option">
                             <?php echo $year; ?> 
                             <?php if($has_data): ?>
                                 (<?php echo $year_counts[$year]; ?> reports)
@@ -647,7 +1429,10 @@ foreach($years as $year) {
                 </select>
 
                 <div class="filter-info">
-                    <span id="resultCount"><?php echo $total_reports; ?></span> reports found
+                    <span>
+                        <i class="fas fa-images"></i>
+                        <span id="resultCount"><?php echo $total_reports; ?></span> reports found
+                    </span>
                     <span class="clear-filter" onclick="clearFilters()">
                         <i class="fas fa-times-circle"></i> Clear filters
                     </span>
@@ -656,7 +1441,7 @@ foreach($years as $year) {
 
             <!-- Reports Table -->
             <div class="table-container">
-                <table id="reportsTable">
+                <table class="reports-table" id="reportsTable">
                     <thead>
                         <tr>
                             <th>Photo</th>
@@ -695,24 +1480,26 @@ foreach($years as $year) {
                                 </span>
                             </td>
                             <td>
-                                <a href="uploads/<?php echo $row['photo']; ?>" download class="action-link" title="Download">
-                                    <i class="fas fa-download"></i>
-                                </a>
-                                <a href="client_details.php?id=<?php echo $row['probationer_id']; ?>" class="action-link" title="View Client">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                
-                                <!-- Delete button - Only visible to admin/main -->
-                                <?php if($can_delete): ?>
-                                <a href="?delete=<?php echo $row['id']; ?>" class="action-link delete" title="Delete" 
-                                   onclick="return confirm('⚠️ Are you sure you want to delete this image?\n\nClient: <?php echo addslashes($row['name']); ?>\nPeriod: <?php echo date("F Y", mktime(0,0,0,$row['report_month'],1,$row['report_year'])); ?>\n\nThis action cannot be undone!')">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                                <?php else: ?>
-                                <span class="action-link disabled" title="Delete (View Only)">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                                <?php endif; ?>
+                                <div class="action-buttons">
+                                    <a href="uploads/<?php echo $row['photo']; ?>" download class="action-link download" title="Download">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    <a href="client_details.php?id=<?php echo $row['probationer_id']; ?>" class="action-link" title="View Client">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    <!-- Delete button - Only visible to admin/main -->
+                                    <?php if($can_delete): ?>
+                                    <a href="?delete=<?php echo $row['id']; ?>" class="action-link delete" title="Delete" 
+                                       onclick="return confirm('⚠️ Are you sure you want to delete this image?\n\nClient: <?php echo addslashes($row['name']); ?>\nPeriod: <?php echo date("F Y", mktime(0,0,0,$row['report_month'],1,$row['report_year'])); ?>\n\nThis action cannot be undone!')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    <?php else: ?>
+                                    <span class="action-link disabled" title="Delete (View Only)">
+                                        <i class="fas fa-trash"></i>
+                                    </span>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                         <?php 
@@ -720,11 +1507,11 @@ foreach($years as $year) {
                         else: 
                         ?>
                         <tr>
-                            <td colspan="8" style="text-align: center; padding: 3rem; color: #64748b;">
-                                <i class="fas fa-camera" style="font-size: 3rem; margin-bottom: 1rem; display: block; color: #94a3b8;"></i>
+                            <td colspan="8" class="empty-state">
+                                <i class="fas fa-camera"></i>
                                 <p style="font-size: 1.1rem;">No reports found for 2020-2030</p>
-                                <p style="margin-top: 0.5rem;">Upload your first report from the dashboard.</p>
-                                <a href="dashboard.php" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1.5rem; background: #0f172a; color: white; text-decoration: none; border-radius: 8px;">
+                                <p>Upload your first report from the dashboard.</p>
+                                <a href="dashboard.php" class="btn-primary">
                                     <i class="fas fa-arrow-left"></i> Go to Dashboard
                                 </a>
                             </td>
@@ -734,27 +1521,26 @@ foreach($years as $year) {
                 </table>
             </div>
 
-            <!-- Year Summary -->
+            <!-- Year Summary - Enhanced -->
             <?php if($total_reports > 0): ?>
-            <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; color: #64748b; font-size: 0.85rem; flex-wrap: wrap; gap: 1rem;">
-                <div>
+            <div class="year-summary">
+                <span>
                     <i class="fas fa-chart-bar"></i> 
                     Reports by year: 
                     <?php 
                     $active_years = [];
                     foreach($years as $year) {
                         if($year_counts[$year] > 0) {
-                            $active_years[] = "$year ({$year_counts[$year]})";
+                            $active_years[] = "<strong>{$year}</strong> ({$year_counts[$year]})";
                         }
                     }
                     echo implode(' • ', $active_years);
                     ?>
-                </div>
-                <div>
+                </span>
+                <span>
                     <i class="fas fa-database"></i> 
-                    Total: <?php echo $total_reports; ?> reports | 
-                    Range: <?php echo $min_year_db; ?>-<?php echo $max_year_db; ?>
-                </div>
+                    Total: <?php echo $total_reports; ?> reports
+                </span>
             </div>
             <?php endif; ?>
         </div>
@@ -767,13 +1553,61 @@ foreach($years as $year) {
     </div>
 
     <script>
+        // Mobile Menu Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (menuToggle && sidebar && overlay) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                    
+                    // Change icon
+                    const icon = menuToggle.querySelector('i');
+                    if (sidebar.classList.contains('active')) {
+                        icon.classList.remove('fa-bars');
+                        icon.classList.add('fa-times');
+                    } else {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                });
+                
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    const icon = menuToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                });
+            }
+            
+            // Close sidebar on window resize if in desktop mode
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 991) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    const icon = menuToggle?.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                }
+            });
+        });
+
+        // Image Modal Functions
         function openModal(src) {
             document.getElementById('modalImage').src = src;
             document.getElementById('imageModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
             document.getElementById('imageModal').classList.remove('active');
+            document.body.style.overflow = '';
         }
 
         // Close modal with ESC key
@@ -820,13 +1654,19 @@ foreach($years as $year) {
                 if (!noResultsRow) {
                     noResultsRow = document.createElement('tr');
                     noResultsRow.id = 'noResultsRow';
-                    noResultsRow.innerHTML = '<td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">📭 No reports match your filters for 2020-2030</td>';
+                    noResultsRow.innerHTML = '<td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;"><i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>📭 No reports match your filters for 2020-2030</td>';
                     tbody.appendChild(noResultsRow);
                 }
             } else if (noResultsRow) {
                 noResultsRow.remove();
             }
         }
+
+        // Filter by year (called from year pills)
+        window.filterByYear = function(year) {
+            yearFilter.value = year;
+            filterTable();
+        };
 
         // Clear all filters
         window.clearFilters = function() {
@@ -836,28 +1676,44 @@ foreach($years as $year) {
         };
 
         // Add event listeners
-        searchInput.addEventListener('input', filterTable);
-        yearFilter.addEventListener('change', filterTable);
+        if (searchInput && yearFilter) {
+            searchInput.addEventListener('input', filterTable);
+            yearFilter.addEventListener('change', filterTable);
+        }
 
         // Initial filter
-        filterTable();
+        if (typeof filterTable === 'function') {
+            filterTable();
+        }
 
         // Keyboard shortcut: ESC to clear filters when search is focused
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && this.value !== '') {
-                this.value = '';
-                filterTable();
-            }
-        });
+        if (searchInput) {
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && this.value !== '') {
+                    this.value = '';
+                    filterTable();
+                }
+            });
+        }
 
-        // Double-click on year pills to filter
+        // Double-click on year pills to filter (enhanced)
         document.querySelectorAll('.year-pill').forEach(pill => {
             pill.addEventListener('dblclick', function() {
                 const yearText = this.textContent.match(/\d{4}/);
                 if (yearText) {
                     const year = yearText[0];
-                    yearFilter.value = year;
-                    filterTable();
+                    filterByYear(year);
+                }
+            });
+        });
+
+        // Touch support for mobile
+        document.querySelectorAll('.year-pill').forEach(pill => {
+            pill.addEventListener('touchstart', function(e) {
+                const yearText = this.textContent.match(/\d{4}/);
+                if (yearText) {
+                    const year = yearText[0];
+                    filterByYear(year);
                 }
             });
         });

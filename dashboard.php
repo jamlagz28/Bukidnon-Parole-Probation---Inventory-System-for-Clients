@@ -977,19 +977,11 @@ $recent_uploads = mysqli_query($conn,"
                 </div>
             </div>
 
-            <!-- Quick Actions Row -->
+            <!-- Quick Actions Row - REMOVED Add PI and Add PS Buttons -->
             <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
                 <a href="add_probationer.php" class="upload-btn" style="text-decoration: none;">
                     <i class="fas fa-plus" style="margin-right: 8px;"></i>
                     Add New Client
-                </a>
-                <a href="pi_add.php" class="upload-btn" style="text-decoration: none; background: #f59e0b;">
-                    <i class="fas fa-file-lines" style="margin-right: 8px;"></i>
-                    Add PI Case
-                </a>
-                <a href="ps_add.php" class="upload-btn" style="text-decoration: none; background: #10b981;">
-                    <i class="fas fa-gavel" style="margin-right: 8px;"></i>
-                    Add PS Case
                 </a>
                 <button id="exportCsvBtn" class="export-btn">
                     <i class="fas fa-download" style="margin-right: 8px;"></i>

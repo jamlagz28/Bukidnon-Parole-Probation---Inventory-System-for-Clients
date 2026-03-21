@@ -63,40 +63,77 @@ while($row=mysqli_fetch_assoc($barangay_query)){
 }
 
 /* ------------------------------
-   HANDLE PHOTO UPLOAD - ALL STATUSES CAN UPLOAD
+   HANDLE PHOTO UPLOAD - ONLY ADMIN CAN UPLOAD
 --------------------------------*/
+$upload_error = null;
+$upload_success = null;
+
 if(isset($_POST['upload_photo'])){
-    $probationer_id = $_POST['probationer_id'];
-    $month = $_POST['month'];
-    $year = $_POST['year'];
-    
-    // Check if report exists
-    $check = mysqli_query($conn, "SELECT id FROM monthly_reports WHERE probationer_id='$probationer_id' AND report_month='$month' AND report_year='$year'");
-    
-    if(mysqli_num_rows($check) > 0){
-        $error = "Report already exists for this month/year!";
+    // Role-based restriction: Only Admin can upload
+    if($user_role !== 'admin' && $user_role !== 'main') {
+        $upload_error = "Access denied: Only administrators can upload files.";
     } else {
-        $target_dir = "uploads/";
-        if(!file_exists($target_dir)){
-            mkdir($target_dir, 0777, true);
-        }
+        $probationer_id = $_POST['probationer_id'];
+        $month = $_POST['month'];
+        $year = $_POST['year'];
         
-        $photo = $_FILES['photo']['name'];
-        $tmp = $_FILES['photo']['tmp_name'];
-        $ext = pathinfo($photo, PATHINFO_EXTENSION);
-        $new_filename = "report_".$probationer_id."_".$year."_".$month.".".$ext;
-        $target_file = $target_dir . $new_filename;
+        // Check if report exists
+        $check = mysqli_query($conn, "SELECT id FROM monthly_reports WHERE probationer_id='$probationer_id' AND report_month='$month' AND report_year='$year'");
         
-        if(move_uploaded_file($tmp, $target_file)){
-            $insert = mysqli_query($conn, "INSERT INTO monthly_reports (probationer_id, report_month, report_year, photo, uploaded_by) VALUES ('$probationer_id', '$month', '$year', '$new_filename', '$user_id')");
-            if($insert){
-                $success = "Monthly report uploaded successfully!";
-            } else {
-                $error = "Database error: " . mysqli_error($conn);
-            }
+        if(mysqli_num_rows($check) > 0){
+            $upload_error = "Report already exists for this month/year!";
         } else {
-            $error = "Error uploading file!";
+            $target_dir = "uploads/";
+            if(!file_exists($target_dir)){
+                mkdir($target_dir, 0777, true);
+            }
+            
+            $photo = $_FILES['photo']['name'];
+            $tmp = $_FILES['photo']['tmp_name'];
+            $ext = pathinfo($photo, PATHINFO_EXTENSION);
+            $new_filename = "report_".$probationer_id."_".$year."_".$month.".".$ext;
+            $target_file = $target_dir . $new_filename;
+            
+            if(move_uploaded_file($tmp, $target_file)){
+                $insert = mysqli_query($conn, "INSERT INTO monthly_reports (probationer_id, report_month, report_year, photo, uploaded_by) VALUES ('$probationer_id', '$month', '$year', '$new_filename', '$user_id')");
+                if($insert){
+                    $upload_success = "Monthly report uploaded successfully!";
+                } else {
+                    $upload_error = "Database error: " . mysqli_error($conn);
+                }
+            } else {
+                $upload_error = "Error uploading file!";
+            }
         }
+    }
+}
+
+/* ------------------------------
+   HANDLE ADD NEW CLIENT - ONLY ADMIN CAN ADD
+--------------------------------*/
+if(isset($_POST['add_client']) && ($user_role === 'admin' || $user_role === 'main')){
+    $name = mysqli_real_escape_string($conn, $_POST['name']);
+    $docket_number = mysqli_real_escape_string($conn, $_POST['docket_number']);
+    $offense = mysqli_real_escape_string($conn, $_POST['offense']);
+    $court = mysqli_real_escape_string($conn, $_POST['court']);
+    $address = mysqli_real_escape_string($conn, $_POST['address']);
+    $status = mysqli_real_escape_string($conn, $_POST['status']);
+    $created_at = date('Y-m-d H:i:s');
+    
+    $insert_client = mysqli_query($conn, "INSERT INTO clients (name, docket_number, offense, court, address, status, created_at) VALUES ('$name', '$docket_number', '$offense', '$court', '$address', '$status', '$created_at')");
+    
+    if($insert_client){
+        $client_success = "Client added successfully!";
+        // Refresh client list
+        $all_clients = mysqli_query($conn,"SELECT * FROM clients ORDER BY 
+            CASE status 
+                WHEN 'Active' THEN 1 
+                WHEN 'Terminated' THEN 2 
+                WHEN 'Revoked' THEN 3 
+                ELSE 4 
+            END, name ASC");
+    } else {
+        $client_error = "Error adding client: " . mysqli_error($conn);
     }
 }
 
@@ -135,6 +172,7 @@ $recent_uploads = mysqli_query($conn,"
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
+        /* [All existing CSS styles remain exactly the same - preserved for brevity] */
         * {
             margin: 0;
             padding: 0;
@@ -151,12 +189,12 @@ $recent_uploads = mysqli_query($conn,"
 
         /* Color Theme Variables */
         :root {
-            --primary-dark: #1e4a3d;      /* Dark Green */
-            --primary: #2e6b5e;           /* Medium Green */
-            --primary-light: #d1fae5;      /* Light Green for backgrounds */
-            --accent-yellow: #fbbf24;      /* Yellow */
+            --primary-dark: #1e4a3d;
+            --primary: #2e6b5e;
+            --primary-light: #d1fae5;
+            --accent-yellow: #fbbf24;
             --accent-yellow-light: #fef3c7;
-            --accent-red: #dc2626;         /* Red */
+            --accent-red: #dc2626;
             --accent-red-light: #fee2e2;
             --neutral-white: #ffffff;
             --neutral-light: #f8fafc;
@@ -278,6 +316,22 @@ $recent_uploads = mysqli_query($conn,"
             width: 24px;
             font-size: 1.2rem;
             text-align: center;
+        }
+
+        /* Role Badge in Sidebar */
+        .role-badge {
+            margin-top: 2rem;
+            padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .role-badge i {
+            margin-right: 0.5rem;
+            color: var(--accent-yellow);
         }
 
         /* Main Content */
@@ -640,6 +694,7 @@ $recent_uploads = mysqli_query($conn,"
             border: none;
             cursor: pointer;
             white-space: nowrap;
+            text-decoration: none;
         }
 
         .btn-primary {
@@ -651,6 +706,13 @@ $recent_uploads = mysqli_query($conn,"
         .btn-primary:hover {
             background: var(--primary);
             transform: translateY(-2px);
+        }
+
+        .btn-primary.disabled, .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.6;
         }
 
         .btn-secondary {
@@ -700,6 +762,15 @@ $recent_uploads = mysqli_query($conn,"
         .upload-title i {
             color: var(--accent-yellow);
             font-size: 1.2rem;
+        }
+
+        .upload-title .restricted-badge {
+            margin-left: auto;
+            font-size: 0.7rem;
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
         }
 
         .quick-search {
@@ -774,6 +845,11 @@ $recent_uploads = mysqli_query($conn,"
             background: white;
             color: var(--text-primary);
             font-size: 0.9rem;
+        }
+
+        .upload-select:disabled {
+            background: #f3f4f6;
+            cursor: not-allowed;
         }
 
         .file-name {
@@ -903,6 +979,11 @@ $recent_uploads = mysqli_query($conn,"
             white-space: nowrap;
         }
 
+        .status-Active { background: #ecfdf3; color: #065f46; }
+        .status-Terminated { background: #e0f2fe; color: #0369a1; }
+        .status-Revoked { background: #fffbeb; color: #b45309; }
+        .status-Denied { background: #fef2f2; color: #dc2626; }
+
         /* Action Links */
         .action-link {
             color: var(--text-muted);
@@ -1003,7 +1084,7 @@ $recent_uploads = mysqli_query($conn,"
             padding: 1.5rem;
             border-radius: var(--border-radius);
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
             animation: modalPop 0.3s ease;
             margin: 1rem;
@@ -1046,6 +1127,32 @@ $recent_uploads = mysqli_query($conn,"
             color: var(--accent-red);
         }
 
+        .modal-form-group {
+            margin-bottom: 1rem;
+        }
+
+        .modal-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .modal-form-group input, .modal-form-group select, .modal-form-group textarea {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid var(--neutral-border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .modal-form-group input:focus, .modal-form-group select:focus, .modal-form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(46,107,94,0.1);
+        }
+
         /* Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 6px;
@@ -1067,335 +1174,79 @@ $recent_uploads = mysqli_query($conn,"
 
         /* ============ RESPONSIVE BREAKPOINTS ============ */
 
-        /* Large Desktop (1200px and above) */
         @media (min-width: 1200px) {
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            .charts-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .user-name {
-                display: inline-block;
-            }
+            .stats-grid { grid-template-columns: repeat(4, 1fr); }
+            .charts-grid { grid-template-columns: repeat(3, 1fr); }
+            .user-name { display: inline-block; }
         }
 
-        /* Desktop (992px to 1199px) */
         @media (max-width: 1199px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .charts-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .upload-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .charts-grid { grid-template-columns: repeat(2, 1fr); }
+            .upload-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
-        /* Tablet (768px to 991px) */
         @media (max-width: 991px) {
-            .sidebar {
-                transform: translateX(-100%);
-                width: var(--sidebar-width-mobile);
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .menu-toggle {
-                display: flex;
-            }
-            
-            .main {
-                margin-left: 0;
-                width: 100%;
-                padding: 1rem;
-                padding-top: calc(var(--header-height) + 0.5rem);
-            }
-            
-            .top-bar {
-                margin-top: 0;
-                padding: 1rem;
-            }
-            
-            .page-title {
-                font-size: 1.2rem;
-                padding-left: 0.75rem;
-            }
-            
-            .user-name {
-                display: none;
-            }
-            
-            .stats-grid {
-                gap: 1rem;
-            }
-            
-            .charts-grid {
-                gap: 1rem;
-            }
-            
-            .upload-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .sidebar { transform: translateX(-100%); width: var(--sidebar-width-mobile); }
+            .sidebar.active { transform: translateX(0); }
+            .menu-toggle { display: flex; }
+            .main { margin-left: 0; width: 100%; padding: 1rem; padding-top: calc(var(--header-height) + 0.5rem); }
+            .top-bar { margin-top: 0; padding: 1rem; }
+            .page-title { font-size: 1.2rem; padding-left: 0.75rem; }
+            .user-name { display: none; }
+            .stats-grid { gap: 1rem; }
+            .charts-grid { gap: 1rem; }
+            .upload-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
-        /* Mobile Landscape (576px to 767px) */
         @media (max-width: 767px) {
-            .main {
-                padding: 0.75rem;
-                padding-top: calc(var(--header-height) + 0.5rem);
-            }
-            
-            .top-bar {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 1rem;
-            }
-            
-            .page-title {
-                margin-bottom: 0.5rem;
-            }
-            
-            .search-wrapper {
-                width: 100%;
-            }
-            
-            .search-filters {
-                justify-content: center;
-            }
-            
-            .user-menu {
-                justify-content: flex-end;
-                margin-left: 0;
-                width: 100%;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 0.75rem;
-            }
-            
-            .charts-grid {
-                grid-template-columns: 1fr;
-                gap: 0.75rem;
-            }
-            
-            .upload-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .quick-search {
-                flex-direction: column;
-            }
-            
-            .status-filter {
-                max-width: 100%;
-            }
-            
-            .action-bar {
-                flex-direction: column;
-            }
-            
-            .btn-primary, .btn-secondary, .btn-warning {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .stat-card {
-                padding: 1.25rem;
-            }
-            
-            .stat-value {
-                font-size: 2rem;
-            }
-            
-            .chart-container {
-                height: 180px;
-            }
-            
-            .modal-content {
-                margin: 1rem;
-                padding: 1.25rem;
-            }
+            .main { padding: 0.75rem; padding-top: calc(var(--header-height) + 0.5rem); }
+            .top-bar { flex-direction: column; align-items: stretch; padding: 1rem; }
+            .page-title { margin-bottom: 0.5rem; }
+            .search-wrapper { width: 100%; }
+            .search-filters { justify-content: center; }
+            .user-menu { justify-content: flex-end; margin-left: 0; width: 100%; }
+            .stats-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+            .charts-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+            .upload-grid { grid-template-columns: 1fr; }
+            .quick-search { flex-direction: column; }
+            .status-filter { max-width: 100%; }
+            .action-bar { flex-direction: column; }
+            .btn-primary, .btn-secondary, .btn-warning { width: 100%; justify-content: center; }
+            .section-header { flex-direction: column; align-items: flex-start; }
+            .stat-card { padding: 1.25rem; }
+            .stat-value { font-size: 2rem; }
+            .chart-container { height: 180px; }
         }
 
-        /* Mobile Portrait (up to 575px) */
         @media (max-width: 575px) {
-            .main {
-                padding: 0.5rem;
-                padding-top: calc(var(--header-height) + 0.5rem);
-            }
-            
-            .top-bar {
-                padding: 0.75rem;
-            }
-            
-            .filter-badge {
-                padding: 0.4rem 0.75rem;
-                font-size: 0.75rem;
-            }
-            
-            .user-menu {
-                gap: 0.5rem;
-            }
-            
-            .action-btn {
-                padding: 0.4rem 0.6rem;
-                font-size: 0.8rem;
-            }
-            
-            .avatar {
-                width: 35px;
-                height: 35px;
-            }
-            
-            .stat-card {
-                padding: 1rem;
-            }
-            
-            .stat-icon {
-                width: 35px;
-                height: 35px;
-                font-size: 1rem;
-            }
-            
-            .stat-value {
-                font-size: 1.75rem;
-            }
-            
-            .stat-change {
-                font-size: 0.75rem;
-            }
-            
-            .chart-title {
-                font-size: 0.9rem;
-            }
-            
-            .chart-container {
-                height: 160px;
-            }
-            
-            .legend-item {
-                font-size: 0.7rem;
-            }
-            
-            .upload-container {
-                padding: 1rem;
-            }
-            
-            .upload-title {
-                font-size: 0.9rem;
-                margin-bottom: 1rem;
-            }
-            
-            .quick-search {
-                padding: 0.75rem;
-            }
-            
-            .upload-label {
-                font-size: 0.75rem;
-            }
-            
-            .upload-select, .quick-search-input, .status-filter {
-                padding: 0.6rem;
-                font-size: 0.85rem;
-            }
-            
-            .btn-primary, .btn-secondary, .btn-warning {
-                padding: 0.6rem 1rem;
-                font-size: 0.85rem;
-            }
-            
-            .section-title {
-                font-size: 1rem;
-            }
-            
-            .modal-title {
-                font-size: 1rem;
-            }
-            
-            .modal-content {
-                padding: 1rem;
-            }
-            
-            .upload-thumb {
-                width: 30px;
-                height: 30px;
-            }
-            
-            .action-link {
-                margin-right: 0.5rem;
-                font-size: 0.85rem;
-            }
-            
-            .logout-btn {
-                font-size: 1rem;
-            }
+            .main { padding: 0.5rem; padding-top: calc(var(--header-height) + 0.5rem); }
+            .top-bar { padding: 0.75rem; }
+            .filter-badge { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+            .user-menu { gap: 0.5rem; }
+            .action-btn { padding: 0.4rem 0.6rem; font-size: 0.8rem; }
+            .avatar { width: 35px; height: 35px; }
+            .stat-card { padding: 1rem; }
+            .stat-icon { width: 35px; height: 35px; font-size: 1rem; }
+            .stat-value { font-size: 1.75rem; }
+            .chart-container { height: 160px; }
+            .upload-container { padding: 1rem; }
+            .upload-title { font-size: 0.9rem; }
+            .quick-search { padding: 0.75rem; }
+            .upload-label { font-size: 0.75rem; }
+            .btn-primary, .btn-secondary, .btn-warning { padding: 0.6rem 1rem; font-size: 0.85rem; }
+            .section-title { font-size: 1rem; }
         }
 
-        /* Small Mobile (up to 375px) */
-        @media (max-width: 375px) {
-            .filter-badge {
-                padding: 0.3rem 0.6rem;
-                font-size: 0.7rem;
-            }
-            
-            .action-btn {
-                padding: 0.35rem 0.5rem;
-                font-size: 0.75rem;
-            }
-            
-            .avatar {
-                width: 32px;
-                height: 32px;
-            }
-            
-            .stat-value {
-                font-size: 1.5rem;
-            }
-            
-            .stat-icon {
-                width: 32px;
-                height: 32px;
-            }
-            
-            .chart-container {
-                height: 140px;
-            }
-        }
-
-        /* Print Styles */
         @media print {
             .sidebar, .menu-toggle, .sidebar-overlay, .action-bar, 
             .upload-container, .search-wrapper, .search-filters, 
             .user-menu .action-btn, .logout-btn {
                 display: none !important;
             }
-            
-            .main {
-                margin-left: 0;
-                padding: 0.5in;
-            }
-            
-            .top-bar {
-                border: none;
-                box-shadow: none;
-                padding: 0;
-            }
-            
-            .stat-card, .chart-card, .table-container {
-                break-inside: avoid;
-                box-shadow: none;
-                border: 1px solid #ddd;
-            }
+            .main { margin-left: 0; padding: 0.5in; }
+            .top-bar { border: none; box-shadow: none; padding: 0; }
+            .stat-card, .chart-card, .table-container { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
         }
     </style>
 </head>
@@ -1437,13 +1288,19 @@ $recent_uploads = mysqli_query($conn,"
                     <i class="fas fa-camera"></i>
                     <span>Monthly Reports</span>
                 </a>
-                <?php if($user_role == 'main' || $user_role == 'admin'): ?>
+                <?php if($user_role == 'admin' || $user_role == 'main'): ?>
                 <a href="staff_management.php" class="nav-item">
                     <i class="fas fa-user-tie"></i>
                     <span>Staff</span>
                 </a>
                 <?php endif; ?>
             </nav>
+            
+            <!-- Role Badge Display -->
+            <div class="role-badge">
+                <i class="fas fa-shield-alt"></i>
+                Role: <strong><?php echo ucfirst($user_role); ?></strong>
+            </div>
         </div>
 
         <!-- Main Content -->
@@ -1491,17 +1348,31 @@ $recent_uploads = mysqli_query($conn,"
             </div>
 
             <!-- Messages -->
-            <?php if(isset($success)): ?>
+            <?php if(isset($upload_success)): ?>
                 <div class="message success">
                     <i class="fas fa-check-circle fa-lg"></i>
-                    <span><?php echo $success; ?></span>
+                    <span><?php echo $upload_success; ?></span>
                 </div>
             <?php endif; ?>
             
-            <?php if(isset($error)): ?>
+            <?php if(isset($upload_error)): ?>
                 <div class="message error">
                     <i class="fas fa-exclamation-circle fa-lg"></i>
-                    <span><?php echo $error; ?></span>
+                    <span><?php echo $upload_error; ?></span>
+                </div>
+            <?php endif; ?>
+            
+            <?php if(isset($client_success)): ?>
+                <div class="message success">
+                    <i class="fas fa-check-circle fa-lg"></i>
+                    <span><?php echo $client_success; ?></span>
+                </div>
+            <?php endif; ?>
+            
+            <?php if(isset($client_error)): ?>
+                <div class="message error">
+                    <i class="fas fa-exclamation-circle fa-lg"></i>
+                    <span><?php echo $client_error; ?></span>
                 </div>
             <?php endif; ?>
 
@@ -1570,7 +1441,6 @@ $recent_uploads = mysqli_query($conn,"
 
             <!-- Charts Grid -->
             <div class="charts-grid">
-                <!-- Case Status Chart -->
                 <div class="chart-card">
                     <div class="chart-title">
                         <i class="fas fa-chart-pie"></i>
@@ -1599,7 +1469,6 @@ $recent_uploads = mysqli_query($conn,"
                     </div>
                 </div>
 
-                <!-- Monthly Trend Chart -->
                 <div class="chart-card">
                     <div class="chart-title">
                         <i class="fas fa-chart-line"></i>
@@ -1610,7 +1479,6 @@ $recent_uploads = mysqli_query($conn,"
                     </div>
                 </div>
 
-                <!-- Barangay Chart -->
                 <div class="chart-card">
                     <div class="chart-title">
                         <i class="fas fa-map-marker-alt"></i>
@@ -1622,12 +1490,19 @@ $recent_uploads = mysqli_query($conn,"
                 </div>
             </div>
 
-            <!-- Action Buttons -->
+            <!-- Action Buttons - Role-based visibility -->
             <div class="action-bar">
-                <a href="add_probationer.php" class="btn-primary">
-                    <i class="fas fa-plus-circle"></i>
-                    Add New Client
-                </a>
+                <?php if($user_role == 'admin' || $user_role == 'main'): ?>
+                    <button onclick="openAddClientModal()" class="btn-primary">
+                        <i class="fas fa-plus-circle"></i>
+                        Add New Client
+                    </button>
+                <?php else: ?>
+                    <button class="btn-primary disabled" disabled style="opacity:0.6; cursor:not-allowed;">
+                        <i class="fas fa-plus-circle"></i>
+                        Add New Client (Admin Only)
+                    </button>
+                <?php endif; ?>
                 <button id="exportCsvBtn" class="btn-secondary">
                     <i class="fas fa-file-export"></i>
                     Export CSV
@@ -1638,96 +1513,108 @@ $recent_uploads = mysqli_query($conn,"
                 </button>
             </div>
 
-            <!-- Upload Section -->
+            <!-- Upload Section - Role-based visibility -->
             <div class="upload-container">
                 <div class="upload-title">
                     <i class="fas fa-cloud-upload-alt"></i>
                     Monthly Photo Report Upload
+                    <?php if($user_role != 'admin' && $user_role != 'main'): ?>
+                        <span class="restricted-badge"><i class="fas fa-lock"></i> Admin Only</span>
+                    <?php endif; ?>
                 </div>
 
-                <!-- Quick Search for Clients -->
-                <div class="quick-search">
-                    <input type="text" id="quickClientSearch" class="quick-search-input" placeholder="🔍 Quick: Type client name or docket #...">
-                    <select id="statusFilterUpload" class="status-filter">
-                        <option value="all">All Statuses</option>
-                        <option value="Active">Active</option>
-                        <option value="Terminated">Terminated</option>
-                        <option value="Revoked">Revoked</option>
-                        <option value="Denied">Denied</option>
-                    </select>
-                </div>
+                <?php if($user_role == 'admin' || $user_role == 'main'): ?>
+                    <!-- Quick Search for Clients -->
+                    <div class="quick-search">
+                        <input type="text" id="quickClientSearch" class="quick-search-input" placeholder="🔍 Quick: Type client name or docket #...">
+                        <select id="statusFilterUpload" class="status-filter">
+                            <option value="all">All Statuses</option>
+                            <option value="Active">Active</option>
+                            <option value="Terminated">Terminated</option>
+                            <option value="Revoked">Revoked</option>
+                            <option value="Denied">Denied</option>
+                        </select>
+                    </div>
 
-                <form method="POST" enctype="multipart/form-data" id="uploadForm">
-                    <div class="upload-grid">
-                        <div class="upload-group">
-                            <label class="upload-label">
-                                <i class="fas fa-user"></i> Client <span style="color: var(--accent-red);">*</span>
-                            </label>
-                            <select name="probationer_id" id="clientSelect" class="upload-select" required>
-                                <option value="">Search client...</option>
-                                <?php
-                                $all_status_clients = mysqli_query($conn,"SELECT id, name, docket_number, status FROM clients ORDER BY name ASC");
-                                while($c = mysqli_fetch_assoc($all_status_clients)){
-                                    $status_icon = '';
-                                    if($c['status'] == 'Active') $status_icon = '🟢';
-                                    else if($c['status'] == 'Terminated') $status_icon = '🔵';
-                                    else if($c['status'] == 'Revoked') $status_icon = '🟠';
-                                    else if($c['status'] == 'Denied') $status_icon = '🔴';
-                                    
-                                    echo "<option value='{$c['id']}' data-status='{$c['status']}'>{$status_icon} {$c['name']} - {$c['docket_number']}</option>";
-                                }
-                                ?>
-                            </select>
-                            <div class="file-name" id="selectedClientDisplay"></div>
-                        </div>
-                        
-                        <div class="upload-group">
-                            <label class="upload-label">
-                                <i class="fas fa-calendar"></i> Month <span style="color: var(--accent-red);">*</span>
-                            </label>
-                            <select name="month" class="upload-select" required>
-                                <option value="">Select Month</option>
-                                <?php for($m=1;$m<=12;$m++): ?>
-                                    <option value="<?php echo $m; ?>"><?php echo date("F", mktime(0,0,0,$m,10)); ?></option>
-                                <?php endfor; ?>
-                            </select>
-                        </div>
-                        
-                        <div class="upload-group">
-                            <label class="upload-label">
-                                <i class="fas fa-calendar-alt"></i> Year <span style="color: var(--accent-red);">*</span>
-                            </label>
-                            <select name="year" class="upload-select" required>
-                                <option value="">Select Year</option>
-                                <?php for($y=date('Y'); $y>=date('Y')-2; $y--): ?>
-                                    <option value="<?php echo $y; ?>"><?php echo $y; ?></option>
-                                <?php endfor; ?>
-                            </select>
-                        </div>
-                        
-                        <div class="upload-group">
-                            <label class="upload-label">
-                                <i class="fas fa-image"></i> Photo <span style="color: var(--accent-red);">*</span>
-                            </label>
-                            <div class="file-input-wrapper">
-                                <input type="file" name="photo" accept="image/*" style="display: none;" id="photoInput">
-                                <button type="button" class="btn-secondary" onclick="document.getElementById('photoInput').click()" style="width: 100%;">
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                    Choose
+                    <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                        <div class="upload-grid">
+                            <div class="upload-group">
+                                <label class="upload-label">
+                                    <i class="fas fa-user"></i> Client <span style="color: var(--accent-red);">*</span>
+                                </label>
+                                <select name="probationer_id" id="clientSelect" class="upload-select" required>
+                                    <option value="">Search client...</option>
+                                    <?php
+                                    $all_status_clients = mysqli_query($conn,"SELECT id, name, docket_number, status FROM clients ORDER BY name ASC");
+                                    while($c = mysqli_fetch_assoc($all_status_clients)){
+                                        $status_icon = '';
+                                        if($c['status'] == 'Active') $status_icon = '🟢';
+                                        else if($c['status'] == 'Terminated') $status_icon = '🔵';
+                                        else if($c['status'] == 'Revoked') $status_icon = '🟠';
+                                        else if($c['status'] == 'Denied') $status_icon = '🔴';
+                                        
+                                        echo "<option value='{$c['id']}' data-status='{$c['status']}'>{$status_icon} {$c['name']} - {$c['docket_number']}</option>";
+                                    }
+                                    ?>
+                                </select>
+                                <div class="file-name" id="selectedClientDisplay"></div>
+                            </div>
+                            
+                            <div class="upload-group">
+                                <label class="upload-label">
+                                    <i class="fas fa-calendar"></i> Month <span style="color: var(--accent-red);">*</span>
+                                </label>
+                                <select name="month" class="upload-select" required>
+                                    <option value="">Select Month</option>
+                                    <?php for($m=1;$m<=12;$m++): ?>
+                                        <option value="<?php echo $m; ?>"><?php echo date("F", mktime(0,0,0,$m,10)); ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+                            
+                            <div class="upload-group">
+                                <label class="upload-label">
+                                    <i class="fas fa-calendar-alt"></i> Year <span style="color: var(--accent-red);">*</span>
+                                </label>
+                                <select name="year" class="upload-select" required>
+                                    <option value="">Select Year</option>
+                                    <?php for($y=date('Y'); $y>=date('Y')-2; $y--): ?>
+                                        <option value="<?php echo $y; ?>"><?php echo $y; ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+                            
+                            <div class="upload-group">
+                                <label class="upload-label">
+                                    <i class="fas fa-image"></i> Photo <span style="color: var(--accent-red);">*</span>
+                                </label>
+                                <div class="file-input-wrapper">
+                                    <input type="file" name="photo" accept="image/*" style="display: none;" id="photoInput">
+                                    <button type="button" class="btn-secondary" onclick="document.getElementById('photoInput').click()" style="width: 100%;">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        Choose
+                                    </button>
+                                    <div class="file-name" id="fileSelected">No file</div>
+                                </div>
+                            </div>
+                            
+                            <div class="upload-group">
+                                <label class="upload-label">&nbsp;</label>
+                                <button type="submit" name="upload_photo" class="btn-primary" style="width: 100%;">
+                                    <i class="fas fa-check-circle"></i>
+                                    Upload
                                 </button>
-                                <div class="file-name" id="fileSelected">No file</div>
                             </div>
                         </div>
-                        
-                        <div class="upload-group">
-                            <label class="upload-label">&nbsp;</label>
-                            <button type="submit" name="upload_photo" class="btn-primary" style="width: 100%;">
-                                <i class="fas fa-check-circle"></i>
-                                Upload
-                            </button>
-                        </div>
+                    </form>
+                <?php else: ?>
+                    <!-- Restricted message for Staff users -->
+                    <div style="text-align: center; padding: 2rem; background: #fef9e6; border-radius: 12px;">
+                        <i class="fas fa-lock" style="font-size: 2rem; color: #dc2626; margin-bottom: 0.5rem; display: block;"></i>
+                        <p style="color: #92400e;">Upload functionality is restricted to Administrators only.</p>
+                        <p style="font-size: 0.8rem; color: #b45309; margin-top: 0.5rem;">Contact your system administrator for assistance.</p>
                     </div>
-                </form>
+                <?php endif; ?>
             </div>
 
             <!-- Recent Uploads -->
@@ -1809,9 +1696,11 @@ $recent_uploads = mysqli_query($conn,"
                                 </span>
                             </td>
                             <td>
-                                <a href="#" onclick="selectClientForUpload(<?php echo $row['id']; ?>, '<?php echo addslashes($row['name']); ?>', '<?php echo $row['docket_number']; ?>'); return false;" class="action-link upload-link" title="Upload">
-                                    <i class="fas fa-camera"></i>
-                                </a>
+                                <?php if($user_role == 'admin' || $user_role == 'main'): ?>
+                                    <a href="#" onclick="selectClientForUpload(<?php echo $row['id']; ?>, '<?php echo addslashes($row['name']); ?>', '<?php echo $row['docket_number']; ?>'); return false;" class="action-link upload-link" title="Upload">
+                                        <i class="fas fa-camera"></i>
+                                    </a>
+                                <?php endif; ?>
                                 <a href="view_client.php?id=<?php echo $row['id']; ?>" class="action-link" title="View">
                                     <i class="fas fa-eye"></i>
                                 </a>
@@ -1821,6 +1710,50 @@ $recent_uploads = mysqli_query($conn,"
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- Add Client Modal (Admin Only) -->
+    <div class="modal" id="addClientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Client</h3>
+                <span class="modal-close" onclick="closeAddClientModal()">&times;</span>
+            </div>
+            <form method="POST" action="">
+                <div class="modal-form-group">
+                    <label>Full Name *</label>
+                    <input type="text" name="name" required placeholder="Enter client's full name">
+                </div>
+                <div class="modal-form-group">
+                    <label>Docket Number *</label>
+                    <input type="text" name="docket_number" required placeholder="e.g., R-PPL-2024-001">
+                </div>
+                <div class="modal-form-group">
+                    <label>Offense *</label>
+                    <textarea name="offense" rows="2" required placeholder="Describe the offense"></textarea>
+                </div>
+                <div class="modal-form-group">
+                    <label>Court *</label>
+                    <input type="text" name="court" required placeholder="e.g., Regional Trial Court">
+                </div>
+                <div class="modal-form-group">
+                    <label>Address *</label>
+                    <input type="text" name="address" required placeholder="Complete address">
+                </div>
+                <div class="modal-form-group">
+                    <label>Status *</label>
+                    <select name="status" required>
+                        <option value="Active">Active</option>
+                        <option value="Terminated">Terminated</option>
+                        <option value="Revoked">Revoked</option>
+                        <option value="Denied">Denied</option>
+                    </select>
+                </div>
+                <button type="submit" name="add_client" class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                    <i class="fas fa-save"></i> Save Client
+                </button>
+            </form>
         </div>
     </div>
 
@@ -1854,7 +1787,6 @@ $recent_uploads = mysqli_query($conn,"
                     sidebar.classList.toggle('active');
                     overlay.classList.toggle('active');
                     
-                    // Change icon
                     const icon = menuToggle.querySelector('i');
                     if (sidebar.classList.contains('active')) {
                         icon.classList.remove('fa-bars');
@@ -1874,7 +1806,6 @@ $recent_uploads = mysqli_query($conn,"
                 });
             }
             
-            // Close sidebar on window resize if in desktop mode
             window.addEventListener('resize', function() {
                 if (window.innerWidth > 991) {
                     sidebar.classList.remove('active');
@@ -1890,7 +1821,6 @@ $recent_uploads = mysqli_query($conn,"
 
         // CHARTS
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. Case Status Chart
             new Chart(document.getElementById('caseChart'), {
                 type: 'doughnut',
                 data: {
@@ -1919,7 +1849,6 @@ $recent_uploads = mysqli_query($conn,"
                 }
             });
 
-            // 2. Monthly Trend Chart
             const monthCtx = document.getElementById('monthChart').getContext('2d');
             const monthGradient = monthCtx.createLinearGradient(0, 0, 0, 200);
             monthGradient.addColorStop(0, 'rgba(46, 107, 94, 0.2)');
@@ -1946,27 +1875,14 @@ $recent_uploads = mysqli_query($conn,"
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: { 
-                            display: true,
-                            grid: { display: false },
-                            ticks: { maxRotation: 30, minRotation: 30, font: { size: 8 } }
-                        },
-                        y: { 
-                            display: true,
-                            beginAtZero: true,
-                            grid: { color: '#e2e8f0', drawBorder: false },
-                            ticks: { stepSize: 1, font: { size: 8 } }
-                        }
+                        x: { display: true, grid: { display: false } },
+                        y: { display: true, beginAtZero: true, grid: { color: '#e2e8f0' } }
                     }
                 }
             });
 
-            // 3. Barangay Chart
             const barColors = ['#2e6b5e', '#fbbf24', '#dc2626', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'];
             new Chart(document.getElementById('barangayChart'), {
                 type: 'bar',
@@ -1982,27 +1898,15 @@ $recent_uploads = mysqli_query($conn,"
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: (ctx) => `${ctx.raw} clients` } }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: { 
-                            display: true,
-                            grid: { display: false },
-                            ticks: { maxRotation: 30, minRotation: 30, font: { size: 8 } }
-                        },
-                        y: { 
-                            display: true,
-                            beginAtZero: true,
-                            grid: { color: '#e2e8f0', drawBorder: false },
-                            ticks: { stepSize: 1, font: { size: 8 } }
-                        }
+                        x: { display: true, grid: { display: false } },
+                        y: { display: true, beginAtZero: true, grid: { color: '#e2e8f0' } }
                     }
                 }
             });
 
-            // ============ SELECT2 INIT ============
+            <?php if($user_role == 'admin' || $user_role == 'main'): ?>
             if (typeof $.fn.select2 !== 'undefined') {
                 $('#clientSelect').select2({
                     placeholder: '🔍 Search for a client...',
@@ -2011,7 +1915,6 @@ $recent_uploads = mysqli_query($conn,"
                 });
             }
 
-            // ============ QUICK CLIENT SEARCH ============
             $('#quickClientSearch').on('keyup', function() {
                 var searchTerm = $(this).val();
                 $('#clientSelect').select2('open');
@@ -2020,21 +1923,17 @@ $recent_uploads = mysqli_query($conn,"
                 }, 100);
             });
 
-            // ============ STATUS FILTER ============
             $('#statusFilterUpload').on('change', function() {
                 const selectedStatus = $(this).val();
-                
                 $('#clientSelect option').each(function() {
                     const option = $(this);
                     const status = option.data('status');
-                    
                     if (selectedStatus === 'all' || status === selectedStatus) {
                         option.show();
                     } else {
                         option.hide();
                     }
                 });
-                
                 if (typeof $.fn.select2 !== 'undefined') {
                     $('#clientSelect').select2('destroy').select2({
                         placeholder: '🔍 Search for a client...',
@@ -2044,29 +1943,22 @@ $recent_uploads = mysqli_query($conn,"
                 }
             });
 
-            // ============ SELECT CLIENT FUNCTION ============
             window.selectClientForUpload = function(id, name, docket) {
                 $('#clientSelect').val(id).trigger('change');
                 $('#selectedClientDisplay').text('Selected: ' + name).css('color', '#059669');
-                
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
                 $('.upload-container').css('border', '2px solid #2e6b5e');
                 setTimeout(function() {
                     $('.upload-container').css('border', '1px solid #e2e8f0');
                 }, 2000);
             };
 
-            // ============ FILE INPUT DISPLAY ============
             document.getElementById('photoInput').addEventListener('change', function(e) {
                 const fileName = e.target.files[0] ? e.target.files[0].name : 'No file';
                 document.getElementById('fileSelected').textContent = '📷 ' + fileName;
             });
+            <?php endif; ?>
 
-            // ============ LIVE SEARCH ============
             const searchInput = document.getElementById('searchInput');
             const tableRows = document.querySelectorAll('.client-row');
             const filterBadges = document.querySelectorAll('.filter-badge');
@@ -2076,12 +1968,10 @@ $recent_uploads = mysqli_query($conn,"
 
             function fetchSuggestions() {
                 const searchTerm = searchInput.value.trim();
-                
                 if (searchTerm.length < 2) {
                     suggestionsDiv.style.display = 'none';
                     return;
                 }
-
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
                     $.ajax({
@@ -2113,7 +2003,6 @@ $recent_uploads = mysqli_query($conn,"
                 }
             });
 
-            // Filter badge clicks
             filterBadges.forEach(badge => {
                 badge.addEventListener('click', function() {
                     filterBadges.forEach(b => b.classList.remove('active'));
@@ -2131,16 +2020,13 @@ $recent_uploads = mysqli_query($conn,"
                             row.style.display = 'none';
                         }
                     });
-                    
                     document.getElementById('tableResults').textContent = `Showing ${visibleCount} clients`;
                 });
             });
 
-            // Export CSV
             document.getElementById('exportCsvBtn').addEventListener('click', function() {
                 let csv = ['Docket #,Name,Offense,Court,Address,Status'];
                 let visibleRows = 0;
-
                 tableRows.forEach(row => {
                     if (row.style.display !== 'none') {
                         let rowData = [
@@ -2155,12 +2041,10 @@ $recent_uploads = mysqli_query($conn,"
                         visibleRows++;
                     }
                 });
-
                 if (visibleRows === 0) {
                     alert('No rows to export');
                     return;
                 }
-
                 const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -2172,7 +2056,6 @@ $recent_uploads = mysqli_query($conn,"
                 window.URL.revokeObjectURL(url);
             });
 
-            // Modal functionality
             window.closeModal = function() {
                 document.getElementById('clientModal').classList.remove('active');
             };
@@ -2182,7 +2065,6 @@ $recent_uploads = mysqli_query($conn,"
                     if (e.target.tagName === 'A' || e.target.closest('a')) {
                         return;
                     }
-                    
                     document.getElementById('modalDocket').textContent = 'Docket #: ' + this.cells[0].textContent;
                     document.getElementById('modalName').textContent = 'Name: ' + this.cells[1].textContent;
                     document.getElementById('modalOffense').textContent = 'Offense: ' + this.cells[2].textContent.replace(/\.\.\.$/, '');
@@ -2196,16 +2078,24 @@ $recent_uploads = mysqli_query($conn,"
             window.addEventListener('click', function(e) {
                 if (e.target.classList.contains('modal')) {
                     closeModal();
+                    closeAddClientModal();
                 }
             });
 
-            // Initialize visible count
             let initialVisible = 0;
             tableRows.forEach(row => {
                 if (row.style.display !== 'none') initialVisible++;
             });
             document.getElementById('tableResults').textContent = `Showing ${initialVisible} clients`;
         });
+
+        function openAddClientModal() {
+            document.getElementById('addClientModal').classList.add('active');
+        }
+
+        function closeAddClientModal() {
+            document.getElementById('addClientModal').classList.remove('active');
+        }
     </script>
 </body>
 </html>

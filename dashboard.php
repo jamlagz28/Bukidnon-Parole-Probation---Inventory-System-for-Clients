@@ -179,15 +179,8 @@ $recent_uploads = mysqli_query($conn,"
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f5f7fa;
-            color: #1e293b;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* Color Theme Variables */
+        /* ============ DARK MODE VARIABLES ============ */
+        /* Light mode (default) */
         :root {
             --primary-dark: #1e4a3d;
             --primary: #2e6b5e;
@@ -207,8 +200,52 @@ $recent_uploads = mysqli_query($conn,"
             --header-height: 70px;
             --border-radius: 12px;
             --box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.03);
+            --bg-body: #f5f7fa;
+            --card-bg: #ffffff;
+            --table-header-bg: #f8fafc;
+            --hover-bg: #faf9fe;
+            --sidebar-bg: #1e4a3d;
+            --sidebar-text: rgba(255,255,255,0.8);
+            --sidebar-hover: rgba(255,255,255,0.1);
+            --modal-bg: #ffffff;
         }
 
+        /* Dark mode overrides */
+        body.dark-mode {
+            --primary-dark: #2c6e5e;
+            --primary: #3d8b7a;
+            --primary-light: #2d5a4a;
+            --accent-yellow: #fbbf24;
+            --accent-yellow-light: #4a3e1a;
+            --accent-red: #f87171;
+            --accent-red-light: #4a1e1e;
+            --neutral-white: #1e293b;
+            --neutral-light: #0f172a;
+            --neutral-border: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --box-shadow: 0 4px 6px -2px rgba(0,0,0,0.3), 0 10px 15px -3px rgba(0,0,0,0.2);
+            --bg-body: #0f172a;
+            --card-bg: #1e293b;
+            --table-header-bg: #0f172a;
+            --hover-bg: #334155;
+            --sidebar-bg: #0f172a;
+            --sidebar-text: rgba(255,255,255,0.9);
+            --sidebar-hover: rgba(255,255,255,0.15);
+            --modal-bg: #1e293b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.2s ease;
+        }
+
+        /* Color Theme Variables - Override with CSS variables */
         /* App Layout */
         .app {
             display: flex;
@@ -220,13 +257,13 @@ $recent_uploads = mysqli_query($conn,"
         /* Sidebar - Dark Green Theme */
         .sidebar {
             width: var(--sidebar-width);
-            background: var(--primary-dark);
+            background: var(--sidebar-bg);
             padding: 2rem 1.5rem;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             box-shadow: 4px 0 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, background 0.3s ease;
             z-index: 100;
         }
 
@@ -292,7 +329,7 @@ $recent_uploads = mysqli_query($conn,"
             align-items: center;
             gap: 1rem;
             padding: 0.875rem 1rem;
-            color: rgba(255,255,255,0.8);
+            color: var(--sidebar-text);
             text-decoration: none;
             border-radius: 10px;
             margin-bottom: 0.25rem;
@@ -301,7 +338,7 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .nav-item:hover {
-            background: rgba(255,255,255,0.1);
+            background: var(--sidebar-hover);
             color: white;
             transform: translateX(5px);
         }
@@ -310,6 +347,11 @@ $recent_uploads = mysqli_query($conn,"
             background: white;
             color: var(--primary-dark);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode .nav-item.active {
+            background: var(--primary-dark);
+            color: white;
         }
 
         .nav-item i {
@@ -345,7 +387,7 @@ $recent_uploads = mysqli_query($conn,"
 
         /* Top Bar */
         .top-bar {
-            background: white;
+            background: var(--card-bg);
             border-radius: var(--border-radius);
             padding: 1rem 1.5rem;
             margin-bottom: 2rem;
@@ -354,6 +396,8 @@ $recent_uploads = mysqli_query($conn,"
             gap: 1rem;
             flex-wrap: wrap;
             box-shadow: var(--box-shadow);
+            border: 1px solid var(--neutral-border);
+            transition: background 0.3s ease;
         }
 
         .page-title {
@@ -366,6 +410,10 @@ $recent_uploads = mysqli_query($conn,"
             white-space: nowrap;
         }
 
+        body.dark-mode .page-title {
+            color: var(--accent-yellow);
+        }
+
         /* Search Container */
         .search-wrapper {
             flex: 1;
@@ -376,15 +424,15 @@ $recent_uploads = mysqli_query($conn,"
         .search-container {
             display: flex;
             align-items: center;
-            background: #f1f5f9;
-            border: 1px solid transparent;
+            background: var(--neutral-light);
+            border: 1px solid var(--neutral-border);
             border-radius: 10px;
             padding: 0.5rem;
             transition: all 0.3s;
         }
 
         .search-container:focus-within {
-            background: white;
+            background: var(--card-bg);
             border-color: var(--primary);
             box-shadow: 0 4px 12px rgba(46,107,94,0.15);
         }
@@ -411,7 +459,7 @@ $recent_uploads = mysqli_query($conn,"
             top: 100%;
             left: 0;
             right: 0;
-            background: white;
+            background: var(--card-bg);
             border: 1px solid var(--neutral-border);
             border-radius: 10px;
             margin-top: 5px;
@@ -425,9 +473,10 @@ $recent_uploads = mysqli_query($conn,"
         .suggestion-item {
             padding: 0.75rem 1rem;
             cursor: pointer;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--neutral-border);
             transition: background 0.2s;
             font-size: 0.9rem;
+            color: var(--text-primary);
         }
 
         .suggestion-item:last-child {
@@ -435,7 +484,7 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .suggestion-item:hover {
-            background: #f1f5f9;
+            background: var(--hover-bg);
         }
 
         /* Filter Badges - Scrollable on Mobile */
@@ -446,8 +495,8 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .filter-badge {
-            background: #f1f5f9;
-            border: none;
+            background: var(--neutral-light);
+            border: 1px solid var(--neutral-border);
             padding: 0.5rem 1rem;
             border-radius: 30px;
             font-size: 0.8rem;
@@ -466,6 +515,11 @@ $recent_uploads = mysqli_query($conn,"
         .filter-badge.active {
             background: var(--primary-dark);
             color: white;
+            border-color: var(--primary-dark);
+        }
+
+        body.dark-mode .filter-badge.active {
+            background: var(--primary);
         }
 
         /* User Menu */
@@ -501,8 +555,8 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .action-btn {
-            background: #f1f5f9;
-            border: none;
+            background: var(--neutral-light);
+            border: 1px solid var(--neutral-border);
             padding: 0.5rem 0.75rem;
             border-radius: 8px;
             color: var(--text-secondary);
@@ -530,6 +584,31 @@ $recent_uploads = mysqli_query($conn,"
             color: var(--accent-red);
         }
 
+        /* Dark Mode Toggle Button */
+        .dark-mode-toggle {
+            background: var(--neutral-light);
+            border: 1px solid var(--neutral-border);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dark-mode-toggle:hover {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        body.dark-mode .dark-mode-toggle {
+            background: var(--primary-dark);
+            color: var(--accent-yellow);
+        }
+
         /* Stats Grid - Responsive */
         .stats-grid {
             display: grid;
@@ -539,12 +618,12 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .stat-card {
-            background: white;
+            background: var(--card-bg);
             padding: 1.5rem;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             border: 1px solid var(--neutral-border);
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
             position: relative;
             overflow: hidden;
         }
@@ -586,6 +665,11 @@ $recent_uploads = mysqli_query($conn,"
         .stat-icon.revoked { background: var(--accent-yellow-light); color: #b45309; }
         .stat-icon.denied { background: var(--accent-red-light); color: var(--accent-red); }
 
+        body.dark-mode .stat-icon.active { background: #064e3b; color: #34d399; }
+        body.dark-mode .stat-icon.terminated { background: #0c4a6e; color: #38bdf8; }
+        body.dark-mode .stat-icon.revoked { background: #4a3e1a; color: #fbbf24; }
+        body.dark-mode .stat-icon.denied { background: #4a1e1e; color: #f87171; }
+
         .stat-label {
             color: var(--text-secondary);
             font-size: 0.85rem;
@@ -602,6 +686,10 @@ $recent_uploads = mysqli_query($conn,"
         .stat-value.terminated { color: #0284c7; }
         .stat-value.revoked { color: #b45309; }
         .stat-value.denied { color: var(--accent-red); }
+
+        body.dark-mode .stat-value.active { color: #34d399; }
+        body.dark-mode .stat-value.terminated { color: #38bdf8; }
+        body.dark-mode .stat-value.revoked { color: #fbbf24; }
 
         .stat-change {
             font-size: 0.8rem;
@@ -624,11 +712,12 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .chart-card {
-            background: white;
+            background: var(--card-bg);
             padding: 1.5rem;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             border: 1px solid var(--neutral-border);
+            transition: background 0.3s ease;
         }
 
         .chart-title {
@@ -639,6 +728,10 @@ $recent_uploads = mysqli_query($conn,"
             display: flex;
             align-items: center;
             gap: 0.5rem;
+        }
+
+        body.dark-mode .chart-title {
+            color: var(--accent-yellow);
         }
 
         .chart-title i {
@@ -666,6 +759,7 @@ $recent_uploads = mysqli_query($conn,"
             align-items: center;
             gap: 0.5rem;
             font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
         .legend-color {
@@ -716,13 +810,13 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .btn-secondary {
-            background: white;
+            background: var(--card-bg);
             color: var(--text-secondary);
             border: 1px solid var(--neutral-border);
         }
 
         .btn-secondary:hover {
-            background: #f8fafc;
+            background: var(--neutral-light);
             border-color: var(--primary);
             color: var(--primary-dark);
         }
@@ -739,12 +833,13 @@ $recent_uploads = mysqli_query($conn,"
 
         /* Upload Container - Responsive */
         .upload-container {
-            background: white;
+            background: var(--card-bg);
             border-radius: var(--border-radius);
             padding: 1.5rem;
             margin-bottom: 2rem;
             box-shadow: var(--box-shadow);
             border: 1px solid var(--neutral-border);
+            transition: background 0.3s ease;
         }
 
         .upload-title {
@@ -759,6 +854,10 @@ $recent_uploads = mysqli_query($conn,"
             border-bottom: 2px dashed var(--neutral-border);
         }
 
+        body.dark-mode .upload-title {
+            color: var(--accent-yellow);
+        }
+
         .upload-title i {
             color: var(--accent-yellow);
             font-size: 1.2rem;
@@ -767,8 +866,8 @@ $recent_uploads = mysqli_query($conn,"
         .upload-title .restricted-badge {
             margin-left: auto;
             font-size: 0.7rem;
-            background: #fee2e2;
-            color: #dc2626;
+            background: var(--accent-red-light);
+            color: var(--accent-red);
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
         }
@@ -777,10 +876,11 @@ $recent_uploads = mysqli_query($conn,"
             display: flex;
             gap: 1rem;
             margin-bottom: 1.5rem;
-            background: #f8fafc;
+            background: var(--neutral-light);
             padding: 1rem;
             border-radius: 10px;
             flex-wrap: wrap;
+            transition: background 0.3s ease;
         }
 
         .quick-search-input {
@@ -791,6 +891,8 @@ $recent_uploads = mysqli_query($conn,"
             border-radius: 8px;
             font-size: 0.9rem;
             transition: all 0.3s;
+            background: var(--card-bg);
+            color: var(--text-primary);
         }
 
         .quick-search-input:focus {
@@ -805,7 +907,7 @@ $recent_uploads = mysqli_query($conn,"
             padding: 0.7rem;
             border: 1px solid var(--neutral-border);
             border-radius: 8px;
-            background: white;
+            background: var(--card-bg);
             color: var(--text-primary);
             font-size: 0.9rem;
         }
@@ -842,13 +944,13 @@ $recent_uploads = mysqli_query($conn,"
             padding: 0.7rem;
             border: 1px solid var(--neutral-border);
             border-radius: 8px;
-            background: white;
+            background: var(--card-bg);
             color: var(--text-primary);
             font-size: 0.9rem;
         }
 
         .upload-select:disabled {
-            background: #f3f4f6;
+            background: var(--neutral-light);
             cursor: not-allowed;
         }
 
@@ -867,6 +969,7 @@ $recent_uploads = mysqli_query($conn,"
             border: 1px solid var(--neutral-border);
             border-radius: 8px;
             padding: 0.5rem;
+            background: var(--card-bg);
         }
         
         .select2-container--default .select2-selection--single .select2-selection__rendered {
@@ -884,10 +987,17 @@ $recent_uploads = mysqli_query($conn,"
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             font-size: 0.9rem;
+            background: var(--card-bg);
         }
         
         .select2-results__option {
             padding: 0.7rem 1rem;
+            color: var(--text-primary);
+        }
+
+        .select2-results__option--highlighted {
+            background: var(--primary-light) !important;
+            color: var(--primary-dark) !important;
         }
 
         /* Section Headers */
@@ -909,6 +1019,10 @@ $recent_uploads = mysqli_query($conn,"
             padding-left: 1rem;
         }
 
+        body.dark-mode .section-title {
+            color: var(--accent-yellow);
+        }
+
         .section-title::before {
             content: '';
             position: absolute;
@@ -923,13 +1037,14 @@ $recent_uploads = mysqli_query($conn,"
 
         /* Tables - Horizontal Scroll on Mobile */
         .table-container {
-            background: white;
+            background: var(--card-bg);
             border-radius: var(--border-radius);
             overflow-x: auto;
             margin-bottom: 2rem;
             box-shadow: var(--box-shadow);
             border: 1px solid var(--neutral-border);
             -webkit-overflow-scrolling: touch;
+            transition: background 0.3s ease;
         }
 
         table {
@@ -941,7 +1056,7 @@ $recent_uploads = mysqli_query($conn,"
         th {
             text-align: left;
             padding: 1rem;
-            background: #f8fafc;
+            background: var(--table-header-bg);
             color: var(--text-secondary);
             font-weight: 600;
             font-size: 0.8rem;
@@ -964,7 +1079,7 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         tr:hover td {
-            background: #faf9fe;
+            background: var(--hover-bg);
         }
 
         /* Status Badges */
@@ -983,6 +1098,11 @@ $recent_uploads = mysqli_query($conn,"
         .status-Terminated { background: #e0f2fe; color: #0369a1; }
         .status-Revoked { background: #fffbeb; color: #b45309; }
         .status-Denied { background: #fef2f2; color: #dc2626; }
+
+        body.dark-mode .status-Active { background: #064e3b; color: #34d399; }
+        body.dark-mode .status-Terminated { background: #0c4a6e; color: #38bdf8; }
+        body.dark-mode .status-Revoked { background: #4a3e1a; color: #fbbf24; }
+        body.dark-mode .status-Denied { background: #4a1e1e; color: #f87171; }
 
         /* Action Links */
         .action-link {
@@ -1004,6 +1124,10 @@ $recent_uploads = mysqli_query($conn,"
         .upload-link {
             color: var(--primary-dark);
             font-weight: 600;
+        }
+
+        body.dark-mode .upload-link {
+            color: var(--accent-yellow);
         }
 
         /* Upload Thumbnail */
@@ -1059,6 +1183,16 @@ $recent_uploads = mysqli_query($conn,"
             border: 1px solid #fecaca;
         }
 
+        body.dark-mode .message.success {
+            background: #064e3b;
+            color: #34d399;
+        }
+
+        body.dark-mode .message.error {
+            background: #4a1e1e;
+            color: #f87171;
+        }
+
         /* Modal */
         .modal {
             display: none;
@@ -1080,7 +1214,7 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .modal-content {
-            background: white;
+            background: var(--modal-bg);
             padding: 1.5rem;
             border-radius: var(--border-radius);
             width: 100%;
@@ -1088,6 +1222,7 @@ $recent_uploads = mysqli_query($conn,"
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
             animation: modalPop 0.3s ease;
             margin: 1rem;
+            transition: background 0.3s ease;
         }
 
         @keyframes modalPop {
@@ -1114,6 +1249,10 @@ $recent_uploads = mysqli_query($conn,"
             font-size: 1.2rem;
             font-weight: 600;
             color: var(--primary-dark);
+        }
+
+        body.dark-mode .modal-title {
+            color: var(--accent-yellow);
         }
 
         .modal-close {
@@ -1145,6 +1284,8 @@ $recent_uploads = mysqli_query($conn,"
             border-radius: 8px;
             font-family: inherit;
             font-size: 0.9rem;
+            background: var(--card-bg);
+            color: var(--text-primary);
         }
 
         .modal-form-group input:focus, .modal-form-group select:focus, .modal-form-group textarea:focus {
@@ -1160,7 +1301,7 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         ::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: var(--neutral-light);
         }
 
         ::-webkit-scrollbar-thumb {
@@ -1241,7 +1382,7 @@ $recent_uploads = mysqli_query($conn,"
         @media print {
             .sidebar, .menu-toggle, .sidebar-overlay, .action-bar, 
             .upload-container, .search-wrapper, .search-filters, 
-            .user-menu .action-btn, .logout-btn {
+            .user-menu .action-btn, .logout-btn, .dark-mode-toggle {
                 display: none !important;
             }
             .main { margin-left: 0; padding: 0.5in; }
@@ -1335,6 +1476,11 @@ $recent_uploads = mysqli_query($conn,"
                     <div class="avatar">
                         <i class="fas fa-user"></i>
                     </div>
+                    <!-- DARK MODE TOGGLE BUTTON - ADDED HERE -->
+                    <button id="darkModeToggle" class="dark-mode-toggle">
+                        <i class="fas fa-moon"></i>
+                        <span>Dark Mode</span>
+                    </button>
                     <button onclick="window.print()" class="action-btn">
                         <i class="fas fa-print"></i>
                     </button>
@@ -1609,10 +1755,10 @@ $recent_uploads = mysqli_query($conn,"
                     </form>
                 <?php else: ?>
                     <!-- Restricted message for Staff users -->
-                    <div style="text-align: center; padding: 2rem; background: #fef9e6; border-radius: 12px;">
-                        <i class="fas fa-lock" style="font-size: 2rem; color: #dc2626; margin-bottom: 0.5rem; display: block;"></i>
-                        <p style="color: #92400e;">Upload functionality is restricted to Administrators only.</p>
-                        <p style="font-size: 0.8rem; color: #b45309; margin-top: 0.5rem;">Contact your system administrator for assistance.</p>
+                    <div style="text-align: center; padding: 2rem; background: var(--accent-yellow-light); border-radius: 12px;">
+                        <i class="fas fa-lock" style="font-size: 2rem; color: var(--accent-red); margin-bottom: 0.5rem; display: block;"></i>
+                        <p style="color: var(--text-primary);">Upload functionality is restricted to Administrators only.</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Contact your system administrator for assistance.</p>
                     </div>
                 <?php endif; ?>
             </div>
@@ -1776,6 +1922,59 @@ $recent_uploads = mysqli_query($conn,"
     </div>
 
     <script>
+        // ============ DARK MODE TOGGLE FUNCTIONALITY ============
+        // Check for saved user preference
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // Get saved preference from localStorage
+        let darkMode = localStorage.getItem('darkMode');
+        
+        // Apply dark mode if saved or if system preference is dark and no saved preference
+        if (darkMode === 'enabled') {
+            document.body.classList.add('dark-mode');
+            updateDarkModeButton(true);
+        } else if (darkMode === null && prefersDarkScheme.matches) {
+            document.body.classList.add('dark-mode');
+            localStorage.setItem('darkMode', 'enabled');
+            updateDarkModeButton(true);
+        } else {
+            updateDarkModeButton(false);
+        }
+        
+        // Toggle dark mode function
+        function updateDarkModeButton(isDark) {
+            const icon = darkModeToggle.querySelector('i');
+            const span = darkModeToggle.querySelector('span');
+            if (isDark) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                span.textContent = 'Light Mode';
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                span.textContent = 'Dark Mode';
+            }
+        }
+        
+        // Toggle dark mode on button click
+        darkModeToggle.addEventListener('click', () => {
+            const isDark = document.body.classList.toggle('dark-mode');
+            
+            if (isDark) {
+                localStorage.setItem('darkMode', 'enabled');
+                updateDarkModeButton(true);
+            } else {
+                localStorage.setItem('darkMode', 'disabled');
+                updateDarkModeButton(false);
+            }
+            
+            // Force charts to redraw with new colors if needed
+            if (window.caseChart) window.caseChart.update();
+            if (window.monthChart) window.monthChart.update();
+            if (window.barangayChart) window.barangayChart.update();
+        });
+        
         // Mobile Menu Toggle
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
@@ -1821,7 +2020,7 @@ $recent_uploads = mysqli_query($conn,"
 
         // CHARTS
         document.addEventListener('DOMContentLoaded', function() {
-            new Chart(document.getElementById('caseChart'), {
+            window.caseChart = new Chart(document.getElementById('caseChart'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Active', 'Terminated', 'Revoked', 'Denied'],
@@ -1854,7 +2053,7 @@ $recent_uploads = mysqli_query($conn,"
             monthGradient.addColorStop(0, 'rgba(46, 107, 94, 0.2)');
             monthGradient.addColorStop(1, 'rgba(46, 107, 94, 0.0)');
 
-            new Chart(monthCtx, {
+            window.monthChart = new Chart(monthCtx, {
                 type: 'line',
                 data: {
                     labels: <?php echo json_encode($month_labels); ?>,
@@ -1884,7 +2083,7 @@ $recent_uploads = mysqli_query($conn,"
             });
 
             const barColors = ['#2e6b5e', '#fbbf24', '#dc2626', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'];
-            new Chart(document.getElementById('barangayChart'), {
+            window.barangayChart = new Chart(document.getElementById('barangayChart'), {
                 type: 'bar',
                 data: {
                     labels: <?php echo json_encode($barangay_labels); ?>,

@@ -1417,14 +1417,7 @@ $recent_uploads = mysqli_query($conn,"
                     <i class="fas fa-users"></i>
                     <span>Clients</span>
                 </a>
-                <a href="pi_list.php" class="nav-item">
-                    <i class="fas fa-file-lines"></i>
-                    <span>PI Cases</span>
-                </a>
-                <a href="ps_list.php" class="nav-item">
-                    <i class="fas fa-gavel"></i>
-                    <span>PS Cases</span>
-                </a>
+                <!-- PI Cases and PS Cases links removed for all users -->
                 <a href="monthly_reports.php" class="nav-item">
                     <i class="fas fa-camera"></i>
                     <span>Monthly Reports</span>
@@ -1887,6 +1880,7 @@ $recent_uploads = mysqli_query($conn,"
                     <label>Address *</label>
                     <input type="text" name="address" required placeholder="Complete address">
                 </div>
+                
                 <div class="modal-form-group">
                     <label>Status *</label>
                     <select name="status" required>
@@ -2298,3 +2292,4 @@ $recent_uploads = mysqli_query($conn,"
     </script>
 </body>
 </html>
+```

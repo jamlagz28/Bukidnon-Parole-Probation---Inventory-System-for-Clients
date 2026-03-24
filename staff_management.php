@@ -1219,14 +1219,7 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
                     <i class="fas fa-users"></i>
                     <span>Clients</span>
                 </a>
-                <a href="pi_list.php" class="nav-item">
-                    <i class="fas fa-file-lines"></i>
-                    <span>PI Cases</span>
-                </a>
-                <a href="ps_list.php" class="nav-item">
-                    <i class="fas fa-gavel"></i>
-                    <span>PS Cases</span>
-                </a>
+                <!-- PI Cases and PS Cases links removed for all users -->
                 <a href="monthly_reports.php" class="nav-item">
                     <i class="fas fa-camera"></i>
                     <span>Monthly Reports</span>

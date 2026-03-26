@@ -117,7 +117,7 @@ if(isset($_POST['add_client']) && ($user_role === 'admin' || $user_role === 'mai
     $offense = mysqli_real_escape_string($conn, $_POST['offense']);
     $court = mysqli_real_escape_string($conn, $_POST['court']);
     $address = mysqli_real_escape_string($conn, $_POST['address']);
-    $phone_number = mysqli_real_escape_string($conn, $_POST['phone_number'] ?? ''); // NEW: Optional phone number
+    $phone_number = mysqli_real_escape_string($conn, $_POST['phone_number'] ?? '');
     $status = mysqli_real_escape_string($conn, $_POST['status']);
     $created_at = date('Y-m-d H:i:s');
     

@@ -117,10 +117,11 @@ if(isset($_POST['add_client']) && ($user_role === 'admin' || $user_role === 'mai
     $offense = mysqli_real_escape_string($conn, $_POST['offense']);
     $court = mysqli_real_escape_string($conn, $_POST['court']);
     $address = mysqli_real_escape_string($conn, $_POST['address']);
+    $phone_number = mysqli_real_escape_string($conn, $_POST['phone_number'] ?? ''); // NEW: Optional phone number
     $status = mysqli_real_escape_string($conn, $_POST['status']);
     $created_at = date('Y-m-d H:i:s');
     
-    $insert_client = mysqli_query($conn, "INSERT INTO clients (name, docket_number, offense, court, address, status, created_at) VALUES ('$name', '$docket_number', '$offense', '$court', '$address', '$status', '$created_at')");
+    $insert_client = mysqli_query($conn, "INSERT INTO clients (name, docket_number, offense, court, address, phone_number, status, created_at) VALUES ('$name', '$docket_number', '$offense', '$court', '$address', '$phone_number', '$status', '$created_at')");
     
     if($insert_client){
         $client_success = "Client added successfully!";
@@ -172,7 +173,6 @@ $recent_uploads = mysqli_query($conn,"
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
-        /* [All existing CSS styles remain exactly the same - preserved for brevity] */
         * {
             margin: 0;
             padding: 0;
@@ -1219,10 +1219,39 @@ $recent_uploads = mysqli_query($conn,"
             border-radius: var(--border-radius);
             width: 100%;
             max-width: 500px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
             animation: modalPop 0.3s ease;
             margin: 1rem;
             transition: background 0.3s ease;
+        }
+
+        /* Ensure the form container inside modal is scrollable */
+        .modal-content > div {
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 5px;
+        }
+
+        /* Custom scrollbar for modal content */
+        .modal-content > div::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .modal-content > div::-webkit-scrollbar-track {
+            background: var(--neutral-border);
+            border-radius: 3px;
+        }
+
+        .modal-content > div::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .modal-content > div::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
         }
 
         @keyframes modalPop {
@@ -1859,41 +1888,52 @@ $recent_uploads = mysqli_query($conn,"
                 <h3 class="modal-title">Add New Client</h3>
                 <span class="modal-close" onclick="closeAddClientModal()">&times;</span>
             </div>
-            <form method="POST" action="">
-                <div class="modal-form-group">
-                    <label>Full Name *</label>
-                    <input type="text" name="name" required placeholder="Enter client's full name">
-                </div>
-                <div class="modal-form-group">
-                    <label>Docket Number *</label>
-                    <input type="text" name="docket_number" required placeholder="e.g., R-PPL-2024-001">
-                </div>
-                <div class="modal-form-group">
-                    <label>Offense *</label>
-                    <textarea name="offense" rows="2" required placeholder="Describe the offense"></textarea>
-                </div>
-                <div class="modal-form-group">
-                    <label>Court *</label>
-                    <input type="text" name="court" required placeholder="e.g., Regional Trial Court">
-                </div>
-                <div class="modal-form-group">
-                    <label>Address *</label>
-                    <input type="text" name="address" required placeholder="Complete address">
-                </div>
-                
-                <div class="modal-form-group">
-                    <label>Status *</label>
-                    <select name="status" required>
-                        <option value="Active">Active</option>
-                        <option value="Terminated">Terminated</option>
-                        <option value="Revoked">Revoked</option>
-                        <option value="Denied">Denied</option>
-                    </select>
-                </div>
-                <button type="submit" name="add_client" class="btn-primary" style="width: 100%; margin-top: 1rem;">
-                    <i class="fas fa-save"></i> Save Client
-                </button>
-            </form>
+            <div style="overflow-y: auto; flex: 1; padding-right: 5px;">
+                <form method="POST" action="">
+                    <div class="modal-form-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="name" required placeholder="Enter client's full name">
+                    </div>
+                    <div class="modal-form-group">
+                        <label>Docket Number *</label>
+                        <input type="text" name="docket_number" required placeholder="e.g., R-PPL-2024-001">
+                    </div>
+                    <div class="modal-form-group">
+                        <label>Offense *</label>
+                        <textarea name="offense" rows="2" required placeholder="Describe the offense"></textarea>
+                    </div>
+                    <div class="modal-form-group">
+                        <label>Court *</label>
+                        <input type="text" name="court" required placeholder="e.g., Regional Trial Court">
+                    </div>
+                    <div class="modal-form-group">
+                        <label>Address *</label>
+                        <input type="text" name="address" required placeholder="Complete address">
+                    </div>
+                    
+                    <!-- NEW: Phone Number Field (Optional) -->
+                    <div class="modal-form-group">
+                        <label>Phone Number <span style="color: var(--text-muted); font-weight: normal;">(Optional)</span></label>
+                        <input type="tel" name="phone_number" placeholder="e.g., 09123456789 or 02-1234567">
+                        <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 0.25rem;">
+                            <i class="fas fa-info-circle"></i> Optional field - can be left blank
+                        </small>
+                    </div>
+                    
+                    <div class="modal-form-group">
+                        <label>Status *</label>
+                        <select name="status" required>
+                            <option value="Active">Active</option>
+                            <option value="Terminated">Terminated</option>
+                            <option value="Revoked">Revoked</option>
+                            <option value="Denied">Denied</option>
+                        </select>
+                    </div>
+                    <button type="submit" name="add_client" class="btn-primary" style="width: 100%; margin-top: 1rem; margin-bottom: 0.5rem;">
+                        <i class="fas fa-save"></i> Save Client
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -2292,4 +2332,3 @@ $recent_uploads = mysqli_query($conn,"
     </script>
 </body>
 </html>
-```

@@ -202,16 +202,17 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Profile - <?php echo $client['name']; ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Client Profile - <?php echo $client['name']; ?> | Bukidnon PPA</title>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
+        /* ========== RESET & GLOBAL ========== */
         * {
             margin: 0;
             padding: 0;
@@ -220,97 +221,120 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
 
         body {
             font-family: 'Inter', sans-serif;
-            background: #f0f2f5;
+            background: #f8fafc;
             color: #1e293b;
-            line-height: 1.6;
+            line-height: 1.5;
+            overflow-x: hidden;
         }
 
-        /* Print Styles */
-        @media print {
-            .sidebar, .top-bar, .action-buttons, .no-print, .modal {
-                display: none !important;
-            }
-            .main {
-                margin-left: 0 !important;
-                padding: 20px !important;
-            }
-            .client-profile {
-                border: none !important;
-                box-shadow: none !important;
-            }
+        /* ========== COLOR VARIABLES ========== */
+        :root {
+            --dark-green: #1e4a3d;
+            --dark-green-light: #2c6e5e;
+            --yellow: #fbbf24;
+            --yellow-dark: #f59e0b;
+            --red: #dc2626;
+            --red-light: #fee2e2;
+            --gray-50: #f9fafb;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --transition: all 0.2s ease;
         }
 
-        .app {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Sidebar */
+        /* ========== SIDEBAR ========== */
         .sidebar {
-            width: 260px;
-            background: white;
-            border-right: 1px solid #e2e8f0;
-            padding: 2rem 1.5rem;
+            width: 280px;
+            background: linear-gradient(180deg, var(--dark-green) 0%, #0f2c23 100%);
+            color: white;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
+            padding: 2rem 1.5rem;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            z-index: 100;
+            transition: transform 0.3s ease;
         }
 
         .logo {
-            font-weight: 600;
-            font-size: 1.25rem;
-            color: #0f172a;
-            margin-bottom: 2rem;
-            letter-spacing: -0.01em;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .logo i {
+            color: var(--yellow);
+            font-size: 1.8rem;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
             padding: 0.75rem 1rem;
-            color: #64748b;
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
-            border-radius: 8px;
-            margin-bottom: 0.25rem;
-            transition: all 0.2s;
-        }
-
-        .nav-item:hover {
-            background: #f1f5f9;
-            color: #0f172a;
-        }
-
-        .nav-item.active {
-            background: #f1f5f9;
-            color: #0f172a;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            transition: var(--transition);
             font-weight: 500;
         }
 
-        /* Main Content */
-        .main {
-            flex: 1;
-            margin-left: 260px;
-            padding: 2rem;
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
         }
 
-        /* Top Bar */
+        .nav-item.active {
+            background: var(--yellow);
+            color: var(--dark-green);
+        }
+
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        /* ========== TOP BAR ========== */
         .top-bar {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1rem 1.5rem;
+            background: var(--white);
+            border-radius: 20px;
+            padding: 1rem 2rem;
             margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            backdrop-filter: blur(4px);
         }
 
         .page-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #0f172a;
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--dark-green), var(--dark-green-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
         .user-menu {
@@ -320,140 +344,145 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
         }
 
         .user-name {
-            color: #475569;
-            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--gray-600);
         }
 
         .avatar {
-            width: 38px;
-            height: 38px;
-            background: #f1f5f9;
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--dark-green), var(--dark-green-light));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #475569;
-            border: 1px solid #e2e8f0;
+            color: white;
+            box-shadow: var(--shadow-sm);
         }
 
         .logout-btn {
-            color: #94a3b8;
-            transition: color 0.2s;
+            color: var(--gray-400);
+            transition: var(--transition);
         }
+        .logout-btn:hover { color: var(--red); }
 
-        .logout-btn:hover {
-            color: #ef4444;
-        }
-
-        /* Back Link */
+        /* ========== BACK LINK ========== */
         .back-link {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: #64748b;
+            color: var(--gray-600);
             text-decoration: none;
             margin-bottom: 1.5rem;
-            font-size: 0.95rem;
+            font-weight: 500;
+            transition: var(--transition);
         }
+        .back-link:hover { color: var(--dark-green); transform: translateX(-3px); }
 
-        .back-link:hover {
-            color: #0f172a;
-        }
-
-        /* Messages */
+        /* ========== MESSAGES ========== */
         .message {
             padding: 1rem 1.5rem;
-            border-radius: 8px;
+            border-radius: 16px;
             margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
         }
         .message.success {
-            background: #ecfdf3;
+            background: #ecfdf5;
             color: #065f46;
-            border: 1px solid #a7f3d0;
+            border-left: 4px solid #10b981;
         }
         .message.error {
-            background: #fef2f2;
+            background: var(--red-light);
             color: #991b1b;
-            border: 1px solid #fecaca;
+            border-left: 4px solid var(--red);
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Client Profile Card */
+        /* ========== CLIENT PROFILE CARD ========== */
         .client-profile {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
+            background: var(--white);
+            border-radius: 24px;
             overflow: hidden;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
         }
+        .client-profile:hover { box-shadow: var(--shadow-lg); }
 
         .profile-header {
-            background: <?php 
-                if($client['status'] == 'Pending') echo 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
-                elseif($client['status'] == 'Active') echo 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-                elseif($client['status'] == 'Terminated') echo 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
-                elseif($client['status'] == 'Revoked') echo 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
-                elseif($client['status'] == 'Denied') echo 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
-                else echo 'linear-gradient(135deg, #64748b 0%, #475569 100%)';
-            ?>;
-            padding: 2rem;
-            color: white;
+            background: linear-gradient(135deg, 
+                <?php 
+                if($client['status'] == 'Pending') echo '#f59e0b, #d97706';
+                elseif($client['status'] == 'Active') echo '#10b981, #059669';
+                elseif($client['status'] == 'Terminated') echo '#3b82f6, #2563eb';
+                elseif($client['status'] == 'Revoked') echo '#f59e0b, #d97706';
+                elseif($client['status'] == 'Denied') echo '#ef4444, #dc2626';
+                else echo '#64748b, #475569';
+                ?>);
+            padding: 2rem 2rem;
             position: relative;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            color: white;
         }
 
         .profile-header::after {
             content: '';
             position: absolute;
-            bottom: -20px;
+            bottom: -15px;
             left: 0;
             right: 0;
-            height: 20px;
-            background: linear-gradient(to bottom, rgba(15,23,42,0.1), transparent);
+            height: 30px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.05), transparent);
         }
 
         .profile-name {
             font-size: 2rem;
-            font-weight: 600;
+            font-weight: 800;
             margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
         }
 
         .profile-docket {
             font-size: 1rem;
-            opacity: 0.9;
             display: flex;
-            align-items: center;
             gap: 1rem;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .status-badge {
             display: inline-block;
-            padding: 0.35rem 1rem;
+            padding: 0.25rem 1rem;
             border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 500;
+            font-size: 0.8rem;
+            font-weight: 600;
             background: rgba(255,255,255,0.2);
-            color: white;
+            backdrop-filter: blur(4px);
         }
 
         .edit-profile-btn {
             background: rgba(255,255,255,0.2);
-            color: white;
             border: 1px solid rgba(255,255,255,0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+            padding: 0.6rem 1.2rem;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 0.9rem;
+            transition: var(--transition);
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.2s;
+            font-weight: 500;
         }
         .edit-profile-btn:hover {
             background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
         }
 
         .profile-body {
@@ -463,56 +492,118 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
         .info-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
+            gap: 1.5rem;
         }
 
         .info-section {
-            background: #f8fafc;
-            border-radius: 12px;
+            background: var(--gray-50);
+            border-radius: 20px;
             padding: 1.5rem;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+        }
+        .info-section:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
         }
 
         .section-title {
             font-size: 1rem;
-            font-weight: 600;
-            color: #0f172a;
+            font-weight: 700;
+            color: var(--dark-green);
             margin-bottom: 1.25rem;
             padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e2e8f0;
+            border-bottom: 2px solid var(--yellow);
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-
-        .section-title i {
-            color: #64748b;
-        }
+        .section-title i { color: var(--yellow-dark); }
 
         .info-row {
             display: flex;
             margin-bottom: 1rem;
             padding: 0.5rem;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #f1f5f9;
+            background: var(--white);
+            border-radius: 12px;
+            align-items: center;
         }
 
         .info-label {
-            width: 100px;
-            font-size: 0.85rem;
-            color: #64748b;
-            font-weight: 500;
+            width: 110px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .info-value {
             flex: 1;
-            font-size: 0.95rem;
-            color: #0f172a;
             font-weight: 500;
+            color: var(--gray-800);
         }
 
-        /* Cards Section */
+        /* ========== QUICK ADD PS FORM ========== */
+        .quick-add-ps {
+            background: linear-gradient(135deg, #fef9e3, #fff7e0);
+            border: 2px dashed var(--yellow);
+            border-radius: 24px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+        .quick-add-ps h3 {
+            color: var(--dark-green);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .quick-add-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .quick-add-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .quick-add-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 0.25rem;
+        }
+        .quick-add-group input {
+            padding: 0.7rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            transition: var(--transition);
+        }
+        .quick-add-group input:focus {
+            outline: none;
+            border-color: var(--yellow);
+            box-shadow: 0 0 0 3px rgba(251,191,36,0.2);
+        }
+        .quick-add-btn {
+            background: var(--dark-green);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1rem;
+        }
+        .quick-add-btn:hover {
+            background: var(--dark-green-light);
+            transform: translateY(-2px);
+        }
+
+        /* ========== CARDS SECTIONS (PI/PS/Reports) ========== */
         .cards-section {
             margin-top: 2rem;
         }
@@ -521,173 +612,102 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
-
         .section-header h2 {
             font-size: 1.25rem;
-            font-weight: 600;
-            color: #0f172a;
+            font-weight: 700;
+            color: var(--dark-green);
         }
-
-        .section-header h2 i {
-            margin-right: 0.5rem;
-            color: #64748b;
-        }
-
         .view-all {
-            color: #3b82f6;
+            color: var(--dark-green-light);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
         }
+        .view-all:hover { color: var(--yellow-dark); }
 
-        /* Table */
         .table-container {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            background: var(--white);
+            border-radius: 20px;
+            overflow-x: auto;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 600px;
         }
 
         th {
             text-align: left;
             padding: 1rem 1.5rem;
-            background: #f8fafc;
-            color: #475569;
+            background: var(--gray-50);
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 1px solid #e2e8f0;
+            letter-spacing: 0.5px;
+            color: var(--gray-600);
+            border-bottom: 1px solid var(--gray-200);
         }
 
         td {
             padding: 1rem 1.5rem;
-            color: #1e293b;
-            font-size: 0.95rem;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--gray-100);
+            font-size: 0.9rem;
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--gray-50); }
 
-        tr:hover td {
-            background: #f8fafc;
-        }
-
-        /* Status Badge Colors - Match Client Profile */
+        /* Status badges */
         .status-badge {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 500;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
-
-        .status-Pending {
-            background: #fffbeb;
-            color: #d97706;
-            border: 1px solid #fde68a;
-        }
-
-        .status-Active {
-            background: #ecfdf3;
-            color: #059669;
-            border: 1px solid #a7f3d0;
-        }
-
-        .status-Terminated {
-            background: #e0f2fe;
-            color: #0284c7;
-            border: 1px solid #bae6fd;
-        }
-
-        .status-Revoked {
-            background: #fffbeb;
-            color: #d97706;
-            border: 1px solid #fde68a;
-        }
-
-        .status-Denied {
-            background: #fef2f2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
-        }
-
-        .status-Approved {
-            background: #ecfdf3;
-            color: #059669;
-            border: 1px solid #a7f3d0;
-        }
+        .status-Pending, .status-For Review { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .status-Active, .status-Approved { background: #ecfdf3; color: #059669; border: 1px solid #a7f3d0; }
+        .status-Terminated { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
+        .status-Revoked { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .status-Denied { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
 
         .action-link {
-            color: #64748b;
+            color: var(--gray-600);
             text-decoration: none;
             margin-right: 0.75rem;
-            font-size: 0.9rem;
-            transition: color 0.2s;
+            font-size: 0.85rem;
+            transition: var(--transition);
         }
-
-        .action-link:hover {
-            color: #0f172a;
-        }
-
-        .edit-link {
-            color: #3b82f6;
-            cursor: pointer;
-        }
-        .edit-link:hover {
-            color: #2563eb;
-        }
-
-        .view-only-badge {
-            background: #e2e8f0;
-            color: #475569;
-            padding: 0.25rem 0.75rem;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
+        .action-link:hover { color: var(--dark-green); }
+        .edit-link { color: var(--yellow-dark); cursor: pointer; }
+        .edit-link:hover { color: var(--dark-green); }
 
         .photo-thumb {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             object-fit: cover;
             cursor: pointer;
-            border: 1px solid #e2e8f0;
             transition: transform 0.2s;
+            border: 2px solid var(--gray-200);
         }
-
-        .photo-thumb:hover {
-            transform: scale(1.1);
-        }
+        .photo-thumb:hover { transform: scale(1.1); }
 
         .no-data {
             text-align: center;
             padding: 3rem;
-            color: #64748b;
-            background: #f8fafc;
-            border-radius: 8px;
+            color: var(--gray-500);
+            background: var(--gray-50);
+            border-radius: 20px;
         }
+        .no-data i { font-size: 2rem; margin-bottom: 0.5rem; color: var(--gray-400); }
 
-        .no-data i {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: #94a3b8;
-        }
-
-        /* Modal */
+        /* ========== MODAL ========== */
         .modal {
             display: none;
             position: fixed;
@@ -699,18 +719,23 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            backdrop-filter: blur(4px);
         }
-        .modal.active {
-            display: flex;
-        }
+        .modal.active { display: flex; }
         .modal-content {
-            background: white;
+            background: var(--white);
             padding: 2rem;
-            border-radius: 12px;
+            border-radius: 28px;
             width: 90%;
             max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: modalPop 0.2s ease;
+        }
+        @keyframes modalPop {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
         .modal-header {
             display: flex;
@@ -720,16 +745,16 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
         }
         .modal-header h2 {
             font-size: 1.3rem;
-            color: #0f172a;
+            font-weight: 700;
+            color: var(--dark-green);
         }
         .modal-close {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             cursor: pointer;
-            color: #64748b;
+            color: var(--gray-400);
+            transition: var(--transition);
         }
-        .modal-close:hover {
-            color: #ef4444;
-        }
+        .modal-close:hover { color: var(--red); }
         .modal-form {
             display: flex;
             flex-direction: column;
@@ -745,178 +770,109 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             flex-direction: column;
         }
         .modal-form-group label {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: #475569;
+            font-weight: 600;
+            color: var(--gray-700);
             margin-bottom: 0.25rem;
         }
-        .modal-form-group input,
-        .modal-form-group select,
-        .modal-form-group textarea {
+        .modal-form-group input, .modal-form-group select, .modal-form-group textarea {
             padding: 0.7rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-family: 'Inter', sans-serif;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            transition: var(--transition);
         }
-        .modal-form-group textarea {
-            resize: vertical;
-            min-height: 60px;
+        .modal-form-group input:focus, .modal-form-group select:focus, .modal-form-group textarea:focus {
+            outline: none;
+            border-color: var(--yellow);
+            box-shadow: 0 0 0 3px rgba(251,191,36,0.2);
         }
         .modal-btn {
-            background: #0f172a;
+            background: var(--dark-green);
             color: white;
             border: none;
             padding: 0.75rem;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 500;
+            border-radius: 40px;
+            font-weight: 600;
             cursor: pointer;
             margin-top: 1rem;
+            transition: var(--transition);
         }
-        .modal-btn:hover {
-            background: #1e293b;
-        }
+        .modal-btn:hover { background: var(--dark-green-light); }
 
-        /* Quick Add PS Form */
-        .quick-add-ps {
-            background: white;
-            border: 2px dashed #10b981;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .quick-add-ps h3 {
-            color: #10b981;
-            margin-bottom: 1rem;
-        }
-        .quick-add-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-        .quick-add-group {
-            display: flex;
-            flex-direction: column;
-        }
-        .quick-add-group label {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #475569;
-            margin-bottom: 0.25rem;
-        }
-        .quick-add-group input {
-            padding: 0.6rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-        }
-        .quick-add-btn {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            margin-top: 1rem;
-        }
-        .quick-add-btn:hover {
-            background: #059669;
-        }
-
-        /* Action Buttons */
+        /* ========== ACTION BUTTONS ========== */
         .action-buttons {
             display: flex;
             gap: 1rem;
             margin-top: 2rem;
             padding-top: 2rem;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid var(--gray-200);
+            flex-wrap: wrap;
         }
-
         .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 500;
+            padding: 0.7rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 600;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.2s;
-            border: none;
+            transition: var(--transition);
             cursor: pointer;
-        }
-
-        .btn-primary {
-            background: #0f172a;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #1e293b;
-        }
-
-        .btn-secondary {
-            background: white;
-            color: #475569;
-            border: 1px solid #e2e8f0;
-        }
-
-        .btn-secondary:hover {
-            background: #f8fafc;
-            border-color: #94a3b8;
-        }
-
-        .btn-disabled {
-            background: #f1f5f9;
-            color: #94a3b8;
-            cursor: not-allowed;
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        /* Print Button */
-        .print-btn {
-            background: #64748b;
-            color: white;
             border: none;
         }
-
+        .btn-primary {
+            background: var(--dark-green);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--dark-green-light);
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: var(--white);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-200);
+        }
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--dark-green);
+        }
+        .print-btn {
+            background: var(--gray-600);
+            color: white;
+        }
         .print-btn:hover {
-            background: #475569;
+            background: var(--gray-700);
         }
 
-        /* Responsive */
+        /* ========== RESPONSIVE ========== */
         @media (max-width: 1024px) {
-            .info-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .info-grid { grid-template-columns: repeat(2, 1fr); }
         }
-
         @media (max-width: 768px) {
-            .sidebar {
-                display: none;
+            .sidebar { transform: translateX(-100%); width: 260px; }
+            .sidebar.active { transform: translateX(0); }
+            .main { margin-left: 0; padding: 1rem; }
+            .info-grid { grid-template-columns: 1fr; }
+            .modal-form-row { grid-template-columns: 1fr; }
+            .top-bar { flex-direction: column; gap: 1rem; text-align: center; }
+            .profile-header { flex-direction: column; gap: 1rem; }
+        }
+        @media print {
+            .sidebar, .top-bar, .action-buttons, .no-print, .modal, .quick-add-ps, .back-link {
+                display: none !important;
             }
-            .main {
-                margin-left: 0;
-            }
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-            .quick-add-grid {
-                grid-template-columns: 1fr;
-            }
-            .modal-form-row {
-                grid-template-columns: 1fr;
-            }
+            .main { margin-left: 0; padding: 0; }
+            .client-profile { box-shadow: none; border: 1px solid #ddd; }
         }
     </style>
 </head>
 <body>
     <div class="app">
         <!-- Sidebar -->
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <div class="logo">
-                <i class="fas fa-scale-balanced"></i> PPA System
+                <i class="fas fa-scale-balanced"></i>
+                <span>Bukidnon PPA</span>
             </div>
             <a href="dashboard.php" class="nav-item">Dashboard</a>
             <a href="clients.php" class="nav-item">Clients</a>
@@ -932,19 +888,19 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             <div class="top-bar">
                 <h1 class="page-title">Client Profile</h1>
                 <div class="user-menu">
-                    <span><?php echo htmlspecialchars($fullname); ?></span>
+                    <span class="user-name"><?php echo htmlspecialchars($fullname); ?></span>
                     <div class="avatar"><i class="fas fa-user"></i></div>
                     <button onclick="window.print()" class="btn print-btn"><i class="fas fa-print"></i> Print</button>
-                    <a href="logout.php"><i class="fas fa-sign-out-alt"></i></a>
+                    <a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt fa-lg"></i></a>
                 </div>
             </div>
 
             <!-- Back Link -->
-            <a href="javascript:history.back()" class="back-link"><i class="fas fa-arrow-left"></i> Back</a>
+            <a href="javascript:history.back()" class="back-link"><i class="fas fa-arrow-left"></i> Back to previous page</a>
 
             <!-- Messages -->
-            <?php if(isset($success)): ?><div class="message success"><?php echo $success; ?></div><?php endif; ?>
-            <?php if(isset($error)): ?><div class="message error"><?php echo $error; ?></div><?php endif; ?>
+            <?php if(isset($success)): ?><div class="message success"><i class="fas fa-check-circle"></i> <?php echo $success; ?></div><?php endif; ?>
+            <?php if(isset($error)): ?><div class="message error"><i class="fas fa-exclamation-triangle"></i> <?php echo $error; ?></div><?php endif; ?>
 
             <!-- Client Profile Card -->
             <div class="client-profile">
@@ -952,7 +908,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                     <div>
                         <div class="profile-name"><?php echo htmlspecialchars($client['name']); ?></div>
                         <div class="profile-docket">
-                            <span>Docket #: <?php echo $client['docket_number']; ?></span>
+                            <span><i class="fas fa-hashtag"></i> <?php echo $client['docket_number']; ?></span>
                             <span class="status-badge"><?php echo $client['status']; ?></span>
                         </div>
                     </div>
@@ -969,7 +925,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                         <div class="info-section">
                             <div class="section-title"><i class="fas fa-user-circle"></i> Personal Information</div>
                             <div class="info-row"><span class="info-label">CC Number:</span><span class="info-value"><?php echo $client['cc_number'] ?: 'N/A'; ?></span></div>
-                            <div class="info-row"><span class="info-label">Phone Number:</span><span class="info-value"><?php echo $client['phone_number'] ?: 'N/A'; ?></span></div>
+                            <div class="info-row"><span class="info-label">Phone:</span><span class="info-value"><?php echo $client['phone_number'] ?: 'N/A'; ?></span></div>
                             <div class="info-row"><span class="info-label">Address:</span><span class="info-value"><?php echo $client['address']; ?></span></div>
                             <div class="info-row"><span class="info-label">Court:</span><span class="info-value"><?php echo $client['court']; ?></span></div>
                         </div>
@@ -997,7 +953,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             <!-- Quick Add PS Form for Pending Clients -->
             <?php if($client['status'] == 'Pending' && $can_edit): ?>
             <div class="quick-add-ps">
-                <h3><i class="fas fa-plus-circle"></i> Add PS Case to Activate Client</h3>
+                <h3><i class="fas fa-plus-circle"></i> Activate Client – Add PS Case</h3>
                 <form method="POST">
                     <div class="quick-add-grid">
                         <div class="quick-add-group"><label>Docket #</label><input type="text" name="docket_number" placeholder="PS-<?php echo date('Y'); ?>-001" required></div>
@@ -1008,7 +964,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                         <div class="quick-add-group"><label>Payment</label><input type="number" name="payment" value="0.00" step="0.01"></div>
                         <div class="quick-add-group"><label>Monthly Fee</label><input type="number" name="monthly_fee" value="500.00" step="0.01"></div>
                     </div>
-                    <button type="submit" name="add_ps_quick" class="quick-add-btn">Add PS Case & Activate</button>
+                    <button type="submit" name="add_ps_quick" class="quick-add-btn"><i class="fas fa-check-circle"></i> Add PS Case & Activate</button>
                 </form>
             </div>
             <?php endif; ?>
@@ -1018,7 +974,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                 <div class="section-header">
                     <h2><i class="fas fa-file-lines" style="color:#f59e0b;"></i> Pre-Investigation Cases</h2>
                     <?php if($can_edit && $client['status'] == 'Pending'): ?>
-                        <a href="pi_add.php?client_id=<?php echo $client_id; ?>" class="view-all"><i class="fas fa-plus"></i> Add PI</a>
+                        <a href="pi_add.php?client_id=<?php echo $client_id; ?>" class="view-all"><i class="fas fa-plus-circle"></i> Add PI</a>
                     <?php endif; ?>
                 </div>
 
@@ -1026,33 +982,33 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                     <div class="table-container">
                          <table>
                             <thead>
-                                <tr>
+                                 <tr>
                                     <th>Docket #</th>
                                     <th>Offense</th>
                                     <th>Investigator</th>
                                     <th>Date Filed</th>
                                     <th>Status</th>
                                     <th>Actions</th>
-                                </tr>
+                                 </tr>
                             </thead>
                             <tbody>
                                 <?php while($pi = mysqli_fetch_assoc($pi_cases)): ?>
-                                <tr>
+                                 <tr>
                                     <td><?php echo $pi['docket_number']; ?></td>
                                     <td><?php echo $pi['offense']; ?></td>
                                     <td><?php echo $pi['investigator']; ?></td>
                                     <td><?php echo date('M d, Y', strtotime($pi['date_filed'])); ?></td>
                                     <td><span class="status-badge status-<?php echo $pi['status']; ?>"><?php echo $pi['status']; ?></span></td>
                                     <td>
-                                        <a href="pi_view.php?id=<?php echo $pi['id']; ?>" class="action-link">View</a>
+                                        <a href="pi_view.php?id=<?php echo $pi['id']; ?>" class="action-link"><i class="fas fa-eye"></i> View</a>
                                         <?php if($can_edit): ?>
-                                        <span class="action-link edit-link" onclick='openEditPIModal(<?php echo json_encode($pi); ?>)'>Edit</span>
+                                        <span class="action-link edit-link" onclick='openEditPIModal(<?php echo json_encode($pi); ?>)'><i class="fas fa-edit"></i> Edit</span>
                                         <?php endif; ?>
                                     </td>
-                                </tr>
+                                 </tr>
                                 <?php endwhile; ?>
                             </tbody>
-                        </table>
+                         </table>
                     </div>
                 <?php else: ?>
                     <div class="no-data"><i class="fas fa-folder-open"></i><p>No PI cases found</p></div>
@@ -1065,40 +1021,40 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                 <div class="section-header">
                     <h2><i class="fas fa-gavel" style="color:#10b981;"></i> Probation Supervision Cases</h2>
                     <?php if($can_edit): ?>
-                        <a href="ps_add.php?client_id=<?php echo $client_id; ?>" class="view-all"><i class="fas fa-plus"></i> Add PS</a>
+                        <a href="ps_add.php?client_id=<?php echo $client_id; ?>" class="view-all"><i class="fas fa-plus-circle"></i> Add PS</a>
                     <?php endif; ?>
                 </div>
 
                 <div class="table-container">
-                    <table>
+                     <table>
                         <thead>
-                            <tr>
+                             <tr>
                                 <th>Docket #</th>
                                 <th>Offense</th>
                                 <th>Payment</th>
                                 <th>Period</th>
                                 <th>Status</th>
                                 <th>Actions</th>
-                            </tr>
+                             </tr>
                         </thead>
                         <tbody>
                             <?php while($ps = mysqli_fetch_assoc($ps_cases)): ?>
-                            <tr>
+                             <tr>
                                 <td><?php echo $ps['docket_number']; ?></td>
                                 <td><?php echo $ps['offense']; ?></td>
                                 <td>₱<?php echo number_format($ps['payment'], 2); ?></td>
-                                <td><?php echo date('M d, Y', strtotime($ps['start_date'])); ?> - <?php echo date('M d, Y', strtotime($ps['end_date'])); ?></td>
+                                <td><?php echo date('M d, Y', strtotime($ps['start_date'])); ?> – <?php echo date('M d, Y', strtotime($ps['end_date'])); ?></td>
                                 <td><span class="status-badge status-<?php echo $ps['status']; ?>"><?php echo $ps['status']; ?></span></td>
                                 <td>
-                                    <a href="ps_view.php?id=<?php echo $ps['id']; ?>" class="action-link">View</a>
+                                    <a href="ps_view.php?id=<?php echo $ps['id']; ?>" class="action-link"><i class="fas fa-eye"></i> View</a>
                                     <?php if($can_edit): ?>
-                                    <span class="action-link edit-link" onclick='openEditPSModal(<?php echo json_encode($ps); ?>)'>Edit</span>
+                                    <span class="action-link edit-link" onclick='openEditPSModal(<?php echo json_encode($ps); ?>)'><i class="fas fa-edit"></i> Edit</span>
                                     <?php endif; ?>
                                 </td>
-                            </tr>
+                             </tr>
                             <?php endwhile; ?>
                         </tbody>
-                    </table>
+                     </table>
                 </div>
             </div>
             <?php endif; ?>
@@ -1112,24 +1068,24 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
 
                 <?php if(mysqli_num_rows($reports) > 0): ?>
                     <div class="table-container">
-                        <table>
+                         <table>
                             <thead>
-                                <tr>
+                                 <tr>
                                     <th>Period</th>
                                     <th>Photo</th>
                                     <th>Upload Date</th>
-                                </tr>
+                                 </tr>
                             </thead>
                             <tbody>
                                 <?php while($report = mysqli_fetch_assoc($reports)): ?>
-                                <tr>
+                                 <tr>
                                     <td><?php echo date("F Y", mktime(0,0,0,$report['report_month'],1,$report['report_year'])); ?></td>
                                     <td><img src="uploads/<?php echo $report['photo']; ?>" class="photo-thumb" onclick="window.open('uploads/<?php echo $report['photo']; ?>')"></td>
                                     <td><?php echo date("M d, Y", strtotime($report['upload_date'])); ?></td>
-                                </tr>
+                                 </tr>
                                 <?php endwhile; ?>
                             </tbody>
-                        </table>
+                         </table>
                     </div>
                 <?php else: ?>
                     <div class="no-data"><i class="fas fa-camera"></i><p>No reports found</p></div>
@@ -1138,11 +1094,11 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <a href="dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="dashboard.php" class="btn btn-secondary"><i class="fas fa-chart-line"></i> Back to Dashboard</a>
                 <?php if($can_edit): ?>
-                    <button onclick="openModal('editClientModal')" class="btn btn-primary">Edit Client</button>
+                    <button onclick="openModal('editClientModal')" class="btn btn-primary"><i class="fas fa-edit"></i> Edit Client</button>
                 <?php endif; ?>
-                <button onclick="window.print()" class="btn print-btn">Print</button>
+                <button onclick="window.print()" class="btn print-btn"><i class="fas fa-print"></i> Print Profile</button>
             </div>
         </div>
     </div>
@@ -1151,7 +1107,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
     <div class="modal" id="editClientModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Edit Client</h2>
+                <h2><i class="fas fa-user-edit"></i> Edit Client</h2>
                 <span class="modal-close" onclick="closeModal('editClientModal')">&times;</span>
             </div>
             <form method="POST" class="modal-form">
@@ -1187,13 +1143,11 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                     <label>Offense</label>
                     <textarea name="offense" required><?php echo $client['offense']; ?></textarea>
                 </div>
-                <div class="modal-form-row">
-                    <div class="modal-form-group">
-                        <label>Sentence</label>
-                        <input type="text" name="sentence" value="<?php echo $client['sentence']; ?>" required>
-                    </div>
+                <div class="modal-form-group">
+                    <label>Sentence</label>
+                    <input type="text" name="sentence" value="<?php echo $client['sentence']; ?>" required>
                 </div>
-                <button type="submit" name="edit_client" class="modal-btn">Update Client</button>
+                <button type="submit" name="edit_client" class="modal-btn"><i class="fas fa-save"></i> Update Client</button>
             </form>
         </div>
     </div>
@@ -1202,7 +1156,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
     <div class="modal" id="editPIModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Edit PI Case</h2>
+                <h2><i class="fas fa-file-lines"></i> Edit PI Case</h2>
                 <span class="modal-close" onclick="closeModal('editPIModal')">&times;</span>
             </div>
             <form method="POST" class="modal-form" id="editPIForm">
@@ -1224,16 +1178,16 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                     </div>
                     <div class="modal-form-group"><label>Remarks</label><input type="text" name="remarks" id="edit_pi_remarks"></div>
                 </div>
-                <button type="submit" name="edit_pi" class="modal-btn">Update PI Case</button>
+                <button type="submit" name="edit_pi" class="modal-btn"><i class="fas fa-save"></i> Update PI Case</button>
             </form>
         </div>
     </div>
 
-    <!-- Edit PS Modal - Status Options: Active, Terminated, Revoked, Denied -->
+    <!-- Edit PS Modal -->
     <div class="modal" id="editPSModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Edit PS Case</h2>
+                <h2><i class="fas fa-gavel"></i> Edit PS Case</h2>
                 <span class="modal-close" onclick="closeModal('editPSModal')">&times;</span>
             </div>
             <form method="POST" class="modal-form" id="editPSForm">
@@ -1259,13 +1213,13 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                         </select>
                     </div>
                 </div>
-                <button type="submit" name="edit_ps" class="modal-btn">Update PS Case</button>
+                <button type="submit" name="edit_ps" class="modal-btn"><i class="fas fa-save"></i> Update PS Case</button>
             </form>
         </div>
     </div>
 
     <script>
-        // Modal functions
+        // Modal functions (unchanged)
         function openModal(modalId) {
             document.getElementById(modalId).classList.add('active');
         }
@@ -1274,7 +1228,6 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             document.getElementById(modalId).classList.remove('active');
         }
         
-        // Open Edit PI Modal with data
         function openEditPIModal(pi) {
             document.getElementById('edit_pi_id').value = pi.id;
             document.getElementById('edit_pi_docket').value = pi.docket_number;
@@ -1286,7 +1239,6 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             openModal('editPIModal');
         }
         
-        // Open Edit PS Modal with data
         function openEditPSModal(ps) {
             document.getElementById('edit_ps_id').value = ps.id;
             document.getElementById('edit_ps_docket').value = ps.docket_number;
@@ -1300,14 +1252,12 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             openModal('editPSModal');
         }
         
-        // Close modals when clicking outside
         window.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal')) {
                 e.target.classList.remove('active');
             }
         });
         
-        // Close with ESC key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 document.querySelectorAll('.modal.active').forEach(modal => {
@@ -1315,6 +1265,9 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                 });
             }
         });
+
+        // Optional: Mobile sidebar toggle (if needed)
+        // No additional changes to backend logic.
     </script>
 </body>
 </html>

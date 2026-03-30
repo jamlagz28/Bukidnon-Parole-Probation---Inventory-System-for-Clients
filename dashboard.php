@@ -19,12 +19,17 @@ $user_data = mysqli_fetch_assoc($user_query);
 $user_id = $user_data['id'] ?? 0;
 
 /* ------------------------------
-   CASE STATUS COUNTS
+   CASE STATUS COUNTS (from clients)
 --------------------------------*/
-$active = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Active'"))['total'];
-$terminated = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Terminated'"))['total'];
-$revoked = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Revoked'"))['total'];
-$denied = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Denied'"))['total'];
+$client_active = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Active'"))['total'] ?? 0;
+$terminated = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Terminated'"))['total'] ?? 0;
+$revoked = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Revoked'"))['total'] ?? 0;
+$denied = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE status='Denied'"))['total'] ?? 0;
+
+/* ------------------------------
+   ACTIVE SUPERVISION CASES (from probation_supervision)
+--------------------------------*/
+$ps_active = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) total FROM probation_supervision WHERE status='Active'"))['total'] ?? 0;
 
 /* ------------------------------
    CLIENT LIST - ALL STATUSES
@@ -47,7 +52,7 @@ for($m=1;$m<=12;$m++){
     $month_labels[] = $monthName;
     $query = mysqli_query($conn,"SELECT COUNT(*) total FROM clients WHERE MONTH(created_at)='$m'");
     $row = mysqli_fetch_assoc($query);
-    $month_data[] = $row['total'];
+    $month_data[] = $row['total'] ?? 0;
 }
 
 /* ------------------------------
@@ -109,7 +114,7 @@ if(isset($_POST['upload_photo'])){
 }
 
 /* ------------------------------
-   HANDLE ADD NEW CLIENT - ONLY ADMIN CAN ADD
+   HANDLE ADD NEW CLIENT - Creates PENDING PI Case Automatically
 --------------------------------*/
 if(isset($_POST['add_client']) && ($user_role === 'admin' || $user_role === 'main')){
     $name = mysqli_real_escape_string($conn, $_POST['name']);
@@ -118,13 +123,38 @@ if(isset($_POST['add_client']) && ($user_role === 'admin' || $user_role === 'mai
     $court = mysqli_real_escape_string($conn, $_POST['court']);
     $address = mysqli_real_escape_string($conn, $_POST['address']);
     $phone_number = mysqli_real_escape_string($conn, $_POST['phone_number'] ?? '');
-    $status = mysqli_real_escape_string($conn, $_POST['status']);
-    $created_at = date('Y-m-d H:i:s');
+    $investigator = mysqli_real_escape_string($conn, $_POST['investigator'] ?? '');
+    $date_filed = date('Y-m-d');
     
-    $insert_client = mysqli_query($conn, "INSERT INTO clients (name, docket_number, offense, court, address, phone_number, status, created_at) VALUES ('$name', '$docket_number', '$offense', '$court', '$address', '$phone_number', '$status', '$created_at')");
+    // Start transaction
+    mysqli_begin_transaction($conn);
     
-    if($insert_client){
-        $client_success = "Client added successfully!";
+    try {
+        // 1. Insert into clients table - status = 'Pending' (not Active)
+        $insert_client = mysqli_query($conn, "INSERT INTO clients (name, docket_number, offense, court, address, phone_number, status, created_at) VALUES ('$name', '$docket_number', '$offense', '$court', '$address', '$phone_number', 'Pending', NOW())");
+        
+        if(!$insert_client) {
+            throw new Exception("Error adding client: " . mysqli_error($conn));
+        }
+        
+        $client_id = mysqli_insert_id($conn);
+        
+        // 2. Create PI case with status 'Pending' (automatically)
+        $pi_docket = "PI-" . $docket_number;
+        $pi_query = "INSERT INTO pre_investigation (client_id, docket_number, name, offense, court, address, investigator, date_filed, status) VALUES ('$client_id', '$pi_docket', '$name', '$offense', '$court', '$address', '$investigator', '$date_filed', 'Pending')";
+        
+        if(!mysqli_query($conn, $pi_query)) {
+            throw new Exception("Error creating PI case: " . mysqli_error($conn));
+        }
+        
+        $pi_id = mysqli_insert_id($conn);
+        
+        // 3. Update client with PI case ID
+        mysqli_query($conn, "UPDATE clients SET pi_case_id = '$pi_id' WHERE id = '$client_id'");
+        
+        mysqli_commit($conn);
+        $client_success = "Client added successfully! PI case created as PENDING.";
+        
         // Refresh client list
         $all_clients = mysqli_query($conn,"SELECT * FROM clients ORDER BY 
             CASE status 
@@ -133,8 +163,10 @@ if(isset($_POST['add_client']) && ($user_role === 'admin' || $user_role === 'mai
                 WHEN 'Revoked' THEN 3 
                 ELSE 4 
             END, name ASC");
-    } else {
-        $client_error = "Error adding client: " . mysqli_error($conn);
+            
+    } catch (Exception $e) {
+        mysqli_rollback($conn);
+        $client_error = $e->getMessage();
     }
 }
 
@@ -179,8 +211,6 @@ $recent_uploads = mysqli_query($conn,"
             box-sizing: border-box;
         }
 
-        /* ============ DARK MODE VARIABLES ============ */
-        /* Light mode (default) */
         :root {
             --primary-dark: #1e4a3d;
             --primary: #2e6b5e;
@@ -210,7 +240,6 @@ $recent_uploads = mysqli_query($conn,"
             --modal-bg: #ffffff;
         }
 
-        /* Dark mode overrides */
         body.dark-mode {
             --primary-dark: #2c6e5e;
             --primary: #3d8b7a;
@@ -245,8 +274,6 @@ $recent_uploads = mysqli_query($conn,"
             transition: background 0.3s ease, color 0.2s ease;
         }
 
-        /* Color Theme Variables - Override with CSS variables */
-        /* App Layout */
         .app {
             display: flex;
             min-height: 100vh;
@@ -254,7 +281,6 @@ $recent_uploads = mysqli_query($conn,"
             width: 100%;
         }
 
-        /* Sidebar - Dark Green Theme */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--sidebar-bg);
@@ -267,7 +293,6 @@ $recent_uploads = mysqli_query($conn,"
             z-index: 100;
         }
 
-        /* Mobile Menu Toggle */
         .menu-toggle {
             display: none;
             position: fixed;
@@ -291,7 +316,6 @@ $recent_uploads = mysqli_query($conn,"
             color: white;
         }
 
-        /* Sidebar Overlay for Mobile */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -360,7 +384,6 @@ $recent_uploads = mysqli_query($conn,"
             text-align: center;
         }
 
-        /* Role Badge in Sidebar */
         .role-badge {
             margin-top: 2rem;
             padding: 0.75rem 1rem;
@@ -376,7 +399,6 @@ $recent_uploads = mysqli_query($conn,"
             color: var(--accent-yellow);
         }
 
-        /* Main Content */
         .main {
             flex: 1;
             margin-left: var(--sidebar-width);
@@ -385,7 +407,6 @@ $recent_uploads = mysqli_query($conn,"
             transition: margin-left 0.3s ease;
         }
 
-        /* Top Bar */
         .top-bar {
             background: var(--card-bg);
             border-radius: var(--border-radius);
@@ -414,7 +435,6 @@ $recent_uploads = mysqli_query($conn,"
             color: var(--accent-yellow);
         }
 
-        /* Search Container */
         .search-wrapper {
             flex: 1;
             min-width: 200px;
@@ -453,7 +473,6 @@ $recent_uploads = mysqli_query($conn,"
             width: 100%;
         }
 
-        /* Live Search Suggestions */
         .search-suggestions {
             position: absolute;
             top: 100%;
@@ -487,7 +506,6 @@ $recent_uploads = mysqli_query($conn,"
             background: var(--hover-bg);
         }
 
-        /* Filter Badges - Scrollable on Mobile */
         .search-filters {
             display: flex;
             gap: 0.5rem;
@@ -522,7 +540,6 @@ $recent_uploads = mysqli_query($conn,"
             background: var(--primary);
         }
 
-        /* User Menu */
         .user-menu {
             display: flex;
             align-items: center;
@@ -584,7 +601,6 @@ $recent_uploads = mysqli_query($conn,"
             color: var(--accent-red);
         }
 
-        /* Dark Mode Toggle Button */
         .dark-mode-toggle {
             background: var(--neutral-light);
             border: 1px solid var(--neutral-border);
@@ -609,7 +625,6 @@ $recent_uploads = mysqli_query($conn,"
             color: var(--accent-yellow);
         }
 
-        /* Stats Grid - Responsive */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -703,7 +718,6 @@ $recent_uploads = mysqli_query($conn,"
         .trend-up { color: #10b981; }
         .trend-down { color: var(--accent-red); }
 
-        /* Charts Grid - Responsive */
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -744,7 +758,6 @@ $recent_uploads = mysqli_query($conn,"
             position: relative;
         }
 
-        /* Legend - Responsive */
         .legend {
             display: flex;
             flex-wrap: wrap;
@@ -768,7 +781,6 @@ $recent_uploads = mysqli_query($conn,"
             border-radius: 3px;
         }
 
-        /* Action Buttons - Responsive */
         .action-bar {
             display: flex;
             gap: 0.75rem;
@@ -831,7 +843,6 @@ $recent_uploads = mysqli_query($conn,"
             transform: translateY(-2px);
         }
 
-        /* Upload Container - Responsive */
         .upload-container {
             background: var(--card-bg);
             border-radius: var(--border-radius);
@@ -912,7 +923,6 @@ $recent_uploads = mysqli_query($conn,"
             font-size: 0.9rem;
         }
 
-        /* Upload Grid - Fully Responsive */
         .upload-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -963,7 +973,6 @@ $recent_uploads = mysqli_query($conn,"
             text-overflow: ellipsis;
         }
 
-        /* Select2 Customization - Mobile Friendly */
         .select2-container--default .select2-selection--single {
             height: 42px;
             border: 1px solid var(--neutral-border);
@@ -1000,7 +1009,6 @@ $recent_uploads = mysqli_query($conn,"
             color: var(--primary-dark) !important;
         }
 
-        /* Section Headers */
         .section-header {
             display: flex;
             flex-direction: row;
@@ -1035,7 +1043,6 @@ $recent_uploads = mysqli_query($conn,"
             border-radius: 2px;
         }
 
-        /* Tables - Horizontal Scroll on Mobile */
         .table-container {
             background: var(--card-bg);
             border-radius: var(--border-radius);
@@ -1082,7 +1089,6 @@ $recent_uploads = mysqli_query($conn,"
             background: var(--hover-bg);
         }
 
-        /* Status Badges */
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -1098,13 +1104,14 @@ $recent_uploads = mysqli_query($conn,"
         .status-Terminated { background: #e0f2fe; color: #0369a1; }
         .status-Revoked { background: #fffbeb; color: #b45309; }
         .status-Denied { background: #fef2f2; color: #dc2626; }
+        .status-Pending { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
 
         body.dark-mode .status-Active { background: #064e3b; color: #34d399; }
         body.dark-mode .status-Terminated { background: #0c4a6e; color: #38bdf8; }
         body.dark-mode .status-Revoked { background: #4a3e1a; color: #fbbf24; }
         body.dark-mode .status-Denied { background: #4a1e1e; color: #f87171; }
+        body.dark-mode .status-Pending { background: #4a3e1a; color: #fbbf24; }
 
-        /* Action Links */
         .action-link {
             color: var(--text-muted);
             text-decoration: none;
@@ -1130,7 +1137,6 @@ $recent_uploads = mysqli_query($conn,"
             color: var(--accent-yellow);
         }
 
-        /* Upload Thumbnail */
         .upload-thumb {
             width: 35px;
             height: 35px;
@@ -1148,7 +1154,6 @@ $recent_uploads = mysqli_query($conn,"
             position: relative;
         }
 
-        /* Messages */
         .message {
             padding: 0.75rem 1rem;
             border-radius: 8px;
@@ -1161,14 +1166,8 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         @keyframes slideIn {
-            from {
-                transform: translateY(-10px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         .message.success {
@@ -1193,7 +1192,6 @@ $recent_uploads = mysqli_query($conn,"
             color: #f87171;
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -1228,14 +1226,12 @@ $recent_uploads = mysqli_query($conn,"
             transition: background 0.3s ease;
         }
 
-        /* Ensure the form container inside modal is scrollable */
         .modal-content > div {
             overflow-y: auto;
             flex: 1;
             padding-right: 5px;
         }
 
-        /* Custom scrollbar for modal content */
         .modal-content > div::-webkit-scrollbar {
             width: 5px;
         }
@@ -1255,14 +1251,8 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         @keyframes modalPop {
-            from {
-                transform: scale(0.95);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .modal-header {
@@ -1323,7 +1313,6 @@ $recent_uploads = mysqli_query($conn,"
             box-shadow: 0 0 0 3px rgba(46,107,94,0.1);
         }
 
-        /* Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -1341,8 +1330,6 @@ $recent_uploads = mysqli_query($conn,"
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
-
-        /* ============ RESPONSIVE BREAKPOINTS ============ */
 
         @media (min-width: 1200px) {
             .stats-grid { grid-template-columns: repeat(4, 1fr); }
@@ -1446,7 +1433,6 @@ $recent_uploads = mysqli_query($conn,"
                     <i class="fas fa-users"></i>
                     <span>Clients</span>
                 </a>
-                <!-- PI Cases and PS Cases links removed for all users -->
                 <a href="monthly_reports.php" class="nav-item">
                     <i class="fas fa-camera"></i>
                     <span>Monthly Reports</span>
@@ -1498,7 +1484,7 @@ $recent_uploads = mysqli_query($conn,"
                     <div class="avatar">
                         <i class="fas fa-user"></i>
                     </div>
-                    <!-- DARK MODE TOGGLE BUTTON - ADDED HERE -->
+                    <!-- DARK MODE TOGGLE BUTTON -->
                     <button id="darkModeToggle" class="dark-mode-toggle">
                         <i class="fas fa-moon"></i>
                         <span>Dark Mode</span>
@@ -1553,8 +1539,8 @@ $recent_uploads = mysqli_query($conn,"
                         </div>
                         <i class="fas fa-ellipsis-h" style="color: var(--text-muted);"></i>
                     </div>
-                    <div class="stat-label">Active Cases</div>
-                    <div class="stat-value active"><?php echo $active; ?></div>
+                    <div class="stat-label">Active Supervision Cases</div>
+                    <div class="stat-value active"><?php echo $ps_active; ?></div>
                     <div class="stat-change">
                         <i class="fas fa-arrow-up trend-up"></i>
                         <span>+12%</span>
@@ -1620,7 +1606,7 @@ $recent_uploads = mysqli_query($conn,"
                     <div class="legend">
                         <div class="legend-item">
                             <span class="legend-color" style="background:#10b981;"></span>
-                            <span>Active (<?php echo $active; ?>)</span>
+                            <span>Active (<?php echo $client_active; ?>)</span>
                         </div>
                         <div class="legend-item">
                             <span class="legend-color" style="background:#3b82f6;"></span>
@@ -1663,7 +1649,7 @@ $recent_uploads = mysqli_query($conn,"
                 <?php if($user_role == 'admin' || $user_role == 'main'): ?>
                     <button onclick="openAddClientModal()" class="btn-primary">
                         <i class="fas fa-plus-circle"></i>
-                        Add New Client
+                        Add New Client (Creates Pending PI)
                     </button>
                 <?php else: ?>
                     <button class="btn-primary disabled" disabled style="opacity:0.6; cursor:not-allowed;">
@@ -1869,7 +1855,7 @@ $recent_uploads = mysqli_query($conn,"
                                         <i class="fas fa-camera"></i>
                                     </a>
                                 <?php endif; ?>
-                                <a href="view_client.php?id=<?php echo $row['id']; ?>" class="action-link" title="View">
+                                <a href="client_details.php?id=<?php echo $row['id']; ?>" class="action-link" title="View">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </td>
@@ -1911,7 +1897,6 @@ $recent_uploads = mysqli_query($conn,"
                         <input type="text" name="address" required placeholder="Complete address">
                     </div>
                     
-                    <!-- NEW: Phone Number Field (Optional) -->
                     <div class="modal-form-group">
                         <label>Phone Number <span style="color: var(--text-muted); font-weight: normal;">(Optional)</span></label>
                         <input type="tel" name="phone_number" placeholder="e.g., 09123456789 or 02-1234567">
@@ -1921,17 +1906,19 @@ $recent_uploads = mysqli_query($conn,"
                     </div>
                     
                     <div class="modal-form-group">
-                        <label>Status *</label>
-                        <select name="status" required>
-                            <option value="Active">Active</option>
-                            <option value="Terminated">Terminated</option>
-                            <option value="Revoked">Revoked</option>
-                            <option value="Denied">Denied</option>
-                        </select>
+                        <label>Investigator *</label>
+                        <input type="text" name="investigator" required placeholder="Name of investigating officer">
+                        <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 0.25rem;">
+                            <i class="fas fa-info-circle"></i> The assigned investigator for this PI case
+                        </small>
                     </div>
+                    
                     <button type="submit" name="add_client" class="btn-primary" style="width: 100%; margin-top: 1rem; margin-bottom: 0.5rem;">
-                        <i class="fas fa-save"></i> Save Client
+                        <i class="fas fa-save"></i> Save Client (Creates Pending PI)
                     </button>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem;">
+                        <i class="fas fa-info-circle"></i> This will automatically create a PENDING PI case for this client.
+                    </p>
                 </form>
             </div>
         </div>
@@ -1957,14 +1944,11 @@ $recent_uploads = mysqli_query($conn,"
 
     <script>
         // ============ DARK MODE TOGGLE FUNCTIONALITY ============
-        // Check for saved user preference
         const darkModeToggle = document.getElementById('darkModeToggle');
         const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
         
-        // Get saved preference from localStorage
         let darkMode = localStorage.getItem('darkMode');
         
-        // Apply dark mode if saved or if system preference is dark and no saved preference
         if (darkMode === 'enabled') {
             document.body.classList.add('dark-mode');
             updateDarkModeButton(true);
@@ -1976,7 +1960,6 @@ $recent_uploads = mysqli_query($conn,"
             updateDarkModeButton(false);
         }
         
-        // Toggle dark mode function
         function updateDarkModeButton(isDark) {
             const icon = darkModeToggle.querySelector('i');
             const span = darkModeToggle.querySelector('span');
@@ -1991,10 +1974,8 @@ $recent_uploads = mysqli_query($conn,"
             }
         }
         
-        // Toggle dark mode on button click
         darkModeToggle.addEventListener('click', () => {
             const isDark = document.body.classList.toggle('dark-mode');
-            
             if (isDark) {
                 localStorage.setItem('darkMode', 'enabled');
                 updateDarkModeButton(true);
@@ -2002,8 +1983,6 @@ $recent_uploads = mysqli_query($conn,"
                 localStorage.setItem('darkMode', 'disabled');
                 updateDarkModeButton(false);
             }
-            
-            // Force charts to redraw with new colors if needed
             if (window.caseChart) window.caseChart.update();
             if (window.monthChart) window.monthChart.update();
             if (window.barangayChart) window.barangayChart.update();
@@ -2019,7 +1998,6 @@ $recent_uploads = mysqli_query($conn,"
                 menuToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('active');
                     overlay.classList.toggle('active');
-                    
                     const icon = menuToggle.querySelector('i');
                     if (sidebar.classList.contains('active')) {
                         icon.classList.remove('fa-bars');
@@ -2059,7 +2037,7 @@ $recent_uploads = mysqli_query($conn,"
                 data: {
                     labels: ['Active', 'Terminated', 'Revoked', 'Denied'],
                     datasets: [{
-                        data: [<?php echo $active;?>, <?php echo $terminated;?>, <?php echo $revoked;?>, <?php echo $denied;?>],
+                        data: [<?php echo $client_active;?>, <?php echo $terminated;?>, <?php echo $revoked;?>, <?php echo $denied;?>],
                         backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
                         borderWidth: 0,
                         hoverOffset: 8

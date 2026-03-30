@@ -171,6 +171,7 @@ if(isset($_POST['edit_client']) && $can_edit) {
     $offense = mysqli_real_escape_string($conn, $_POST['offense']);
     $sentence = mysqli_real_escape_string($conn, $_POST['sentence']);
     $address = mysqli_real_escape_string($conn, $_POST['address']);
+    $phone_number = mysqli_real_escape_string($conn, $_POST['phone_number'] ?? '');
     
     $update_query = "UPDATE clients SET 
         docket_number = '$docket_number',
@@ -179,7 +180,8 @@ if(isset($_POST['edit_client']) && $can_edit) {
         court = '$court',
         offense = '$offense',
         sentence = '$sentence',
-        address = '$address'
+        address = '$address',
+        phone_number = '$phone_number'
         WHERE id = '$client_id'";
     
     if(mysqli_query($conn, $update_query)) {
@@ -918,9 +920,10 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
             </div>
             <a href="dashboard.php" class="nav-item">Dashboard</a>
             <a href="clients.php" class="nav-item">Clients</a>
-            <a href="pi_list.php" class="nav-item">PI Cases</a>
-            <a href="ps_list.php" class="nav-item">PS Cases</a>
             <a href="monthly_reports.php" class="nav-item">Monthly Reports</a>
+            <?php if($user_role == 'admin' || $user_role == 'main'): ?>
+            <a href="staff_management.php" class="nav-item">Staff</a>
+            <?php endif; ?>
         </div>
 
         <!-- Main Content -->
@@ -966,6 +969,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                         <div class="info-section">
                             <div class="section-title"><i class="fas fa-user-circle"></i> Personal Information</div>
                             <div class="info-row"><span class="info-label">CC Number:</span><span class="info-value"><?php echo $client['cc_number'] ?: 'N/A'; ?></span></div>
+                            <div class="info-row"><span class="info-label">Phone Number:</span><span class="info-value"><?php echo $client['phone_number'] ?: 'N/A'; ?></span></div>
                             <div class="info-row"><span class="info-label">Address:</span><span class="info-value"><?php echo $client['address']; ?></span></div>
                             <div class="info-row"><span class="info-label">Court:</span><span class="info-value"><?php echo $client['court']; ?></span></div>
                         </div>
@@ -1020,7 +1024,7 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
 
                 <?php if(mysqli_num_rows($pi_cases) > 0): ?>
                     <div class="table-container">
-                        <table>
+                         <table>
                             <thead>
                                 <tr>
                                     <th>Docket #</th>
@@ -1151,16 +1155,43 @@ $next_year = date('Y-m-d', strtotime('+1 year'));
                 <span class="modal-close" onclick="closeModal('editClientModal')">&times;</span>
             </div>
             <form method="POST" class="modal-form">
-                <div class="modal-form-group"><label>Docket Number</label><input type="text" name="docket_number" value="<?php echo $client['docket_number']; ?>" required></div>
-                <div class="modal-form-group"><label>Full Name</label><input type="text" name="name" value="<?php echo $client['name']; ?>" required></div>
-                <div class="modal-form-row">
-                    <div class="modal-form-group"><label>CC Number</label><input type="text" name="cc_number" value="<?php echo $client['cc_number']; ?>"></div>
-                    <div class="modal-form-group"><label>Court</label><input type="text" name="court" value="<?php echo $client['court']; ?>" required></div>
+                <div class="modal-form-group">
+                    <label>Docket Number</label>
+                    <input type="text" name="docket_number" value="<?php echo $client['docket_number']; ?>" required>
                 </div>
-                <div class="modal-form-group"><label>Offense</label><textarea name="offense" required><?php echo $client['offense']; ?></textarea></div>
+                <div class="modal-form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" value="<?php echo $client['name']; ?>" required>
+                </div>
                 <div class="modal-form-row">
-                    <div class="modal-form-group"><label>Sentence</label><input type="text" name="sentence" value="<?php echo $client['sentence']; ?>" required></div>
-                    <div class="modal-form-group"><label>Address</label><input type="text" name="address" value="<?php echo $client['address']; ?>" required></div>
+                    <div class="modal-form-group">
+                        <label>CC Number</label>
+                        <input type="text" name="cc_number" value="<?php echo $client['cc_number']; ?>">
+                    </div>
+                    <div class="modal-form-group">
+                        <label>Phone Number</label>
+                        <input type="text" name="phone_number" value="<?php echo $client['phone_number']; ?>" placeholder="e.g., 09123456789">
+                    </div>
+                </div>
+                <div class="modal-form-row">
+                    <div class="modal-form-group">
+                        <label>Court</label>
+                        <input type="text" name="court" value="<?php echo $client['court']; ?>" required>
+                    </div>
+                    <div class="modal-form-group">
+                        <label>Address</label>
+                        <input type="text" name="address" value="<?php echo $client['address']; ?>" required>
+                    </div>
+                </div>
+                <div class="modal-form-group">
+                    <label>Offense</label>
+                    <textarea name="offense" required><?php echo $client['offense']; ?></textarea>
+                </div>
+                <div class="modal-form-row">
+                    <div class="modal-form-group">
+                        <label>Sentence</label>
+                        <input type="text" name="sentence" value="<?php echo $client['sentence']; ?>" required>
+                    </div>
                 </div>
                 <button type="submit" name="edit_client" class="modal-btn">Update Client</button>
             </form>

@@ -186,10 +186,10 @@ $recent_uploads = mysqli_query($conn,"
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>Parole & Probation System | Dashboard</title>
+    <title>Bukidnon PPA | Parole & Probation System Dashboard</title>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -228,21 +228,21 @@ $recent_uploads = mysqli_query($conn,"
             --sidebar-width: 280px;
             --sidebar-width-mobile: 240px;
             --header-height: 70px;
-            --border-radius: 12px;
-            --box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.03);
-            --bg-body: #f5f7fa;
+            --border-radius: 16px;
+            --box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --bg-body: #f1f5f9;
             --card-bg: #ffffff;
             --table-header-bg: #f8fafc;
             --hover-bg: #faf9fe;
-            --sidebar-bg: #1e4a3d;
-            --sidebar-text: rgba(255,255,255,0.8);
-            --sidebar-hover: rgba(255,255,255,0.1);
+            --sidebar-bg: linear-gradient(165deg, #1e4a3d 0%, #0f3b30 100%);
+            --sidebar-text: rgba(255,255,255,0.85);
+            --sidebar-hover: rgba(255,255,255,0.12);
             --modal-bg: #ffffff;
         }
 
         body.dark-mode {
-            --primary-dark: #2c6e5e;
-            --primary: #3d8b7a;
+            --primary-dark: #3d8b7a;
+            --primary: #4c9e8a;
             --primary-light: #2d5a4a;
             --accent-yellow: #fbbf24;
             --accent-yellow-light: #4a3e1a;
@@ -254,12 +254,12 @@ $recent_uploads = mysqli_query($conn,"
             --text-primary: #f1f5f9;
             --text-secondary: #cbd5e1;
             --text-muted: #94a3b8;
-            --box-shadow: 0 4px 6px -2px rgba(0,0,0,0.3), 0 10px 15px -3px rgba(0,0,0,0.2);
-            --bg-body: #0f172a;
+            --box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+            --bg-body: #0a0f1c;
             --card-bg: #1e293b;
             --table-header-bg: #0f172a;
-            --hover-bg: #334155;
-            --sidebar-bg: #0f172a;
+            --hover-bg: #2d3a4e;
+            --sidebar-bg: linear-gradient(165deg, #0f172a 0%, #0a0f1c 100%);
             --sidebar-text: rgba(255,255,255,0.9);
             --sidebar-hover: rgba(255,255,255,0.15);
             --modal-bg: #1e293b;
@@ -269,7 +269,7 @@ $recent_uploads = mysqli_query($conn,"
             font-family: 'Inter', sans-serif;
             background: var(--bg-body);
             color: var(--text-primary);
-            line-height: 1.6;
+            line-height: 1.5;
             overflow-x: hidden;
             transition: background 0.3s ease, color 0.2s ease;
         }
@@ -301,9 +301,9 @@ $recent_uploads = mysqli_query($conn,"
             z-index: 101;
             background: var(--primary-dark);
             color: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 10px;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -333,7 +333,7 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .logo {
-            font-weight: 700;
+            font-weight: 800;
             font-size: 1.5rem;
             color: white;
             margin-bottom: 2.5rem;
@@ -355,7 +355,7 @@ $recent_uploads = mysqli_query($conn,"
             padding: 0.875rem 1rem;
             color: var(--sidebar-text);
             text-decoration: none;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-bottom: 0.25rem;
             transition: all 0.3s ease;
             font-weight: 500;
@@ -388,7 +388,7 @@ $recent_uploads = mysqli_query($conn,"
             margin-top: 2rem;
             padding: 0.75rem 1rem;
             background: rgba(255,255,255,0.1);
-            border-radius: 10px;
+            border-radius: 40px;
             color: white;
             font-size: 0.8rem;
             text-align: center;
@@ -422,9 +422,12 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .page-title {
-            font-size: clamp(1.2rem, 4vw, 1.5rem);
-            font-weight: 600;
-            color: var(--primary-dark);
+            font-size: clamp(1.2rem, 4vw, 1.6rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
             position: relative;
             padding-left: 1rem;
             border-left: 4px solid var(--accent-yellow);
@@ -432,7 +435,9 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         body.dark-mode .page-title {
-            color: var(--accent-yellow);
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            background-clip: text;
+            -webkit-background-clip: text;
         }
 
         .search-wrapper {
@@ -446,15 +451,15 @@ $recent_uploads = mysqli_query($conn,"
             align-items: center;
             background: var(--neutral-light);
             border: 1px solid var(--neutral-border);
-            border-radius: 10px;
-            padding: 0.5rem;
+            border-radius: 60px;
+            padding: 0.5rem 1rem;
             transition: all 0.3s;
         }
 
         .search-container:focus-within {
             background: var(--card-bg);
             border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(46,107,94,0.15);
+            box-shadow: 0 0 0 3px rgba(46,107,94,0.15);
         }
 
         .search-icon {
@@ -480,7 +485,7 @@ $recent_uploads = mysqli_query($conn,"
             right: 0;
             background: var(--card-bg);
             border: 1px solid var(--neutral-border);
-            border-radius: 10px;
+            border-radius: 12px;
             margin-top: 5px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             z-index: 1000;
@@ -516,9 +521,9 @@ $recent_uploads = mysqli_query($conn,"
             background: var(--neutral-light);
             border: 1px solid var(--neutral-border);
             padding: 0.5rem 1rem;
-            border-radius: 30px;
+            border-radius: 40px;
             font-size: 0.8rem;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s;
@@ -560,10 +565,10 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .avatar {
-            width: 38px;
-            height: 38px;
+            width: 42px;
+            height: 42px;
             background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            border-radius: 8px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -574,8 +579,8 @@ $recent_uploads = mysqli_query($conn,"
         .action-btn {
             background: var(--neutral-light);
             border: 1px solid var(--neutral-border);
-            padding: 0.5rem 0.75rem;
-            border-radius: 8px;
+            padding: 0.5rem 0.9rem;
+            border-radius: 10px;
             color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s;
@@ -604,8 +609,8 @@ $recent_uploads = mysqli_query($conn,"
         .dark-mode-toggle {
             background: var(--neutral-light);
             border: 1px solid var(--neutral-border);
-            padding: 0.5rem 0.75rem;
-            border-radius: 8px;
+            padding: 0.5rem 0.9rem;
+            border-radius: 10px;
             color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s;
@@ -666,13 +671,13 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .stat-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            font-size: 1.35rem;
         }
 
         .stat-icon.active { background: #ecfdf3; color: #059669; }
@@ -689,11 +694,13 @@ $recent_uploads = mysqli_query($conn,"
             color: var(--text-secondary);
             font-size: 0.85rem;
             font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .stat-value {
             font-size: clamp(1.5rem, 5vw, 2.25rem);
-            font-weight: 700;
+            font-weight: 800;
             line-height: 1.2;
         }
 
@@ -707,7 +714,7 @@ $recent_uploads = mysqli_query($conn,"
         body.dark-mode .stat-value.revoked { color: #fbbf24; }
 
         .stat-change {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
             margin-top: 0.5rem;
             display: flex;
@@ -735,8 +742,8 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .chart-title {
-            font-size: 0.95rem;
-            font-weight: 600;
+            font-size: 1rem;
+            font-weight: 700;
             color: var(--primary-dark);
             margin-bottom: 1rem;
             display: flex;
@@ -771,14 +778,14 @@ $recent_uploads = mysqli_query($conn,"
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-secondary);
         }
 
         .legend-color {
-            width: 10px;
-            height: 10px;
-            border-radius: 3px;
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
         }
 
         .action-bar {
@@ -789,13 +796,13 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .btn-primary, .btn-secondary, .btn-warning {
-            padding: 0.7rem 1.25rem;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 0.9rem;
+            padding: 0.7rem 1.4rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
             transition: all 0.3s;
             border: none;
             cursor: pointer;
@@ -855,7 +862,7 @@ $recent_uploads = mysqli_query($conn,"
 
         .upload-title {
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--primary-dark);
             margin-bottom: 1.5rem;
             display: flex;
@@ -889,7 +896,7 @@ $recent_uploads = mysqli_query($conn,"
             margin-bottom: 1.5rem;
             background: var(--neutral-light);
             padding: 1rem;
-            border-radius: 10px;
+            border-radius: 14px;
             flex-wrap: wrap;
             transition: background 0.3s ease;
         }
@@ -899,7 +906,7 @@ $recent_uploads = mysqli_query($conn,"
             min-width: 200px;
             padding: 0.7rem 1rem;
             border: 1px solid var(--neutral-border);
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 0.9rem;
             transition: all 0.3s;
             background: var(--card-bg);
@@ -917,7 +924,7 @@ $recent_uploads = mysqli_query($conn,"
             max-width: 200px;
             padding: 0.7rem;
             border: 1px solid var(--neutral-border);
-            border-radius: 8px;
+            border-radius: 12px;
             background: var(--card-bg);
             color: var(--text-primary);
             font-size: 0.9rem;
@@ -936,8 +943,8 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .upload-label {
-            font-size: 0.8rem;
-            font-weight: 600;
+            font-size: 0.7rem;
+            font-weight: 700;
             color: var(--text-secondary);
             margin-bottom: 0.4rem;
             text-transform: uppercase;
@@ -953,7 +960,7 @@ $recent_uploads = mysqli_query($conn,"
             width: 100%;
             padding: 0.7rem;
             border: 1px solid var(--neutral-border);
-            border-radius: 8px;
+            border-radius: 12px;
             background: var(--card-bg);
             color: var(--text-primary);
             font-size: 0.9rem;
@@ -965,7 +972,7 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .file-name {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-muted);
             margin-top: 0.25rem;
             white-space: nowrap;
@@ -976,7 +983,7 @@ $recent_uploads = mysqli_query($conn,"
         .select2-container--default .select2-selection--single {
             height: 42px;
             border: 1px solid var(--neutral-border);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 0.5rem;
             background: var(--card-bg);
         }
@@ -993,7 +1000,7 @@ $recent_uploads = mysqli_query($conn,"
         
         .select2-dropdown {
             border: 1px solid var(--neutral-border);
-            border-radius: 8px;
+            border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             font-size: 0.9rem;
             background: var(--card-bg);
@@ -1021,7 +1028,7 @@ $recent_uploads = mysqli_query($conn,"
 
         .section-title {
             font-size: clamp(1.1rem, 4vw, 1.25rem);
-            font-weight: 600;
+            font-weight: 700;
             color: var(--primary-dark);
             position: relative;
             padding-left: 1rem;
@@ -1065,8 +1072,8 @@ $recent_uploads = mysqli_query($conn,"
             padding: 1rem;
             background: var(--table-header-bg);
             color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 0.8rem;
+            font-weight: 700;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-bottom: 2px solid var(--neutral-border);
@@ -1092,10 +1099,10 @@ $recent_uploads = mysqli_query($conn,"
         .status-badge {
             display: inline-flex;
             align-items: center;
-            padding: 0.3rem 0.8rem;
-            border-radius: 30px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 700;
             letter-spacing: 0.3px;
             white-space: nowrap;
         }
@@ -1116,7 +1123,7 @@ $recent_uploads = mysqli_query($conn,"
             color: var(--text-muted);
             text-decoration: none;
             margin-right: 0.75rem;
-            font-size: 0.9rem;
+            font-size: 1rem;
             transition: all 0.2s;
             padding: 0.25rem 0.4rem;
             border-radius: 4px;
@@ -1126,6 +1133,7 @@ $recent_uploads = mysqli_query($conn,"
         .action-link:hover {
             color: var(--primary-dark);
             background: var(--primary-light);
+            transform: scale(1.05);
         }
 
         .upload-link {
@@ -1138,9 +1146,9 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .upload-thumb {
-            width: 35px;
-            height: 35px;
-            border-radius: 6px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             object-fit: cover;
             cursor: pointer;
             border: 2px solid var(--neutral-border);
@@ -1148,7 +1156,7 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .upload-thumb:hover {
-            transform: scale(2);
+            transform: scale(2.2);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 10;
             position: relative;
@@ -1156,7 +1164,7 @@ $recent_uploads = mysqli_query($conn,"
 
         .message {
             padding: 0.75rem 1rem;
-            border-radius: 8px;
+            border-radius: 60px;
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
@@ -1173,13 +1181,13 @@ $recent_uploads = mysqli_query($conn,"
         .message.success {
             background: #ecfdf3;
             color: #065f46;
-            border: 1px solid #a7f3d0;
+            border-left: 5px solid #10b981;
         }
 
         .message.error {
             background: var(--accent-red-light);
             color: #991b1b;
-            border: 1px solid #fecaca;
+            border-left: 5px solid #dc2626;
         }
 
         body.dark-mode .message.success {
@@ -1199,7 +1207,7 @@ $recent_uploads = mysqli_query($conn,"
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             align-items: center;
             justify-content: center;
             z-index: 1000;
@@ -1213,10 +1221,10 @@ $recent_uploads = mysqli_query($conn,"
 
         .modal-content {
             background: var(--modal-bg);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
+            padding: 2rem;
+            border-radius: 28px;
             width: 100%;
-            max-width: 500px;
+            max-width: 520px;
             max-height: 90vh;
             display: flex;
             flex-direction: column;
@@ -1230,24 +1238,6 @@ $recent_uploads = mysqli_query($conn,"
             overflow-y: auto;
             flex: 1;
             padding-right: 5px;
-        }
-
-        .modal-content > div::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .modal-content > div::-webkit-scrollbar-track {
-            background: var(--neutral-border);
-            border-radius: 3px;
-        }
-
-        .modal-content > div::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 3px;
-        }
-
-        .modal-content > div::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
         }
 
         @keyframes modalPop {
@@ -1265,8 +1255,8 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .modal-title {
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-size: 1.3rem;
+            font-weight: 700;
             color: var(--primary-dark);
         }
 
@@ -1277,7 +1267,7 @@ $recent_uploads = mysqli_query($conn,"
         .modal-close {
             cursor: pointer;
             color: var(--text-muted);
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             transition: color 0.2s;
         }
 
@@ -1286,21 +1276,21 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         .modal-form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
         }
 
         .modal-form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-secondary);
         }
 
         .modal-form-group input, .modal-form-group select, .modal-form-group textarea {
             width: 100%;
-            padding: 0.7rem;
+            padding: 0.8rem;
             border: 1px solid var(--neutral-border);
-            border-radius: 8px;
+            border-radius: 14px;
             font-family: inherit;
             font-size: 0.9rem;
             background: var(--card-bg);
@@ -1314,17 +1304,18 @@ $recent_uploads = mysqli_query($conn,"
         }
 
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
         }
 
         ::-webkit-scrollbar-track {
             background: var(--neutral-light);
+            border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb {
             background: var(--primary);
-            border-radius: 3px;
+            border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
@@ -1359,7 +1350,7 @@ $recent_uploads = mysqli_query($conn,"
         @media (max-width: 767px) {
             .main { padding: 0.75rem; padding-top: calc(var(--header-height) + 0.5rem); }
             .top-bar { flex-direction: column; align-items: stretch; padding: 1rem; }
-            .page-title { margin-bottom: 0.5rem; }
+            .page-title { margin-bottom: 0.5rem; white-space: normal; }
             .search-wrapper { width: 100%; }
             .search-filters { justify-content: center; }
             .user-menu { justify-content: flex-end; margin-left: 0; width: 100%; }
@@ -1379,19 +1370,19 @@ $recent_uploads = mysqli_query($conn,"
         @media (max-width: 575px) {
             .main { padding: 0.5rem; padding-top: calc(var(--header-height) + 0.5rem); }
             .top-bar { padding: 0.75rem; }
-            .filter-badge { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+            .filter-badge { padding: 0.4rem 0.75rem; font-size: 0.7rem; }
             .user-menu { gap: 0.5rem; }
-            .action-btn { padding: 0.4rem 0.6rem; font-size: 0.8rem; }
-            .avatar { width: 35px; height: 35px; }
+            .action-btn { padding: 0.4rem 0.6rem; font-size: 0.75rem; }
+            .avatar { width: 38px; height: 38px; }
             .stat-card { padding: 1rem; }
-            .stat-icon { width: 35px; height: 35px; font-size: 1rem; }
+            .stat-icon { width: 42px; height: 42px; font-size: 1.2rem; }
             .stat-value { font-size: 1.75rem; }
             .chart-container { height: 160px; }
             .upload-container { padding: 1rem; }
             .upload-title { font-size: 0.9rem; }
             .quick-search { padding: 0.75rem; }
-            .upload-label { font-size: 0.75rem; }
-            .btn-primary, .btn-secondary, .btn-warning { padding: 0.6rem 1rem; font-size: 0.85rem; }
+            .upload-label { font-size: 0.65rem; }
+            .btn-primary, .btn-secondary, .btn-warning { padding: 0.6rem 1rem; font-size: 0.8rem; }
             .section-title { font-size: 1rem; }
         }
 
@@ -1421,7 +1412,7 @@ $recent_uploads = mysqli_query($conn,"
         <div class="sidebar" id="sidebar">
             <div class="logo">
                 <i class="fas fa-scale-balanced"></i>
-                <span>PPA System</span>
+                <span>Bukidnon PPA</span>
             </div>
             
             <nav>
@@ -1763,8 +1754,8 @@ $recent_uploads = mysqli_query($conn,"
                     </form>
                 <?php else: ?>
                     <!-- Restricted message for Staff users -->
-                    <div style="text-align: center; padding: 2rem; background: var(--accent-yellow-light); border-radius: 12px;">
-                        <i class="fas fa-lock" style="font-size: 2rem; color: var(--accent-red); margin-bottom: 0.5rem; display: block;"></i>
+                    <div style="text-align: center; padding: 2rem; background: var(--accent-yellow-light); border-radius: 16px;">
+                        <i class="fas fa-lock" style="font-size: 2.5rem; color: var(--accent-red); margin-bottom: 0.5rem; display: block;"></i>
                         <p style="color: var(--text-primary);">Upload functionality is restricted to Administrators only.</p>
                         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Contact your system administrator for assistance.</p>
                     </div>
@@ -1900,7 +1891,7 @@ $recent_uploads = mysqli_query($conn,"
                     <div class="modal-form-group">
                         <label>Phone Number <span style="color: var(--text-muted); font-weight: normal;">(Optional)</span></label>
                         <input type="tel" name="phone_number" placeholder="e.g., 09123456789 or 02-1234567">
-                        <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 0.25rem;">
+                        <small style="color: var(--text-muted); font-size: 0.7rem; display: block; margin-top: 0.25rem;">
                             <i class="fas fa-info-circle"></i> Optional field - can be left blank
                         </small>
                     </div>
@@ -1908,7 +1899,7 @@ $recent_uploads = mysqli_query($conn,"
                     <div class="modal-form-group">
                         <label>Investigator *</label>
                         <input type="text" name="investigator" required placeholder="Name of investigating officer">
-                        <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 0.25rem;">
+                        <small style="color: var(--text-muted); font-size: 0.7rem; display: block; margin-top: 0.25rem;">
                             <i class="fas fa-info-circle"></i> The assigned investigator for this PI case
                         </small>
                     </div>
@@ -1916,7 +1907,7 @@ $recent_uploads = mysqli_query($conn,"
                     <button type="submit" name="add_client" class="btn-primary" style="width: 100%; margin-top: 1rem; margin-bottom: 0.5rem;">
                         <i class="fas fa-save"></i> Save Client (Creates Pending PI)
                     </button>
-                    <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem;">
+                    <p style="font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem;">
                         <i class="fas fa-info-circle"></i> This will automatically create a PENDING PI case for this client.
                     </p>
                 </form>
@@ -2044,7 +2035,7 @@ $recent_uploads = mysqli_query($conn,"
                     }]
                 },
                 options: {
-                    cutout: '70%',
+                    cutout: '65%',
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
@@ -2054,7 +2045,7 @@ $recent_uploads = mysqli_query($conn,"
                             titleColor: 'white',
                             bodyColor: '#e2e8f0',
                             padding: 10,
-                            cornerRadius: 6
+                            cornerRadius: 8
                         }
                     }
                 }
@@ -2077,8 +2068,8 @@ $recent_uploads = mysqli_query($conn,"
                         pointBackgroundColor: '#1e4a3d',
                         pointBorderColor: 'white',
                         pointBorderWidth: 2,
-                        pointRadius: 3,
-                        pointHoverRadius: 5,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
                         tension: 0.3,
                         fill: true
                     }]
@@ -2102,8 +2093,8 @@ $recent_uploads = mysqli_query($conn,"
                     datasets: [{
                         data: <?php echo json_encode($barangay_data); ?>,
                         backgroundColor: barColors.slice(0, <?php echo count($barangay_labels); ?>),
-                        borderRadius: 6,
-                        barPercentage: 0.6
+                        borderRadius: 8,
+                        barPercentage: 0.65
                     }]
                 },
                 options: {
@@ -2156,11 +2147,11 @@ $recent_uploads = mysqli_query($conn,"
 
             window.selectClientForUpload = function(id, name, docket) {
                 $('#clientSelect').val(id).trigger('change');
-                $('#selectedClientDisplay').text('Selected: ' + name).css('color', '#059669');
+                $('#selectedClientDisplay').text('✓ Selected: ' + name).css('color', '#059669');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                $('.upload-container').css('border', '2px solid #2e6b5e');
+                $('.upload-container').css('border', '2px solid #fbbf24');
                 setTimeout(function() {
-                    $('.upload-container').css('border', '1px solid #e2e8f0');
+                    $('.upload-container').css('border', '1px solid var(--neutral-border)');
                 }, 2000);
             };
 
@@ -2276,12 +2267,12 @@ $recent_uploads = mysqli_query($conn,"
                     if (e.target.tagName === 'A' || e.target.closest('a')) {
                         return;
                     }
-                    document.getElementById('modalDocket').textContent = 'Docket #: ' + this.cells[0].textContent;
-                    document.getElementById('modalName').textContent = 'Name: ' + this.cells[1].textContent;
-                    document.getElementById('modalOffense').textContent = 'Offense: ' + this.cells[2].textContent.replace(/\.\.\.$/, '');
-                    document.getElementById('modalCourt').textContent = 'Court: ' + this.cells[3].textContent;
-                    document.getElementById('modalStatus').textContent = 'Status: ' + this.cells[5].textContent.trim();
-                    document.getElementById('modalAddress').textContent = 'Address: ' + this.cells[4].textContent;
+                    document.getElementById('modalDocket').innerHTML = '<strong>Docket #:</strong> ' + this.cells[0].textContent;
+                    document.getElementById('modalName').innerHTML = '<strong>Name:</strong> ' + this.cells[1].textContent;
+                    document.getElementById('modalOffense').innerHTML = '<strong>Offense:</strong> ' + this.cells[2].textContent.replace(/\.\.\.$/, '');
+                    document.getElementById('modalCourt').innerHTML = '<strong>Court:</strong> ' + this.cells[3].textContent;
+                    document.getElementById('modalStatus').innerHTML = '<strong>Status:</strong> ' + this.cells[5].textContent.trim();
+                    document.getElementById('modalAddress').innerHTML = '<strong>Address:</strong> ' + this.cells[4].textContent;
                     document.getElementById('clientModal').classList.add('active');
                 });
             });

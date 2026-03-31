@@ -82,10 +82,10 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>Staff Management - PPA System</title>
+    <title>Bukidnon PPA | Staff Management System</title>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -97,22 +97,13 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f5f7fa;
-            color: #1e293b;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* Color Theme Variables */
         :root {
-            --primary-dark: #1e4a3d;      /* Dark Green */
-            --primary: #2e6b5e;           /* Medium Green */
-            --primary-light: #d1fae5;      /* Light Green for backgrounds */
-            --accent-yellow: #fbbf24;      /* Yellow */
+            --primary-dark: #1e4a3d;
+            --primary: #2e6b5e;
+            --primary-light: #d1fae5;
+            --accent-yellow: #fbbf24;
             --accent-yellow-light: #fef3c7;
-            --accent-red: #dc2626;         /* Red */
+            --accent-red: #dc2626;
             --accent-red-light: #fee2e2;
             --neutral-white: #ffffff;
             --neutral-light: #f8fafc;
@@ -121,11 +112,46 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             --text-secondary: #475569;
             --text-muted: #64748b;
             --sidebar-width: 280px;
-            --sidebar-width-mobile: 240px;
+            --sidebar-width-mobile: 260px;
             --header-height: 70px;
-            --border-radius: 12px;
-            --box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.03);
-            --card-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --border-radius: 20px;
+            --box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --card-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.01);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.dark-mode {
+            --primary-dark: #3d8b7a;
+            --primary: #4c9e8a;
+            --primary-light: #2d5a4a;
+            --accent-yellow: #fbbf24;
+            --accent-yellow-light: #4a3e1a;
+            --accent-red: #f87171;
+            --accent-red-light: #4a1e1e;
+            --neutral-white: #1e293b;
+            --neutral-light: #0f172a;
+            --neutral-border: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+            --bg-body: #0f172a;
+            --card-bg: #1e293b;
+            --table-header-bg: #0f172a;
+            --hover-bg: #2d3a4e;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            color: var(--text-primary);
+            line-height: 1.5;
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.2s ease;
+        }
+
+        body.dark-mode {
+            background: #0a0f1c;
         }
 
         /* App Layout */
@@ -136,7 +162,7 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             width: 100%;
         }
 
-        /* Mobile Menu Toggle */
+        /* Mobile Menu Toggle - Enhanced */
         .menu-toggle {
             display: none;
             position: fixed;
@@ -145,15 +171,21 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             z-index: 101;
             background: var(--primary-dark);
             color: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: var(--box-shadow);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             border: none;
             font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .menu-toggle:hover {
+            transform: scale(0.96);
+            background: var(--primary);
         }
 
         .menu-toggle i {
@@ -168,30 +200,41 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             z-index: 99;
-            backdrop-filter: blur(3px);
+            backdrop-filter: blur(5px);
+            transition: var(--transition);
         }
 
         .sidebar-overlay.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
-        /* Sidebar - Dark Green Theme */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Sidebar - Enhanced Dark Green Theme with Gradient */
         .sidebar {
             width: var(--sidebar-width);
-            background: var(--primary-dark);
+            background: linear-gradient(165deg, #1e4a3d 0%, #0f3b30 100%);
             padding: 2rem 1.5rem;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
-            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
+            box-shadow: 8px 0 25px -10px rgba(0,0,0,0.15);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
             z-index: 100;
         }
 
+        body.dark-mode .sidebar {
+            background: linear-gradient(165deg, #0f172a 0%, #0a0f1c 100%);
+        }
+
         .logo {
-            font-weight: 700;
+            font-weight: 800;
             font-size: 1.5rem;
             color: white;
             margin-bottom: 2.5rem;
@@ -199,40 +242,65 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 2px solid rgba(255,255,255,0.15);
         }
 
         .logo i {
             color: var(--accent-yellow);
             font-size: 1.8rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 0.875rem 1rem;
-            color: rgba(255,255,255,0.8);
+            padding: 0.9rem 1.2rem;
+            color: rgba(255,255,255,0.85);
             text-decoration: none;
-            border-radius: 10px;
-            margin-bottom: 0.25rem;
-            transition: all 0.3s ease;
+            border-radius: 14px;
+            margin-bottom: 0.5rem;
+            transition: var(--transition);
             font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: rgba(255,255,255,0.1);
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-item:hover::before {
+            width: 100%;
         }
 
         .nav-item:hover {
-            background: rgba(255,255,255,0.1);
             color: white;
-            transform: translateX(5px);
+            transform: translateX(6px);
         }
 
         .nav-item.active {
             background: white;
             color: var(--primary-dark);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode .nav-item.active {
+            background: var(--primary-dark);
+            color: white;
         }
 
         .nav-item i {
-            width: 24px;
+            width: 26px;
             font-size: 1.2rem;
             text-align: center;
         }
@@ -246,32 +314,46 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             transition: margin-left 0.3s ease;
         }
 
-        /* Top Bar */
+        /* Top Bar - Enhanced with Glassmorphism */
         .top-bar {
-            background: white;
+            background: var(--neutral-white);
             border-radius: var(--border-radius);
-            padding: 1.25rem 2rem;
+            padding: 1.2rem 2rem;
             margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: var(--box-shadow);
             border: 1px solid var(--neutral-border);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .top-bar {
+            background: var(--card-bg);
         }
 
         .page-title {
-            font-size: clamp(1.2rem, 4vw, 1.5rem);
-            font-weight: 600;
-            color: var(--primary-dark);
+            font-size: clamp(1.2rem, 4vw, 1.7rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
             position: relative;
             padding-left: 1rem;
-            border-left: 4px solid var(--accent-yellow);
+            border-left: 5px solid var(--accent-yellow);
+        }
+
+        body.dark-mode .page-title {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            background-clip: text;
+            -webkit-background-clip: text;
         }
 
         .user-menu {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.2rem;
         }
 
         .user-name {
@@ -281,69 +363,114 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
         }
 
         .role-indicator {
-            background: <?php echo $current_role == 'main' ? 'var(--primary-dark)' : ($current_role == 'admin' ? '#3b82f6' : 'var(--accent-yellow)'); ?>;
-            color: <?php echo $current_role == 'staff' ? '#b45309' : 'white'; ?>;
-            padding: 0.35rem 1rem;
-            border-radius: 30px;
+            background: <?php echo $current_role == 'main' ? 'linear-gradient(135deg, var(--primary-dark), var(--primary))' : ($current_role == 'admin' ? 'linear-gradient(135deg, #3b82f6, #2563eb)' : 'linear-gradient(135deg, var(--accent-yellow), #f59e0b)'); ?>;
+            color: white;
+            padding: 0.45rem 1.2rem;
+            border-radius: 50px;
             font-size: 0.8rem;
-            font-weight: 500;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            border: 1px solid <?php echo $current_role == 'staff' ? '#fde68a' : 'transparent'; ?>;
+            gap: 0.6rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .avatar {
-            width: 42px;
-            height: 42px;
+            width: 48px;
+            height: 48px;
             background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            border-radius: 10px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            box-shadow: 0 2px 8px rgba(46,107,94,0.25);
+            box-shadow: 0 4px 12px rgba(46,107,94,0.3);
+            transition: var(--transition);
+        }
+
+        .avatar:hover {
+            transform: scale(1.05);
         }
 
         .logout-btn {
             color: var(--text-muted);
-            transition: all 0.2s;
-            font-size: 1.2rem;
+            transition: var(--transition);
+            font-size: 1.3rem;
+            padding: 0.5rem;
+            border-radius: 10px;
         }
 
         .logout-btn:hover {
             color: var(--accent-red);
             transform: scale(1.1);
+            background: var(--accent-red-light);
+        }
+
+        /* Dark Mode Toggle Button */
+        .dark-mode-toggle {
+            background: var(--neutral-light);
+            border: 1px solid var(--neutral-border);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dark-mode-toggle:hover {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        body.dark-mode .dark-mode-toggle {
+            background: var(--primary-dark);
+            color: var(--accent-yellow);
         }
 
         /* Messages */
         .message {
             padding: 1rem 1.5rem;
-            border-radius: 10px;
+            border-radius: 16px;
             margin-bottom: 2rem;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            animation: slideIn 0.3s ease;
+            gap: 1rem;
+            animation: slideInDown 0.4s ease;
             font-size: 0.95rem;
-            border-left: 4px solid;
+            border-left: 5px solid;
+            box-shadow: var(--box-shadow);
         }
 
         .message.success {
-            background: #ecfdf3;
+            background: linear-gradient(135deg, #ecfdf3, #d1fae5);
             color: #065f46;
-            border-color: #059669;
+            border-left-color: #059669;
         }
 
         .message.error {
-            background: var(--accent-red-light);
+            background: linear-gradient(135deg, var(--accent-red-light), #fee2e2);
             color: #991b1b;
-            border-color: var(--accent-red);
+            border-left-color: var(--accent-red);
         }
 
-        @keyframes slideIn {
+        body.dark-mode .message.success {
+            background: #064e3b;
+            color: #a7f3d0;
+        }
+
+        body.dark-mode .message.error {
+            background: #4a1e1e;
+            color: #fecaca;
+        }
+
+        @keyframes slideInDown {
             from {
-                transform: translateY(-10px);
+                transform: translateY(-20px);
                 opacity: 0;
             }
             to {
@@ -354,10 +481,10 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
 
         /* Permission Notice */
         .permission-notice {
-            background: white;
+            background: var(--neutral-white);
             border: 1px solid var(--neutral-border);
             border-radius: var(--border-radius);
-            padding: 1.5rem;
+            padding: 1.8rem;
             margin-bottom: 2rem;
             display: flex;
             align-items: center;
@@ -365,6 +492,11 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             box-shadow: var(--box-shadow);
             position: relative;
             overflow: hidden;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .permission-notice {
+            background: var(--card-bg);
         }
 
         .permission-notice::before {
@@ -372,17 +504,22 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             position: absolute;
             top: 0;
             left: 0;
-            width: 4px;
+            width: 6px;
             height: 100%;
-            background: var(--accent-yellow);
+            background: linear-gradient(180deg, var(--accent-yellow), var(--primary));
         }
 
         .permission-notice i {
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: var(--accent-yellow);
             background: var(--accent-yellow-light);
             padding: 1rem;
-            border-radius: 50%;
+            border-radius: 60px;
+            box-shadow: 0 8px 20px rgba(251,191,36,0.2);
+        }
+
+        body.dark-mode .permission-notice i {
+            background: #4a3e1a;
         }
 
         .permission-notice-content {
@@ -391,8 +528,9 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
 
         .permission-notice h4 {
             color: var(--text-primary);
-            margin-bottom: 0.25rem;
-            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
         }
 
         .permission-notice p {
@@ -409,14 +547,18 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
         }
 
         .stat-card {
-            background: white;
+            background: var(--neutral-white);
             padding: 1.5rem;
             border-radius: var(--border-radius);
             box-shadow: var(--card-shadow);
             border: 1px solid var(--neutral-border);
-            transition: all 0.3s ease;
+            transition: var(--transition);
             position: relative;
             overflow: hidden;
+        }
+
+        body.dark-mode .stat-card {
+            background: var(--card-bg);
         }
 
         .stat-card::before {
@@ -425,48 +567,58 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
+            height: 5px;
             background: linear-gradient(90deg, var(--primary), var(--accent-yellow));
         }
 
         .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            transform: translateY(-6px);
+            box-shadow: 0 25px 35px -12px rgba(0,0,0,0.15);
         }
 
         .stat-header {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
             margin-bottom: 1rem;
         }
 
         .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
+            transition: var(--transition);
         }
 
+        .stat-icon.total { 
+            background: linear-gradient(135deg, var(--primary-light), #d1fae5);
+            color: var(--primary-dark);
+            box-shadow: 0 8px 16px rgba(46,107,94,0.15);
+        }
         .stat-icon.main { 
-            background: var(--primary-dark); 
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
             color: white;
+            box-shadow: 0 8px 16px rgba(30,74,61,0.25);
         }
         .stat-icon.admin { 
-            background: #dbeafe; 
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
             color: #1e40af;
+            box-shadow: 0 8px 16px rgba(59,130,246,0.15);
         }
         .stat-icon.staff { 
-            background: var(--accent-yellow-light); 
+            background: linear-gradient(135deg, var(--accent-yellow-light), #fef9c3);
             color: #b45309;
+            box-shadow: 0 8px 16px rgba(245,158,11,0.15);
         }
-        .stat-icon.total { 
-            background: var(--primary-light); 
-            color: var(--primary-dark);
-        }
+
+        body.dark-mode .stat-icon.total { background: #064e3b; color: #34d399; }
+        body.dark-mode .stat-icon.main { background: #0f172a; color: #fbbf24; }
+        body.dark-mode .stat-icon.admin { background: #1e3a8a; color: #60a5fa; }
+        body.dark-mode .stat-icon.staff { background: #4a3e1a; color: #fcd34d; }
 
         .stat-content {
             flex: 1;
@@ -474,22 +626,26 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
 
         .stat-label {
             color: var(--text-secondary);
-            font-size: 0.85rem;
-            font-weight: 500;
+            font-size: 0.8rem;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
         }
 
         .stat-value {
-            font-size: clamp(1.5rem, 5vw, 2.25rem);
-            font-weight: 700;
+            font-size: clamp(1.5rem, 5vw, 2.3rem);
+            font-weight: 800;
             line-height: 1.2;
             color: var(--primary-dark);
         }
 
+        body.dark-mode .stat-value {
+            color: var(--accent-yellow);
+        }
+
         /* Add Section */
         .add-section {
-            background: white;
+            background: var(--neutral-white);
             border-radius: var(--border-radius);
             padding: 2rem;
             margin-bottom: 2rem;
@@ -497,6 +653,11 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             border: 1px solid var(--neutral-border);
             position: relative;
             overflow: hidden;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .add-section {
+            background: var(--card-bg);
         }
 
         .add-section::before {
@@ -505,22 +666,27 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
+            height: 5px;
             background: linear-gradient(90deg, var(--primary), var(--accent-yellow));
         }
 
         .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.2rem;
+            font-weight: 700;
             color: var(--primary-dark);
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.7rem;
+        }
+
+        body.dark-mode .section-title {
+            color: var(--accent-yellow);
         }
 
         .section-title i {
             color: var(--accent-yellow);
+            font-size: 1.3rem;
         }
 
         .form-grid {
@@ -536,13 +702,13 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
         }
 
         label {
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-size: 0.85rem;
+            font-weight: 700;
             color: var(--text-secondary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.4rem;
         }
 
         label i {
@@ -557,65 +723,66 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
 
         input, select {
             width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--neutral-border);
-            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            border: 2px solid var(--neutral-border);
+            border-radius: 14px;
             font-size: 0.95rem;
             font-family: 'Inter', sans-serif;
-            transition: all 0.3s;
-            background: #f8fafc;
+            transition: var(--transition);
+            background: var(--neutral-light);
+            color: var(--text-primary);
         }
 
         input:focus, select:focus {
             outline: none;
             border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 3px rgba(46,107,94,0.1);
+            background: var(--neutral-white);
+            box-shadow: 0 0 0 4px rgba(46,107,94,0.15);
         }
 
         input::placeholder {
-            color: #94a3b8;
+            color: var(--text-muted);
         }
 
         .btn {
-            background: var(--primary-dark);
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
             color: white;
-            padding: 0.75rem 2rem;
+            padding: 0.85rem 2rem;
             border: none;
-            border-radius: 10px;
+            border-radius: 50px;
             font-size: 0.95rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 6px -2px rgba(30,74,61,0.2);
+            gap: 0.6rem;
+            box-shadow: 0 4px 12px rgba(30,74,61,0.3);
         }
 
         .btn:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(30,74,61,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px -8px rgba(30,74,61,0.4);
+            filter: brightness(1.02);
         }
 
         .btn:active {
             transform: translateY(0);
         }
 
-        .btn-small {
-            padding: 0.4rem 1rem;
-            font-size: 0.85rem;
-        }
-
         /* Table Container */
         .table-container {
-            background: white;
+            background: var(--neutral-white);
             border-radius: var(--border-radius);
             overflow: hidden;
             box-shadow: var(--card-shadow);
             border: 1px solid var(--neutral-border);
             margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .table-container {
+            background: var(--card-bg);
         }
 
         /* Modern Table Design */
@@ -625,35 +792,41 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
         }
 
         .staff-table thead tr {
-            background: linear-gradient(90deg, #f8fafc, white);
+            background: linear-gradient(90deg, var(--neutral-light), var(--neutral-white));
+        }
+
+        body.dark-mode .staff-table thead tr {
+            background: var(--table-header-bg);
         }
 
         .staff-table th {
             text-align: left;
-            padding: 1.25rem 1.5rem;
+            padding: 1.3rem 1.5rem;
             color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 0.85rem;
+            font-weight: 700;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
             border-bottom: 2px solid var(--neutral-border);
             white-space: nowrap;
         }
 
         .staff-table td {
-            padding: 1.25rem 1.5rem;
+            padding: 1.2rem 1.5rem;
             color: var(--text-primary);
             font-size: 0.95rem;
             border-bottom: 1px solid var(--neutral-border);
-            transition: background 0.2s;
+            transition: var(--transition);
         }
 
         .staff-table tbody tr {
-            transition: all 0.2s;
+            transition: var(--transition);
         }
 
         .staff-table tbody tr:hover {
-            background: #faf9fe;
+            background: var(--hover-bg);
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
         .staff-table tbody tr:last-child td {
@@ -662,89 +835,106 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
 
         /* Current User Highlight */
         .current-user {
-            background: #f0f9ff;
+            background: linear-gradient(90deg, rgba(46,107,94,0.05), rgba(251,191,36,0.05));
             position: relative;
+            border-left: 4px solid var(--accent-yellow);
         }
 
-        .current-user td {
-            border-left: 4px solid var(--primary);
+        .current-user td:first-child {
+            padding-left: calc(1.5rem - 4px);
         }
 
         .current-user:hover {
-            background: #e6f2ff;
+            background: linear-gradient(90deg, rgba(46,107,94,0.1), rgba(251,191,36,0.1));
         }
 
         .you-badge {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             font-size: 0.7rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-            margin-left: 0.5rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 30px;
+            margin-left: 0.6rem;
             display: inline-flex;
             align-items: center;
             gap: 0.25rem;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         /* Role Badges */
         .role-badge {
             display: inline-flex;
             align-items: center;
-            padding: 0.4rem 1rem;
-            border-radius: 30px;
+            gap: 0.5rem;
+            padding: 0.45rem 1.1rem;
+            border-radius: 50px;
             font-size: 0.8rem;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.3px;
             white-space: nowrap;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            transition: var(--transition);
+        }
+
+        .role-badge:hover {
+            transform: scale(1.02);
         }
 
         .role-main {
-            background: var(--primary-dark);
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
             color: white;
-            border: 1px solid var(--primary);
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .role-admin {
-            background: #dbeafe;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
             color: #1e40af;
             border: 1px solid #bfdbfe;
         }
 
         .role-staff {
-            background: var(--accent-yellow-light);
+            background: linear-gradient(135deg, var(--accent-yellow-light), #fef9c3);
             color: #b45309;
             border: 1px solid #fde68a;
         }
+
+        body.dark-mode .role-main { background: #064e3b; color: #86efac; }
+        body.dark-mode .role-admin { background: #1e3a8a; color: #93c5fd; border-color: #2563eb; }
+        body.dark-mode .role-staff { background: #4a3e1a; color: #fcd34d; border-color: #854d0e; }
 
         /* Access Level Badges */
         .access-badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
-            padding: 0.3rem 0.8rem;
-            border-radius: 30px;
+            gap: 0.4rem;
+            padding: 0.35rem 0.9rem;
+            border-radius: 50px;
             font-size: 0.75rem;
-            font-weight: 500;
+            font-weight: 600;
+            transition: var(--transition);
         }
 
         .access-full {
-            background: #ecfdf3;
+            background: linear-gradient(135deg, #ecfdf3, #d1fae5);
             color: #059669;
             border: 1px solid #a7f3d0;
         }
 
         .access-view {
-            background: var(--accent-yellow-light);
+            background: linear-gradient(135deg, var(--accent-yellow-light), #fef9c3);
             color: #b45309;
             border: 1px solid #fde68a;
         }
+
+        body.dark-mode .access-full { background: #064e3b; color: #86efac; border-color: #065f46; }
+        body.dark-mode .access-view { background: #4a3e1a; color: #fcd34d; border-color: #854d0e; }
 
         /* Action Buttons */
         .action-buttons {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
             flex-wrap: wrap;
         }
 
@@ -752,24 +942,22 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             color: var(--text-muted);
             text-decoration: none;
             padding: 0.5rem;
-            border-radius: 8px;
-            transition: all 0.2s;
+            border-radius: 10px;
+            transition: var(--transition);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 36px;
-            background: #f8fafc;
+            width: 38px;
+            height: 38px;
+            background: var(--neutral-light);
         }
 
         .action-link:hover {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
         }
 
         .action-link.delete:hover {
-            background: var(--accent-red-light);
+            background: linear-gradient(135deg, var(--accent-red-light), #fee2e2);
             color: var(--accent-red);
         }
 
@@ -784,35 +972,37 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
         .current-user-indicator {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.4rem;
             color: var(--text-muted);
             font-size: 0.85rem;
-            padding: 0.25rem 0.75rem;
-            background: #f1f5f9;
-            border-radius: 20px;
+            padding: 0.35rem 0.9rem;
+            background: var(--neutral-light);
+            border-radius: 30px;
+            font-weight: 500;
         }
 
         .role-select {
-            padding: 0.5rem;
-            border: 1px solid var(--neutral-border);
-            border-radius: 8px;
-            font-size: 0.85rem;
-            background: white;
+            padding: 0.5rem 0.8rem;
+            border: 2px solid var(--neutral-border);
+            border-radius: 40px;
+            font-size: 0.8rem;
+            background: var(--neutral-light);
             color: var(--text-primary);
             cursor: pointer;
-            transition: all 0.2s;
-            min-width: 100px;
+            transition: var(--transition);
+            min-width: 110px;
+            font-weight: 500;
         }
 
         .role-select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(46,107,94,0.1);
+            box-shadow: 0 0 0 3px rgba(46,107,94,0.15);
         }
 
         .role-select:disabled {
-            background: #f1f5f9;
-            color: #94a3b8;
+            background: var(--neutral-light);
+            color: var(--text-muted);
             cursor: not-allowed;
             border-color: var(--neutral-border);
         }
@@ -825,34 +1015,40 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             justify-content: flex-end;
             align-items: center;
             color: var(--text-muted);
-            font-size: 0.9rem;
-            padding: 1rem;
-            background: white;
+            font-size: 0.85rem;
+            padding: 1rem 1.5rem;
+            background: var(--neutral-white);
             border-radius: var(--border-radius);
             border: 1px solid var(--neutral-border);
             flex-wrap: wrap;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .staff-summary {
+            background: var(--card-bg);
         }
 
         .summary-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
         }
 
         .summary-item i {
             color: var(--accent-yellow);
+            font-size: 0.9rem;
         }
 
         .summary-badge {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             display: inline-block;
         }
 
-        .badge-main { background: var(--primary-dark); }
-        .badge-admin { background: #3b82f6; }
-        .badge-staff { background: var(--accent-yellow); }
+        .badge-main { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); }
+        .badge-admin { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .badge-staff { background: linear-gradient(135deg, var(--accent-yellow), #f59e0b); }
 
         /* Scrollbar Styling */
         ::-webkit-scrollbar {
@@ -861,29 +1057,31 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
         }
 
         ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 4px;
+            background: #e2e8f0;
+            border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb {
             background: var(--primary);
-            border-radius: 4px;
+            border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
 
+        body.dark-mode ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
         /* ============ RESPONSIVE BREAKPOINTS ============ */
 
-        /* Large Desktop (1200px and above) */
         @media (min-width: 1200px) {
             .stats-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
         }
 
-        /* Desktop (992px to 1199px) */
         @media (max-width: 1199px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -895,7 +1093,6 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             }
         }
 
-        /* Tablet (768px to 991px) */
         @media (max-width: 991px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -944,7 +1141,6 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             }
         }
 
-        /* Mobile Landscape (576px to 767px) */
         @media (max-width: 767px) {
             .main {
                 padding: 1rem;
@@ -975,7 +1171,7 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             .permission-notice {
                 flex-direction: column;
                 text-align: center;
-                padding: 1.25rem;
+                padding: 1.5rem;
                 gap: 1rem;
             }
             
@@ -992,25 +1188,25 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             
             .staff-table th,
             .staff-table td {
-                padding: 0.875rem 1rem;
+                padding: 0.9rem 1rem;
                 font-size: 0.9rem;
             }
             
             .role-badge {
-                padding: 0.3rem 0.8rem;
+                padding: 0.35rem 0.9rem;
                 font-size: 0.75rem;
             }
             
             .action-link {
-                width: 32px;
-                height: 32px;
+                width: 34px;
+                height: 34px;
                 font-size: 0.9rem;
             }
             
             .role-select {
-                min-width: 80px;
-                padding: 0.35rem;
-                font-size: 0.8rem;
+                min-width: 90px;
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
             }
             
             .staff-summary {
@@ -1020,7 +1216,6 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             }
         }
 
-        /* Mobile Portrait (up to 575px) */
         @media (max-width: 575px) {
             .main {
                 padding: 0.75rem;
@@ -1028,25 +1223,21 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             }
             
             .top-bar {
-                padding: 0.875rem 1rem;
+                padding: 0.9rem 1rem;
             }
             
             .page-title {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
                 padding-left: 0.75rem;
             }
             
             .avatar {
-                width: 36px;
-                height: 36px;
-            }
-            
-            .logout-btn {
-                font-size: 1rem;
+                width: 40px;
+                height: 40px;
             }
             
             .role-indicator {
-                padding: 0.25rem 0.75rem;
+                padding: 0.35rem 0.9rem;
                 font-size: 0.7rem;
             }
             
@@ -1055,17 +1246,17 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             }
             
             .stat-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 1.25rem;
+                width: 48px;
+                height: 48px;
+                font-size: 1.3rem;
             }
             
             .stat-value {
-                font-size: 1.75rem;
+                font-size: 1.6rem;
             }
             
             .message {
-                padding: 0.875rem 1rem;
+                padding: 0.9rem 1.2rem;
                 font-size: 0.9rem;
             }
             
@@ -1079,91 +1270,34 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
             }
             
             .action-buttons {
-                gap: 0.25rem;
+                gap: 0.4rem;
             }
             
             .action-link {
-                width: 28px;
-                height: 28px;
+                width: 30px;
+                height: 30px;
                 font-size: 0.85rem;
             }
             
             .role-select {
-                min-width: 70px;
-                font-size: 0.75rem;
+                min-width: 80px;
+                font-size: 0.7rem;
             }
             
             .current-user-indicator {
                 font-size: 0.75rem;
-                padding: 0.2rem 0.5rem;
+                padding: 0.25rem 0.6rem;
             }
             
             .you-badge {
-                font-size: 0.65rem;
-                padding: 0.15rem 0.4rem;
-            }
-        }
-
-        /* Small Mobile (up to 375px) */
-        @media (max-width: 375px) {
-            .main {
-                padding: 0.5rem;
-            }
-            
-            .top-bar {
-                padding: 0.75rem;
-            }
-            
-            .avatar {
-                width: 32px;
-                height: 32px;
-            }
-            
-            .stat-card {
-                padding: 0.875rem;
-            }
-            
-            .stat-icon {
-                width: 36px;
-                height: 36px;
-                font-size: 1.1rem;
-            }
-            
-            .stat-value {
-                font-size: 1.5rem;
-            }
-            
-            .stat-label {
-                font-size: 0.8rem;
-            }
-            
-            .staff-table th,
-            .staff-table td {
-                padding: 0.75rem;
-                font-size: 0.85rem;
-            }
-            
-            .role-badge {
-                padding: 0.2rem 0.6rem;
-                font-size: 0.7rem;
-            }
-            
-            .access-badge {
+                font-size: 0.6rem;
                 padding: 0.2rem 0.5rem;
-                font-size: 0.65rem;
-            }
-            
-            .action-link {
-                width: 26px;
-                height: 26px;
-                font-size: 0.8rem;
             }
         }
 
-        /* Print Styles */
         @media print {
             .sidebar, .menu-toggle, .sidebar-overlay, .add-section,
-            .action-link, .logout-btn, .role-select, .btn {
+            .action-link, .logout-btn, .role-select, .btn, .dark-mode-toggle {
                 display: none !important;
             }
             
@@ -1181,7 +1315,7 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
                 border: 1px solid #000;
             }
             
-            .role-badge {
+            .role-badge, .access-badge {
                 border: 1px solid #000;
                 background: none !important;
                 color: #000 !important;
@@ -1207,7 +1341,7 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
         <div class="sidebar" id="sidebar">
             <div class="logo">
                 <i class="fas fa-scale-balanced"></i>
-                <span>PPA System</span>
+                <span>Bukidnon PPA</span>
             </div>
             
             <nav>
@@ -1219,7 +1353,6 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
                     <i class="fas fa-users"></i>
                     <span>Clients</span>
                 </a>
-                <!-- PI Cases and PS Cases links removed for all users -->
                 <a href="monthly_reports.php" class="nav-item">
                     <i class="fas fa-camera"></i>
                     <span>Monthly Reports</span>
@@ -1239,12 +1372,16 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
                 <div class="user-menu">
                     <span class="user-name"><?php echo htmlspecialchars($current_fullname); ?></span>
                     <span class="role-indicator">
-                        <i class="fas fa-<?php echo $current_role == 'main' ? 'crown' : ($current_role == 'admin' ? 'shield' : 'eye'); ?>"></i>
+                        <i class="fas fa-<?php echo $current_role == 'main' ? 'crown' : ($current_role == 'admin' ? 'shield-alt' : 'eye'); ?>"></i>
                         <?php echo ucfirst($current_role); ?>
                     </span>
                     <div class="avatar">
                         <i class="fas fa-user"></i>
                     </div>
+                    <button id="darkModeToggle" class="dark-mode-toggle">
+                        <i class="fas fa-moon"></i>
+                        <span>Dark</span>
+                    </button>
                     <a href="logout.php" class="logout-btn" title="Logout">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
@@ -1361,14 +1498,14 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
                                 <i class="fas fa-user"></i>
                                 Full Name <span class="required-star">*</span>
                             </label>
-                            <input type="text" name="fullname" placeholder="e.g. Juan Dela Cruz" required>
+                            <input type="text" name="fullname" placeholder="e.g., Juan Dela Cruz" required>
                         </div>
                         <div class="form-group">
                             <label>
                                 <i class="fas fa-at"></i>
                                 Username <span class="required-star">*</span>
                             </label>
-                            <input type="text" name="username" placeholder="e.g. juan.dela.cruz" required>
+                            <input type="text" name="username" placeholder="e.g., juan.dela.cruz" required>
                         </div>
                         <div class="form-group">
                             <label>
@@ -1423,8 +1560,8 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
                         <tr class="<?php echo $is_current ? 'current-user' : ''; ?>">
                             <td>
                                 <div style="display: flex; align-items: center;">
-                                    <div class="avatar" style="width: 32px; height: 32px; margin-right: 0.75rem; background: <?php echo $is_current ? 'var(--primary)' : '#f1f5f9'; ?>; color: <?php echo $is_current ? 'white' : 'var(--text-secondary)'; ?>;">
-                                        <i class="fas fa-user" style="font-size: 0.9rem;"></i>
+                                    <div class="avatar" style="width: 38px; height: 38px; margin-right: 0.9rem; background: <?php echo $is_current ? 'linear-gradient(135deg, var(--primary), var(--primary-dark))' : 'linear-gradient(135deg, #f1f5f9, #e2e8f0)'; ?>; color: <?php echo $is_current ? 'white' : 'var(--text-secondary)'; ?>;">
+                                        <i class="fas fa-user" style="font-size: 1rem;"></i>
                                     </div>
                                     <div>
                                         <strong><?php echo htmlspecialchars($row['fullname']); ?></strong>
@@ -1467,7 +1604,7 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
                                         <!-- Role change dropdown for admin/main -->
                                         <form method="POST" style="display: inline;">
                                             <input type="hidden" name="staff_id" value="<?php echo $row['id']; ?>">
-                                            <select name="new_role" class="role-select" onchange="this.form.submit()" style="margin-right: 0.5rem;">
+                                            <select name="new_role" class="role-select" onchange="this.form.submit()">
                                                 <option value="staff" <?php echo $row['role'] == 'staff' ? 'selected' : ''; ?>>👁️ Staff</option>
                                                 <option value="admin" <?php echo $row['role'] == 'admin' ? 'selected' : ''; ?>>🛡️ Admin</option>
                                                 <?php if($current_role == 'main'): ?>
@@ -1493,11 +1630,11 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
 
                         <?php if($counter == 0): ?>
                         <tr>
-                            <td colspan="<?php echo $can_manage_staff ? '5' : '4'; ?>" style="text-align: center; padding: 3rem; color: var(--text-muted);">
-                                <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
-                                <p style="font-size: 1.1rem;">No staff members found.</p>
+                            <td colspan="<?php echo $can_manage_staff ? '5' : '4'; ?>" style="text-align: center; padding: 3rem;">
+                                <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; display: block; opacity: 0.5; color: var(--text-muted);"></i>
+                                <p style="font-size: 1.1rem; color: var(--text-primary);">No staff members found.</p>
                                 <?php if($can_manage_staff): ?>
-                                    <p style="margin-top: 0.5rem;">Add your first staff member using the form above.</p>
+                                    <p style="margin-top: 0.5rem; color: var(--text-muted);">Add your first staff member using the form above.</p>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -1525,7 +1662,7 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
                     Staff: <strong><?php echo $staff_count; ?></strong>
                 </span>
                 <span class="summary-item">
-                    <i class="fas fa-<?php echo $current_role == 'main' ? 'crown' : ($current_role == 'admin' ? 'shield' : 'eye'); ?>"></i>
+                    <i class="fas fa-<?php echo $current_role == 'main' ? 'crown' : ($current_role == 'admin' ? 'shield-alt' : 'eye'); ?>"></i>
                     Your Role: <strong><?php echo ucfirst($current_role); ?></strong> - 
                     <?php echo $can_manage_staff ? 'Full Access' : 'View Only'; ?>
                 </span>
@@ -1534,6 +1671,45 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
     </div>
 
     <script>
+        // Dark Mode Toggle Functionality
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        let darkMode = localStorage.getItem('darkMode');
+        
+        if (darkMode === 'enabled') {
+            document.body.classList.add('dark-mode');
+            updateDarkModeButton(true);
+        } else {
+            updateDarkModeButton(false);
+        }
+        
+        function updateDarkModeButton(isDark) {
+            if (!darkModeToggle) return;
+            const icon = darkModeToggle.querySelector('i');
+            const span = darkModeToggle.querySelector('span');
+            if (isDark) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                span.textContent = 'Light';
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                span.textContent = 'Dark';
+            }
+        }
+        
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('click', () => {
+                const isDark = document.body.classList.toggle('dark-mode');
+                if (isDark) {
+                    localStorage.setItem('darkMode', 'enabled');
+                    updateDarkModeButton(true);
+                } else {
+                    localStorage.setItem('darkMode', 'disabled');
+                    updateDarkModeButton(false);
+                }
+            });
+        }
+        
         // Mobile Menu Functionality
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
@@ -1560,16 +1736,18 @@ $staff = mysqli_query($conn, "SELECT * FROM staff ORDER BY
                     sidebar.classList.remove('active');
                     overlay.classList.remove('active');
                     const icon = menuToggle.querySelector('i');
-                    icon.classList.remove('fa-times');
-                    icon.classList.add('fa-bars');
+                    if (icon) {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
                 });
             }
             
             // Close sidebar on window resize if in desktop mode
             window.addEventListener('resize', function() {
                 if (window.innerWidth > 991) {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
+                    if (sidebar) sidebar.classList.remove('active');
+                    if (overlay) overlay.classList.remove('active');
                     const icon = menuToggle?.querySelector('i');
                     if (icon) {
                         icon.classList.remove('fa-times');

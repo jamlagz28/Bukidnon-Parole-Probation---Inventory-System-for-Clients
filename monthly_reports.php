@@ -92,10 +92,10 @@ foreach($years as $year) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>Monthly Reports 2020-2030 - Parole & Probation System</title>
+    <title>Bukidnon PPA | Monthly Reports Archive 2020-2030</title>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -107,22 +107,13 @@ foreach($years as $year) {
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f5f7fa;
-            color: #1e293b;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* Color Theme Variables */
         :root {
-            --primary-dark: #1e4a3d;      /* Dark Green */
-            --primary: #2e6b5e;           /* Medium Green */
-            --primary-light: #d1fae5;      /* Light Green for backgrounds */
-            --accent-yellow: #fbbf24;      /* Yellow */
+            --primary-dark: #1e4a3d;
+            --primary: #2e6b5e;
+            --primary-light: #d1fae5;
+            --accent-yellow: #fbbf24;
             --accent-yellow-light: #fef3c7;
-            --accent-red: #dc2626;         /* Red */
+            --accent-red: #dc2626;
             --accent-red-light: #fee2e2;
             --neutral-white: #ffffff;
             --neutral-light: #f8fafc;
@@ -131,11 +122,46 @@ foreach($years as $year) {
             --text-secondary: #475569;
             --text-muted: #64748b;
             --sidebar-width: 280px;
-            --sidebar-width-mobile: 240px;
+            --sidebar-width-mobile: 260px;
             --header-height: 70px;
-            --border-radius: 12px;
-            --box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.03);
-            --card-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --border-radius: 20px;
+            --box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --card-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.01);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.dark-mode {
+            --primary-dark: #3d8b7a;
+            --primary: #4c9e8a;
+            --primary-light: #2d5a4a;
+            --accent-yellow: #fbbf24;
+            --accent-yellow-light: #4a3e1a;
+            --accent-red: #f87171;
+            --accent-red-light: #4a1e1e;
+            --neutral-white: #1e293b;
+            --neutral-light: #0f172a;
+            --neutral-border: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+            --bg-body: #0f172a;
+            --card-bg: #1e293b;
+            --table-header-bg: #0f172a;
+            --hover-bg: #2d3a4e;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            color: var(--text-primary);
+            line-height: 1.5;
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.2s ease;
+        }
+
+        body.dark-mode {
+            background: #0a0f1c;
         }
 
         /* App Layout */
@@ -146,7 +172,7 @@ foreach($years as $year) {
             width: 100%;
         }
 
-        /* Mobile Menu Toggle */
+        /* Mobile Menu Toggle - Enhanced */
         .menu-toggle {
             display: none;
             position: fixed;
@@ -155,15 +181,21 @@ foreach($years as $year) {
             z-index: 101;
             background: var(--primary-dark);
             color: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: var(--box-shadow);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             border: none;
             font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .menu-toggle:hover {
+            transform: scale(0.96);
+            background: var(--primary);
         }
 
         .menu-toggle i {
@@ -178,30 +210,41 @@ foreach($years as $year) {
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             z-index: 99;
-            backdrop-filter: blur(3px);
+            backdrop-filter: blur(5px);
+            transition: var(--transition);
         }
 
         .sidebar-overlay.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
-        /* Sidebar - Dark Green Theme */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Sidebar - Enhanced Dark Green Theme with Gradient */
         .sidebar {
             width: var(--sidebar-width);
-            background: var(--primary-dark);
+            background: linear-gradient(165deg, #1e4a3d 0%, #0f3b30 100%);
             padding: 2rem 1.5rem;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
-            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
+            box-shadow: 8px 0 25px -10px rgba(0,0,0,0.15);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
             z-index: 100;
         }
 
+        body.dark-mode .sidebar {
+            background: linear-gradient(165deg, #0f172a 0%, #0a0f1c 100%);
+        }
+
         .logo {
-            font-weight: 700;
+            font-weight: 800;
             font-size: 1.5rem;
             color: white;
             margin-bottom: 2.5rem;
@@ -209,40 +252,65 @@ foreach($years as $year) {
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 2px solid rgba(255,255,255,0.15);
         }
 
         .logo i {
             color: var(--accent-yellow);
             font-size: 1.8rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 0.875rem 1rem;
-            color: rgba(255,255,255,0.8);
+            padding: 0.9rem 1.2rem;
+            color: rgba(255,255,255,0.85);
             text-decoration: none;
-            border-radius: 10px;
-            margin-bottom: 0.25rem;
-            transition: all 0.3s ease;
+            border-radius: 14px;
+            margin-bottom: 0.5rem;
+            transition: var(--transition);
             font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: rgba(255,255,255,0.1);
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-item:hover::before {
+            width: 100%;
         }
 
         .nav-item:hover {
-            background: rgba(255,255,255,0.1);
             color: white;
-            transform: translateX(5px);
+            transform: translateX(6px);
         }
 
         .nav-item.active {
             background: white;
             color: var(--primary-dark);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode .nav-item.active {
+            background: var(--primary-dark);
+            color: white;
         }
 
         .nav-item i {
-            width: 24px;
+            width: 26px;
             font-size: 1.2rem;
             text-align: center;
         }
@@ -256,32 +324,46 @@ foreach($years as $year) {
             transition: margin-left 0.3s ease;
         }
 
-        /* Top Bar */
+        /* Top Bar - Enhanced with Glassmorphism */
         .top-bar {
-            background: white;
+            background: var(--neutral-white);
             border-radius: var(--border-radius);
-            padding: 1.25rem 2rem;
+            padding: 1.2rem 2rem;
             margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: var(--box-shadow);
             border: 1px solid var(--neutral-border);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .top-bar {
+            background: var(--card-bg);
         }
 
         .page-title {
-            font-size: clamp(1.2rem, 4vw, 1.5rem);
-            font-weight: 600;
-            color: var(--primary-dark);
+            font-size: clamp(1.2rem, 4vw, 1.7rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
             position: relative;
             padding-left: 1rem;
-            border-left: 4px solid var(--accent-yellow);
+            border-left: 5px solid var(--accent-yellow);
+        }
+
+        body.dark-mode .page-title {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            background-clip: text;
+            -webkit-background-clip: text;
         }
 
         .page-subtitle {
             font-size: 0.85rem;
             color: var(--text-muted);
-            margin-top: 0.25rem;
+            margin-top: 0.5rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -290,7 +372,7 @@ foreach($years as $year) {
         .user-info {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.2rem;
         }
 
         .user-name {
@@ -300,69 +382,115 @@ foreach($years as $year) {
         }
 
         .avatar {
-            width: 42px;
-            height: 42px;
+            width: 48px;
+            height: 48px;
             background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            border-radius: 10px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            box-shadow: 0 2px 8px rgba(46,107,94,0.25);
+            box-shadow: 0 4px 12px rgba(46,107,94,0.3);
+            transition: var(--transition);
+        }
+
+        .avatar:hover {
+            transform: scale(1.05);
         }
 
         .logout-btn {
             color: var(--text-muted);
-            transition: all 0.2s;
-            font-size: 1.2rem;
+            transition: var(--transition);
+            font-size: 1.3rem;
+            padding: 0.5rem;
+            border-radius: 10px;
         }
 
         .logout-btn:hover {
             color: var(--accent-red);
             transform: scale(1.1);
+            background: var(--accent-red-light);
         }
 
         .view-only-badge {
-            background: var(--accent-yellow-light);
+            background: linear-gradient(135deg, var(--accent-yellow-light), #fef9c3);
             color: #b45309;
-            padding: 0.35rem 1rem;
-            border-radius: 30px;
+            padding: 0.45rem 1.2rem;
+            border-radius: 50px;
             font-size: 0.8rem;
-            font-weight: 500;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            border: 1px solid #fde68a;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        /* Dark Mode Toggle Button */
+        .dark-mode-toggle {
+            background: var(--neutral-light);
+            border: 1px solid var(--neutral-border);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.85rem;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            border: 1px solid #fde68a;
+        }
+
+        .dark-mode-toggle:hover {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        body.dark-mode .dark-mode-toggle {
+            background: var(--primary-dark);
+            color: var(--accent-yellow);
         }
 
         /* Messages */
         .message {
             padding: 1rem 1.5rem;
-            border-radius: 10px;
+            border-radius: 16px;
             margin-bottom: 2rem;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            animation: slideIn 0.3s ease;
+            gap: 1rem;
+            animation: slideInDown 0.4s ease;
             font-size: 0.95rem;
-            border-left: 4px solid;
+            border-left: 5px solid;
+            box-shadow: var(--box-shadow);
         }
 
         .message.success {
-            background: #ecfdf3;
+            background: linear-gradient(135deg, #ecfdf3, #d1fae5);
             color: #065f46;
-            border-color: #059669;
+            border-left-color: #059669;
         }
 
         .message.error {
-            background: var(--accent-red-light);
+            background: linear-gradient(135deg, var(--accent-red-light), #fee2e2);
             color: #991b1b;
-            border-color: var(--accent-red);
+            border-left-color: var(--accent-red);
         }
 
-        @keyframes slideIn {
+        body.dark-mode .message.success {
+            background: #064e3b;
+            color: #a7f3d0;
+        }
+
+        body.dark-mode .message.error {
+            background: #4a1e1e;
+            color: #fecaca;
+        }
+
+        @keyframes slideInDown {
             from {
-                transform: translateY(-10px);
+                transform: translateY(-20px);
                 opacity: 0;
             }
             to {
@@ -380,14 +508,18 @@ foreach($years as $year) {
         }
 
         .stat-card {
-            background: white;
+            background: var(--neutral-white);
             padding: 1.5rem;
             border-radius: var(--border-radius);
             box-shadow: var(--card-shadow);
             border: 1px solid var(--neutral-border);
-            transition: all 0.3s ease;
+            transition: var(--transition);
             position: relative;
             overflow: hidden;
+        }
+
+        body.dark-mode .stat-card {
+            background: var(--card-bg);
         }
 
         .stat-card::before {
@@ -396,74 +528,99 @@ foreach($years as $year) {
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
+            height: 5px;
             background: linear-gradient(90deg, var(--primary), var(--accent-yellow));
         }
 
         .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            transform: translateY(-6px);
+            box-shadow: 0 25px 35px -12px rgba(0,0,0,0.15);
         }
 
         .stat-header {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
             margin-bottom: 1rem;
         }
 
         .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            background: var(--primary-light);
+            font-size: 1.6rem;
+            transition: var(--transition);
+        }
+
+        .stat-icon.green {
+            background: linear-gradient(135deg, var(--primary-light), #d1fae5);
             color: var(--primary-dark);
+            box-shadow: 0 8px 16px rgba(46,107,94,0.15);
         }
 
         .stat-icon.yellow {
-            background: var(--accent-yellow-light);
+            background: linear-gradient(135deg, var(--accent-yellow-light), #fef9c3);
             color: #b45309;
+            box-shadow: 0 8px 16px rgba(245,158,11,0.15);
         }
 
         .stat-icon.red {
-            background: var(--accent-red-light);
+            background: linear-gradient(135deg, var(--accent-red-light), #fee2e2);
             color: var(--accent-red);
+            box-shadow: 0 8px 16px rgba(220,38,38,0.15);
+        }
+
+        body.dark-mode .stat-icon.green {
+            background: #064e3b;
+            color: #34d399;
+        }
+
+        body.dark-mode .stat-icon.yellow {
+            background: #4a3e1a;
+            color: #fbbf24;
+        }
+
+        body.dark-mode .stat-icon.red {
+            background: #4a1e1e;
+            color: #f87171;
         }
 
         .stat-label {
             color: var(--text-secondary);
-            font-size: 0.85rem;
-            font-weight: 500;
+            font-size: 0.8rem;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+        }
+
+        .stat-value {
+            font-size: clamp(1.5rem, 5vw, 2.3rem);
+            font-weight: 800;
+            line-height: 1.2;
+            color: var(--primary-dark);
+        }
+
+        body.dark-mode .stat-value {
+            color: var(--accent-yellow);
+        }
+
+        .stat-note {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--neutral-border);
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .stat-value {
-            font-size: clamp(1.5rem, 5vw, 2.25rem);
-            font-weight: 700;
-            line-height: 1.2;
-            color: var(--primary-dark);
-        }
-
-        .stat-note {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
         /* Year Range Visualization */
         .year-range-info {
-            background: white;
+            background: var(--neutral-white);
             padding: 1.25rem 1.5rem;
             border-radius: var(--border-radius);
             margin-bottom: 1.5rem;
@@ -473,61 +630,74 @@ foreach($years as $year) {
             flex-wrap: wrap;
             box-shadow: var(--box-shadow);
             border: 1px solid var(--neutral-border);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .year-range-info {
+            background: var(--card-bg);
         }
 
         .year-range-info span:first-child {
             color: var(--text-secondary);
-            font-weight: 500;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
         }
 
         .year-stats {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.6rem;
             flex-wrap: wrap;
             flex: 1;
         }
 
         .year-pill {
-            background: #f1f5f9;
-            padding: 0.35rem 0.9rem;
-            border-radius: 30px;
+            background: var(--neutral-light);
+            padding: 0.45rem 1rem;
+            border-radius: 50px;
             font-size: 0.8rem;
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.5rem;
             cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .year-pill.has-data {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-            border-color: var(--primary);
+            transition: var(--transition);
+            border: 1px solid var(--neutral-border);
             font-weight: 500;
         }
 
+        .year-pill.has-data {
+            background: linear-gradient(135deg, var(--primary-light), #d1fae5);
+            color: var(--primary-dark);
+            border-color: var(--primary);
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(46,107,94,0.15);
+        }
+
         .year-pill:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
 
         .year-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             display: inline-block;
+            transition: var(--transition);
         }
 
         .dot-active {
             background: var(--primary-dark);
+            box-shadow: 0 0 0 2px rgba(30,74,61,0.2);
         }
 
         .dot-inactive {
             background: #cbd5e1;
+        }
+
+        body.dark-mode .dot-active {
+            background: var(--accent-yellow);
         }
 
         /* Filter Section */
@@ -537,11 +707,16 @@ foreach($years as $year) {
             gap: 1rem;
             align-items: center;
             flex-wrap: wrap;
-            background: white;
+            background: var(--neutral-white);
             padding: 1.5rem;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             border: 1px solid var(--neutral-border);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .filter-section {
+            background: var(--card-bg);
         }
 
         .search-wrapper {
@@ -556,42 +731,44 @@ foreach($years as $year) {
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
         .search-input {
             width: 100%;
-            padding: 0.75rem 1rem 0.75rem 2.5rem;
-            border: 1px solid var(--neutral-border);
-            border-radius: 10px;
+            padding: 0.85rem 1rem 0.85rem 2.8rem;
+            border: 2px solid var(--neutral-border);
+            border-radius: 50px;
             font-size: 0.95rem;
-            transition: all 0.3s;
-            background: #f8fafc;
+            transition: var(--transition);
+            background: var(--neutral-light);
+            color: var(--text-primary);
         }
 
         .search-input:focus {
             border-color: var(--primary);
             outline: none;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(46,107,94,0.1);
+            background: var(--neutral-white);
+            box-shadow: 0 0 0 4px rgba(46,107,94,0.15);
         }
 
         .filter-select {
-            padding: 0.75rem;
-            border: 1px solid var(--neutral-border);
-            border-radius: 10px;
-            background: #f8fafc;
+            padding: 0.85rem 1.2rem;
+            border: 2px solid var(--neutral-border);
+            border-radius: 50px;
+            background: var(--neutral-light);
             color: var(--text-primary);
             font-size: 0.95rem;
             cursor: pointer;
-            transition: all 0.3s;
-            min-width: 180px;
+            transition: var(--transition);
+            min-width: 200px;
+            font-weight: 500;
         }
 
         .filter-select:focus {
             border-color: var(--primary);
             outline: none;
-            background: white;
+            box-shadow: 0 0 0 4px rgba(46,107,94,0.15);
         }
 
         .filter-info {
@@ -599,7 +776,7 @@ foreach($years as $year) {
             font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.2rem;
             flex-wrap: wrap;
             margin-left: auto;
         }
@@ -611,26 +788,33 @@ foreach($years as $year) {
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
+            gap: 0.4rem;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
             background: var(--primary-light);
-            transition: all 0.2s;
+            transition: var(--transition);
+            font-weight: 500;
         }
 
         .clear-filter:hover {
             background: var(--primary);
             color: white;
+            transform: translateY(-2px);
         }
 
         /* Table Container */
         .table-container {
-            background: white;
+            background: var(--neutral-white);
             border-radius: var(--border-radius);
             overflow: hidden;
             box-shadow: var(--card-shadow);
             border: 1px solid var(--neutral-border);
             margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .table-container {
+            background: var(--card-bg);
         }
 
         /* Modern Table Design */
@@ -640,35 +824,39 @@ foreach($years as $year) {
         }
 
         .reports-table thead tr {
-            background: linear-gradient(90deg, #f8fafc, white);
+            background: linear-gradient(90deg, var(--neutral-light), var(--neutral-white));
+        }
+
+        body.dark-mode .reports-table thead tr {
+            background: var(--table-header-bg);
         }
 
         .reports-table th {
             text-align: left;
-            padding: 1.25rem 1.5rem;
+            padding: 1.3rem 1.5rem;
             color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 0.85rem;
+            font-weight: 700;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
             border-bottom: 2px solid var(--neutral-border);
             white-space: nowrap;
         }
 
         .reports-table td {
-            padding: 1.25rem 1.5rem;
+            padding: 1.2rem 1.5rem;
             color: var(--text-primary);
             font-size: 0.95rem;
             border-bottom: 1px solid var(--neutral-border);
-            transition: background 0.2s;
+            transition: var(--transition);
         }
 
         .reports-table tbody tr {
-            transition: all 0.2s;
+            transition: var(--transition);
         }
 
         .reports-table tbody tr:hover {
-            background: #faf9fe;
+            background: var(--hover-bg);
             transform: scale(1.01);
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
@@ -679,19 +867,19 @@ foreach($years as $year) {
 
         /* Report Thumbnail */
         .report-thumb {
-            width: 60px;
-            height: 60px;
+            width: 65px;
+            height: 65px;
             object-fit: cover;
-            border-radius: 10px;
+            border-radius: 14px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
             border: 2px solid var(--neutral-border);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
         }
 
         .report-thumb:hover {
-            transform: scale(1.5);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            transform: scale(1.8);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
             z-index: 10;
             position: relative;
             border-color: var(--primary);
@@ -701,55 +889,71 @@ foreach($years as $year) {
         .status-badge {
             display: inline-flex;
             align-items: center;
-            padding: 0.4rem 1rem;
-            border-radius: 30px;
+            gap: 0.4rem;
+            padding: 0.45rem 1.1rem;
+            border-radius: 50px;
             font-size: 0.8rem;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.3px;
             white-space: nowrap;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            transition: var(--transition);
+        }
+
+        .status-badge:hover {
+            transform: scale(1.02);
         }
 
         .status-Active {
-            background: #ecfdf3;
+            background: linear-gradient(135deg, #ecfdf3, #d1fae5);
             color: #059669;
             border: 1px solid #a7f3d0;
         }
 
         .status-Terminated {
-            background: #e0f2fe;
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
             color: #0284c7;
             border: 1px solid #bae6fd;
         }
 
         .status-Revoked {
-            background: var(--accent-yellow-light);
+            background: linear-gradient(135deg, var(--accent-yellow-light), #fef9c3);
             color: #b45309;
             border: 1px solid #fde68a;
         }
 
         .status-Denied {
-            background: var(--accent-red-light);
+            background: linear-gradient(135deg, var(--accent-red-light), #fee2e2);
             color: var(--accent-red);
             border: 1px solid #fecaca;
         }
 
+        body.dark-mode .status-Active { background: #064e3b; color: #86efac; border-color: #065f46; }
+        body.dark-mode .status-Terminated { background: #0c4a6e; color: #7dd3fc; border-color: #075985; }
+        body.dark-mode .status-Revoked { background: #4a3e1a; color: #fcd34d; border-color: #854d0e; }
+        body.dark-mode .status-Denied { background: #4a1e1e; color: #fca5a5; border-color: #991b1b; }
+
         /* Year Badge */
         .year-badge {
             display: inline-block;
-            padding: 0.2rem 0.6rem;
+            padding: 0.25rem 0.7rem;
             background: var(--primary-light);
-            border-radius: 20px;
+            border-radius: 30px;
             font-size: 0.7rem;
-            margin-left: 0.5rem;
+            margin-left: 0.6rem;
             color: var(--primary-dark);
-            font-weight: 600;
+            font-weight: 700;
+        }
+
+        body.dark-mode .year-badge {
+            background: var(--primary-dark);
+            color: var(--accent-yellow);
         }
 
         /* Action Buttons */
         .action-buttons {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.6rem;
             flex-wrap: wrap;
         }
 
@@ -757,30 +961,33 @@ foreach($years as $year) {
             color: var(--text-muted);
             text-decoration: none;
             padding: 0.5rem;
-            border-radius: 8px;
-            transition: all 0.2s;
+            border-radius: 10px;
+            transition: var(--transition);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 36px;
-            background: #f8fafc;
+            width: 38px;
+            height: 38px;
+            background: var(--neutral-light);
         }
 
         .action-link:hover {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .action-link.delete:hover {
-            background: var(--accent-red-light);
-            color: var(--accent-red);
+            transform: translateY(-3px);
         }
 
         .action-link.download:hover {
-            background: #e0f2fe;
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
             color: #0284c7;
+        }
+
+        .action-link.view:hover {
+            background: linear-gradient(135deg, var(--primary-light), #d1fae5);
+            color: var(--primary-dark);
+        }
+
+        .action-link.delete:hover {
+            background: linear-gradient(135deg, var(--accent-red-light), #fee2e2);
+            color: var(--accent-red);
         }
 
         .action-link.disabled {
@@ -799,23 +1006,30 @@ foreach($years as $year) {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.96);
             z-index: 1000;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(12px);
+            transition: var(--transition);
         }
 
         .modal.active {
             display: flex;
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .modal img {
             max-width: 90%;
             max-height: 90%;
-            border-radius: 12px;
+            border-radius: 20px;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            border: 3px solid white;
+            border: 4px solid white;
         }
 
         .modal-close {
@@ -825,14 +1039,14 @@ foreach($years as $year) {
             color: white;
             font-size: 3rem;
             cursor: pointer;
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.15);
             border-radius: 50%;
-            transition: all 0.2s;
+            transition: var(--transition);
         }
 
         .modal-close:hover {
@@ -847,9 +1061,9 @@ foreach($years as $year) {
         }
 
         .empty-state i {
-            font-size: 4rem;
+            font-size: 4.5rem;
             color: var(--text-muted);
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
             opacity: 0.5;
         }
 
@@ -860,19 +1074,18 @@ foreach($years as $year) {
 
         .empty-state .btn-primary {
             display: inline-block;
-            padding: 0.75rem 2rem;
-            background: var(--primary-dark);
+            padding: 0.85rem 2rem;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
             color: white;
             text-decoration: none;
-            border-radius: 10px;
-            font-weight: 500;
-            transition: all 0.3s;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: var(--transition);
         }
 
         .empty-state .btn-primary:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(30,74,61,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px -8px rgba(30,74,61,0.4);
         }
 
         /* Year Summary */
@@ -885,10 +1098,15 @@ foreach($years as $year) {
             font-size: 0.85rem;
             flex-wrap: wrap;
             gap: 1rem;
-            padding: 1rem;
-            background: white;
+            padding: 1rem 1.5rem;
+            background: var(--neutral-white);
             border-radius: var(--border-radius);
             border: 1px solid var(--neutral-border);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .year-summary {
+            background: var(--card-bg);
         }
 
         .year-summary i {
@@ -898,7 +1116,7 @@ foreach($years as $year) {
         .year-summary span {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
         }
 
         /* Scrollbar Styling */
@@ -908,29 +1126,31 @@ foreach($years as $year) {
         }
 
         ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 4px;
+            background: #e2e8f0;
+            border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb {
             background: var(--primary);
-            border-radius: 4px;
+            border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
 
+        body.dark-mode ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
         /* ============ RESPONSIVE BREAKPOINTS ============ */
 
-        /* Large Desktop (1200px and above) */
         @media (min-width: 1200px) {
             .stats-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
         }
 
-        /* Desktop (992px to 1199px) */
         @media (max-width: 1199px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -942,7 +1162,6 @@ foreach($years as $year) {
             }
         }
 
-        /* Tablet (768px to 991px) */
         @media (max-width: 991px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -970,10 +1189,6 @@ foreach($years as $year) {
             
             .top-bar {
                 margin-top: 0;
-            }
-            
-            .stats-grid {
-                gap: 1rem;
             }
             
             .reports-table {
@@ -1004,7 +1219,6 @@ foreach($years as $year) {
             }
         }
 
-        /* Mobile Landscape (576px to 767px) */
         @media (max-width: 767px) {
             .main {
                 padding: 1rem;
@@ -1029,7 +1243,7 @@ foreach($years as $year) {
             
             .stats-grid {
                 grid-template-columns: 1fr;
-                gap: 0.75rem;
+                gap: 1rem;
             }
             
             .stat-card {
@@ -1053,23 +1267,23 @@ foreach($years as $year) {
             
             .reports-table th,
             .reports-table td {
-                padding: 0.875rem 1rem;
+                padding: 0.9rem 1rem;
                 font-size: 0.9rem;
             }
             
             .report-thumb {
-                width: 50px;
-                height: 50px;
+                width: 55px;
+                height: 55px;
             }
             
             .status-badge {
-                padding: 0.3rem 0.8rem;
+                padding: 0.35rem 0.9rem;
                 font-size: 0.75rem;
             }
             
             .action-link {
-                width: 32px;
-                height: 32px;
+                width: 34px;
+                height: 34px;
                 font-size: 0.9rem;
             }
             
@@ -1079,7 +1293,6 @@ foreach($years as $year) {
             }
         }
 
-        /* Mobile Portrait (up to 575px) */
         @media (max-width: 575px) {
             .main {
                 padding: 0.75rem;
@@ -1087,29 +1300,25 @@ foreach($years as $year) {
             }
             
             .top-bar {
-                padding: 0.875rem 1rem;
+                padding: 0.9rem 1rem;
             }
             
             .page-title {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
                 padding-left: 0.75rem;
             }
             
             .page-subtitle {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
             }
             
             .avatar {
-                width: 36px;
-                height: 36px;
-            }
-            
-            .logout-btn {
-                font-size: 1rem;
+                width: 40px;
+                height: 40px;
             }
             
             .view-only-badge {
-                padding: 0.25rem 0.75rem;
+                padding: 0.35rem 0.9rem;
                 font-size: 0.7rem;
             }
             
@@ -1118,93 +1327,43 @@ foreach($years as $year) {
             }
             
             .stat-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 1.25rem;
+                width: 48px;
+                height: 48px;
+                font-size: 1.3rem;
             }
             
             .stat-value {
-                font-size: 1.75rem;
+                font-size: 1.6rem;
             }
             
             .message {
-                padding: 0.875rem 1rem;
+                padding: 0.9rem 1.2rem;
                 font-size: 0.9rem;
             }
             
             .year-pill {
-                padding: 0.25rem 0.7rem;
+                padding: 0.35rem 0.8rem;
                 font-size: 0.7rem;
+            }
+            
+            .report-thumb {
+                width: 48px;
+                height: 48px;
             }
             
             .modal-close {
                 top: 1rem;
                 right: 1rem;
                 font-size: 2rem;
-                width: 40px;
-                height: 40px;
-            }
-        }
-
-        /* Small Mobile (up to 375px) */
-        @media (max-width: 375px) {
-            .main {
-                padding: 0.5rem;
-            }
-            
-            .top-bar {
-                padding: 0.75rem;
-            }
-            
-            .avatar {
-                width: 32px;
-                height: 32px;
-            }
-            
-            .stat-card {
-                padding: 0.875rem;
-            }
-            
-            .stat-icon {
-                width: 36px;
-                height: 36px;
-                font-size: 1.1rem;
-            }
-            
-            .stat-value {
-                font-size: 1.5rem;
-            }
-            
-            .stat-label {
-                font-size: 0.8rem;
-            }
-            
-            .reports-table th,
-            .reports-table td {
-                padding: 0.75rem;
-                font-size: 0.85rem;
-            }
-            
-            .report-thumb {
                 width: 45px;
                 height: 45px;
             }
-            
-            .action-link {
-                width: 28px;
-                height: 28px;
-                font-size: 0.85rem;
-            }
-            
-            .year-summary {
-                font-size: 0.8rem;
-            }
         }
 
-        /* Print Styles */
         @media print {
             .sidebar, .menu-toggle, .sidebar-overlay, .filter-section,
-            .action-link, .modal, .logout-btn, .avatar {
+            .action-link, .modal, .logout-btn, .avatar, .dark-mode-toggle,
+            .view-only-badge {
                 display: none !important;
             }
             
@@ -1245,7 +1404,7 @@ foreach($years as $year) {
         <div class="sidebar" id="sidebar">
             <div class="logo">
                 <i class="fas fa-scale-balanced"></i>
-                <span>PPA System</span>
+                <span>Bukidnon PPA</span>
             </div>
             
             <nav>
@@ -1257,7 +1416,6 @@ foreach($years as $year) {
                     <i class="fas fa-users"></i>
                     <span>Clients</span>
                 </a>
-                <!-- PI Cases and PS Cases links removed for all users -->
                 <a href="monthly_reports.php" class="nav-item active">
                     <i class="fas fa-camera"></i>
                     <span>Monthly Reports</span>
@@ -1292,6 +1450,10 @@ foreach($years as $year) {
                     <div class="avatar">
                         <i class="fas fa-user"></i>
                     </div>
+                    <button id="darkModeToggle" class="dark-mode-toggle">
+                        <i class="fas fa-moon"></i>
+                        <span>Dark</span>
+                    </button>
                     <a href="logout.php" class="logout-btn" title="Logout">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
@@ -1317,7 +1479,7 @@ foreach($years as $year) {
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-header">
-                        <div class="stat-icon">
+                        <div class="stat-icon green">
                             <i class="fas fa-image"></i>
                         </div>
                         <div class="stat-label">
@@ -1347,7 +1509,7 @@ foreach($years as $year) {
                 
                 <div class="stat-card">
                     <div class="stat-header">
-                        <div class="stat-icon">
+                        <div class="stat-icon green">
                             <i class="fas fa-chart-line"></i>
                         </div>
                         <div class="stat-label">
@@ -1391,7 +1553,7 @@ foreach($years as $year) {
                             <span class="year-dot <?php echo $has_data ? 'dot-active' : 'dot-inactive'; ?>"></span>
                             <?php echo $year; ?>
                             <?php if($has_data): ?>
-                                <span style="font-weight: 600;">(<?php echo $year_counts[$year]; ?>)</span>
+                                <span style="font-weight: 700;">(<?php echo $year_counts[$year]; ?>)</span>
                             <?php endif; ?>
                         </span>
                     <?php endforeach; ?>
@@ -1455,7 +1617,7 @@ foreach($years as $year) {
                         ?>
                         <tr class="report-row" data-year="<?php echo $row['report_year']; ?>" data-month="<?php echo $row['report_month']; ?>">
                             <td>
-                                <img src="uploads/<?php echo $row['photo']; ?>" class="report-thumb" onclick="openModal('uploads/<?php echo $row['photo']; ?>')">
+                                <img src="uploads/<?php echo $row['photo']; ?>" class="report-thumb" onclick="openModal('uploads/<?php echo $row['photo']; ?>')" alt="Report Photo">
                             </td>
                             <td>
                                 <strong><?php echo htmlspecialchars($row['name']); ?></strong>
@@ -1477,7 +1639,7 @@ foreach($years as $year) {
                                     <a href="uploads/<?php echo $row['photo']; ?>" download class="action-link download" title="Download">
                                         <i class="fas fa-download"></i>
                                     </a>
-                                    <a href="client_details.php?id=<?php echo $row['probationer_id']; ?>" class="action-link" title="View Client">
+                                    <a href="client_details.php?id=<?php echo $row['probationer_id']; ?>" class="action-link view" title="View Client">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     
@@ -1546,6 +1708,45 @@ foreach($years as $year) {
     </div>
 
     <script>
+        // Dark Mode Toggle Functionality
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        let darkMode = localStorage.getItem('darkMode');
+        
+        if (darkMode === 'enabled') {
+            document.body.classList.add('dark-mode');
+            updateDarkModeButton(true);
+        } else {
+            updateDarkModeButton(false);
+        }
+        
+        function updateDarkModeButton(isDark) {
+            if (!darkModeToggle) return;
+            const icon = darkModeToggle.querySelector('i');
+            const span = darkModeToggle.querySelector('span');
+            if (isDark) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                span.textContent = 'Light';
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                span.textContent = 'Dark';
+            }
+        }
+        
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('click', () => {
+                const isDark = document.body.classList.toggle('dark-mode');
+                if (isDark) {
+                    localStorage.setItem('darkMode', 'enabled');
+                    updateDarkModeButton(true);
+                } else {
+                    localStorage.setItem('darkMode', 'disabled');
+                    updateDarkModeButton(false);
+                }
+            });
+        }
+        
         // Mobile Menu Functionality
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
@@ -1580,8 +1781,8 @@ foreach($years as $year) {
             // Close sidebar on window resize if in desktop mode
             window.addEventListener('resize', function() {
                 if (window.innerWidth > 991) {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
+                    if (sidebar) sidebar.classList.remove('active');
+                    if (overlay) overlay.classList.remove('active');
                     const icon = menuToggle?.querySelector('i');
                     if (icon) {
                         icon.classList.remove('fa-times');
@@ -1617,7 +1818,7 @@ foreach($years as $year) {
         const resultCountSpan = document.getElementById('resultCount');
 
         function filterTable() {
-            const searchTerm = searchInput.value.toLowerCase();
+            const searchTerm = searchInput.value.toLowerCase().trim();
             const selectedYear = yearFilter.value;
             let visibleCount = 0;
 
@@ -1625,7 +1826,7 @@ foreach($years as $year) {
                 const text = row.textContent.toLowerCase();
                 const year = row.dataset.year;
                 
-                const matchesSearch = text.includes(searchTerm);
+                const matchesSearch = searchTerm === '' || text.includes(searchTerm);
                 const matchesYear = selectedYear === 'all' || year === selectedYear;
 
                 if (matchesSearch && matchesYear) {
@@ -1637,7 +1838,9 @@ foreach($years as $year) {
             });
 
             // Update result count
-            resultCountSpan.textContent = visibleCount;
+            if (resultCountSpan) {
+                resultCountSpan.textContent = visibleCount;
+            }
             
             // Show "no results" message if needed
             const tbody = document.querySelector('#reportsTable tbody');
@@ -1647,7 +1850,7 @@ foreach($years as $year) {
                 if (!noResultsRow) {
                     noResultsRow = document.createElement('tr');
                     noResultsRow.id = 'noResultsRow';
-                    noResultsRow.innerHTML = '<td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;"><i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>📭 No reports match your filters for 2020-2030</td>';
+                    noResultsRow.innerHTML = '<td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);"><i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>📭 No reports match your filters for 2020-2030</td>';
                     tbody.appendChild(noResultsRow);
                 }
             } else if (noResultsRow) {
@@ -1657,14 +1860,18 @@ foreach($years as $year) {
 
         // Filter by year (called from year pills)
         window.filterByYear = function(year) {
-            yearFilter.value = year;
-            filterTable();
+            if (yearFilter) {
+                yearFilter.value = year;
+                filterTable();
+                // Scroll to filter section for better UX
+                document.querySelector('.filter-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         };
 
         // Clear all filters
         window.clearFilters = function() {
-            searchInput.value = '';
-            yearFilter.value = 'all';
+            if (searchInput) searchInput.value = '';
+            if (yearFilter) yearFilter.value = 'all';
             filterTable();
         };
 
@@ -1703,6 +1910,8 @@ foreach($years as $year) {
         // Touch support for mobile
         document.querySelectorAll('.year-pill').forEach(pill => {
             pill.addEventListener('touchstart', function(e) {
+                // Prevent default to avoid double-firing
+                e.preventDefault();
                 const yearText = this.textContent.match(/\d{4}/);
                 if (yearText) {
                     const year = yearText[0];

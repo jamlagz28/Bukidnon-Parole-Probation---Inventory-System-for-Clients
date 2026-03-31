@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config/database.php';
+include 'includes/config.php';
 
 if(!isset($_SESSION['username'])) {
     header("Location: login.php");

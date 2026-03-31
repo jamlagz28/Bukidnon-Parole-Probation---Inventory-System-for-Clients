@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config/database.php';
+include 'includes/config.php';
 include 'includes/permissions.php'; // Make sure this path is correct
 
 // Check login

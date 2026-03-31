@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config/database.php';
+include 'includes/config.php';
 
 if(!isset($_SESSION['username']) || ($_SESSION['role'] != 'main' && $_SESSION['role'] != 'admin')) {
     header("Location: dashboard.php");

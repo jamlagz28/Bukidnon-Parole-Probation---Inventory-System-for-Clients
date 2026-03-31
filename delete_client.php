@@ -1,5 +1,5 @@
 <?php
-include 'config/database.php';
+include 'includes/config.php';
 
 if(isset($_POST['id'])){
     $id = intval($_POST['id']);

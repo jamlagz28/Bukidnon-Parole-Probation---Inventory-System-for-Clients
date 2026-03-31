@@ -1,5 +1,5 @@
 <?php
-include 'config/database.php';
+include 'includes/config.php';
 
 $q = $_GET['q'] ?? '';
 

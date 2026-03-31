@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config/database.php';
+include 'includes/config.php';
 
 // Check if user is logged in
 if(!isset($_SESSION['username'])) {
@@ -1718,16 +1718,15 @@ $recent_uploads = mysqli_query($conn,"
                             </div>
                             
                             <div class="upload-group">
-                                <label class="upload-label">
-                                    <i class="fas fa-calendar-alt"></i> Year <span style="color: var(--accent-red);">*</span>
-                                </label>
-                                <select name="year" class="upload-select" required>
-                                    <option value="">Select Year</option>
-                                    <?php for($y=date('Y'); $y>=date('Y')-2; $y--): ?>
-                                        <option value="<?php echo $y; ?>"><?php echo $y; ?></option>
-                                    <?php endfor; ?>
-                                </select>
-                            </div>
+                            <label class="upload-label"><i class="fas fa-calendar-alt"></i> Year *</label>
+                            <select name="year" class="upload-select" required>
+                                <option value="">Select Year</option>
+                                <!-- Expanded Year Range: 1976 up to 2050 -->
+                                <?php for($year = 2050; $year >= 1976; $year--): ?>
+                                    <option value="<?php echo $year; ?>"><?php echo $year; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
                             
                             <div class="upload-group">
                                 <label class="upload-label">

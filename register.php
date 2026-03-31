@@ -1,6 +1,6 @@
 <?php
 // Include database connection at the VERY TOP
-include("config/database.php");
+include("includes/config.php");
 
 // ===== ADDED: Registration handler =====
 // This processes the form when staff click "Register"

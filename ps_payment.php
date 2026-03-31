@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config/database.php';
+include 'includes/config.php';
 
 // Check login
 if(!isset($_SESSION['username'])) {

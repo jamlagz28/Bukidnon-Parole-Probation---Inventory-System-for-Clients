@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 30, 2026 at 09:27 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Generation Time: Mar 31, 2026 at 09:57 AM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -81,7 +81,8 @@ CREATE TABLE `clients` (
 --
 
 INSERT INTO `clients` (`id`, `docket_number`, `name`, `cc_number`, `court`, `offense`, `sentence`, `address`, `status`, `created_at`, `start_date`, `end_date`, `payment`, `pi_case_id`, `ps_case_id`, `case_status`, `phone_number`) VALUES
-(23, '2', 'creed', NULL, 'dwa', 'ffdss', NULL, 'dwad', 'Terminated', '2026-03-30 07:08:41', NULL, NULL, 0.00, 10, NULL, 'Pending', 'dwa');
+(25, 'DKT - 2026', 'James Laag', NULL, 'Regional Trial Court', 'R.A 9165', NULL, 'Kauswagan Highway', 'Pending', '2026-03-31 07:25:01', NULL, NULL, 0.00, 12, NULL, 'Pending', '09302414492'),
+(26, 'DKT - 2051', 'Kristan Flores', NULL, 'Regional Trial Court', 'R.A 9165', NULL, 'Kauswagan Highway', 'Pending', '2026-03-31 07:37:23', NULL, NULL, 0.00, 13, NULL, 'Pending', '09302414492');
 
 -- --------------------------------------------------------
 
@@ -100,20 +101,6 @@ CREATE TABLE `investigation_records` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `status` varchar(50) DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `investigation_records`
---
-
-INSERT INTO `investigation_records` (`id`, `case_number`, `client_name`, `offense`, `date_received`, `investigator`, `requirements_files`, `created_at`, `status`) VALUES
-(5, 'dsdasdasdasdasdsa', 'dasdasdas', 'dasd', '1111-11-11', 'sdada', '1773201426_northern bukidnon state college.jpg', '2026-03-11 03:57:06', 'Pending'),
-(6, '1232', 'sad', 'dsada', '1111-11-11', 'sadas', '1773201457_northern bukidnon state college.jpg', '2026-03-11 03:57:37', 'Pending'),
-(7, 'asdas', 'dsada', 'adas', '1111-11-11', 'das', '1773201511_ss.JPG', '2026-03-11 03:58:31', 'Pending'),
-(8, 'asdas', 'dsada', 'adas', '1111-11-11', 'das', '1773201626_ss.JPG', '2026-03-11 04:00:26', 'Pending'),
-(9, 'w', 'dawd', 'daw', '0000-00-00', 'wd', '1773201661_IMG_1675.png', '2026-03-11 04:01:01', 'Pending'),
-(10, 'w', 'dawd', 'daw', '0000-00-00', 'wd', '1773201865_IMG_1675.png', '2026-03-11 04:04:25', 'Pending'),
-(11, 'w', 'dawd', 'daw', '0000-00-00', 'wd', '1773201866_IMG_1675.png', '2026-03-11 04:04:26', 'Pending'),
-(12, 'D007', 'Jolina', 'drugs', '2026-03-16', 'Trisha', '1773628788_download (4).jpg', '2026-03-16 02:39:48', 'Approved');
 
 -- --------------------------------------------------------
 
@@ -162,10 +149,8 @@ CREATE TABLE `pre_investigation` (
 --
 
 INSERT INTO `pre_investigation` (`id`, `docket_number`, `name`, `cc_number`, `court`, `offense`, `sentence`, `address`, `investigator`, `date_filed`, `status`, `remarks`, `created_by`, `created_at`, `updated_at`, `client_id`, `converted_to_ps`) VALUES
-(7, 'PI-D017', 'stev', '1234-112', 'rtc 11', 'ggg', '0-4-0', 'manolo', 'Trisha', '2026-03-18', 'Pending', '', NULL, '2026-03-18 03:32:22', NULL, 20, 0),
-(8, 'PI-D006', 'creed', NULL, 'rtc 11', 'drugs', NULL, 'philips', 'Trisha', '2026-03-30', 'Rejected', '', NULL, '2026-03-30 06:03:22', '2026-03-30 06:04:33', 21, 0),
-(9, 'PI-202421', 'Jologs', NULL, 'ddsa', 'Llsd', NULL, 'ffsa', 'Trisha', '2026-03-30', 'Approved', NULL, NULL, '2026-03-30 06:10:04', '2026-03-30 06:10:24', 22, 0),
-(10, 'PI-2', 'creed', NULL, 'dwa', 'ffdss', NULL, 'dwad', 'Trisha', '2026-03-30', 'Approved', NULL, NULL, '2026-03-30 07:08:41', '2026-03-30 07:09:17', 23, 0);
+(12, 'PI-DKT - 2026', 'James Laag', NULL, 'Regional Trial Court', 'R.A 9165', NULL, 'Kauswagan Highway', 'Trezsha Pablo', '2026-03-31', 'Pending', NULL, NULL, '2026-03-31 07:25:01', NULL, 25, 0),
+(13, 'PI-DKT - 2051', 'Kristan Flores', NULL, 'Regional Trial Court', 'R.A 9165', NULL, 'Kauswagan Highway', 'Trezsha Pablo', '2026-03-31', 'Pending', NULL, NULL, '2026-03-31 07:37:23', NULL, 26, 0);
 
 -- --------------------------------------------------------
 
@@ -211,13 +196,6 @@ CREATE TABLE `probation_supervision` (
   `source_pi_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `probation_supervision`
---
-
-INSERT INTO `probation_supervision` (`id`, `docket_number`, `name`, `offense`, `payment`, `address`, `start_date`, `end_date`, `supervising_officer`, `status`, `monthly_fee`, `last_payment_date`, `next_payment_date`, `created_by`, `created_at`, `updated_at`, `client_id`, `source_pi_id`) VALUES
-(11, 'dwa', 'creed', 'ffdss', 1.00, 'dwad', '2026-03-30', '2027-03-30', 'trisha', 'Terminated', 500.00, NULL, '2026-04-30', 1, '2026-03-30 07:09:17', '2026-03-30 07:09:34', 23, NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -252,8 +230,7 @@ CREATE TABLE `staff` (
 
 INSERT INTO `staff` (`id`, `fullname`, `username`, `password`, `role`) VALUES
 (1, 'Trezsha Hazarmaveth G. Pablo', 'Admin', 'admin123', 'main'),
-(4, 'Administrator', 'admin', 'admin123', 'staff'),
-(5, 'stev', 'zenn', 'admin', 'staff');
+(4, 'Administrator', 'admin', 'admin123', 'staff');
 
 --
 -- Indexes for dumped tables
@@ -345,7 +322,7 @@ ALTER TABLE `cases`
 -- AUTO_INCREMENT for table `clients`
 --
 ALTER TABLE `clients`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `investigation_records`
@@ -357,13 +334,13 @@ ALTER TABLE `investigation_records`
 -- AUTO_INCREMENT for table `monthly_reports`
 --
 ALTER TABLE `monthly_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `pre_investigation`
 --
 ALTER TABLE `pre_investigation`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `probation_payments`
@@ -375,7 +352,7 @@ ALTER TABLE `probation_payments`
 -- AUTO_INCREMENT for table `probation_supervision`
 --
 ALTER TABLE `probation_supervision`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `profiles`

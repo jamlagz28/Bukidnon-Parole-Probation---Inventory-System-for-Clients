@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("config/database.php");
+include("config/config.php");
 
 // ===== ADDED: Login handler =====
 // This processes the form when staff click "Sign in to dashboard"

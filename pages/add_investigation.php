@@ -1,6 +1,6 @@
 <?php
 session_start();
-include(__DIR__ . "/../config/database.php"); // Database connection
+include(__DIR__ . "/../includes/config.php"); // Database connection
 
 if(!isset($_SESSION['username'])){
     header("Location: ../index.php");
